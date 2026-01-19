@@ -23,6 +23,7 @@ import type {
   BoolskEgenskap,
   DatoEgenskap,
   GeometriEgenskap,
+  Geometristruktur,
 } from "./generated/uberiket/types.gen";
 
 const BASE_URL = "https://nvdbapiles.atlas.vegvesen.no/uberiket";
@@ -54,6 +55,8 @@ export type {
   StedfestingMangler,
   EgenskapVerdi,
   EnumEgenskap,
+  GeometriEgenskap,
+  Geometristruktur,
 };
 
 export async function hentVeglenkesekvenser(
@@ -100,6 +103,36 @@ export async function hentVegobjekter(
 
 export function getStedfestingFilter(veglenkesekvensIds: number[]): string {
   return veglenkesekvensIds.join(",");
+}
+
+export interface VeglenkeRange {
+  veglenkesekvensId: number;
+  startposisjon: number;
+  sluttposisjon: number;
+}
+
+export function getVeglenkePositionRange(
+  veglenkesekvens: Veglenkesekvens,
+  veglenke: Veglenke
+): { start: number; end: number } | null {
+  const porter = veglenkesekvens.porter;
+  if (!porter) return null;
+
+  const startPort = porter.find((p) => p.nummer === veglenke.startport);
+  const endPort = porter.find((p) => p.nummer === veglenke.sluttport);
+
+  if (!startPort || !endPort) return null;
+
+  const start = Math.min(startPort.posisjon, endPort.posisjon);
+  const end = Math.max(startPort.posisjon, endPort.posisjon);
+
+  return { start, end };
+}
+
+export function buildStedfestingFilter(ranges: VeglenkeRange[]): string {
+  return ranges
+    .map((r) => `${r.startposisjon}-${r.sluttposisjon}@${r.veglenkesekvensId}`)
+    .join(",");
 }
 
 export function getVegobjektPositions(
@@ -199,4 +232,17 @@ export function getEgenskapDisplayValue(egenskap: EgenskapVerdi): string {
     default:
       return "[Ukjent type]";
   }
+}
+
+export function getGeometriEgenskaper(vegobjekt: Vegobjekt): Geometristruktur[] {
+  const egenskaper = vegobjekt.egenskaper;
+  if (!egenskaper) return [];
+
+  const result: Geometristruktur[] = [];
+  for (const egenskap of Object.values(egenskaper)) {
+    if (egenskap.type === "GeometriEgenskap") {
+      result.push((egenskap as GeometriEgenskap).verdi);
+    }
+  }
+  return result;
 }

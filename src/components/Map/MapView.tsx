@@ -11,13 +11,14 @@ import { fromLonLat, toLonLat } from "ol/proj";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
 import Feature from "ol/Feature";
-import { Style, Fill, Stroke } from "ol/style";
+import { Style, Fill, Stroke, Circle as CircleStyle } from "ol/style";
 import WKT from "ol/format/WKT";
 import Overlay from "ol/Overlay";
 import { click } from "ol/events/condition";
 import type { Vegobjekttype } from "../../api/datakatalogClient";
 import {
   isOnVeglenke,
+  getGeometriEgenskaper,
   type Veglenke,
   type Veglenkesekvens,
   type Vegobjekt,
@@ -54,6 +55,27 @@ const HIGHLIGHT_STYLE = new Style({
   stroke: new Stroke({ color: "#f39c12", width: 8 }),
 });
 
+const EGENGEOMETRI_POINT_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 8,
+    fill: new Fill({ color: "rgba(155, 89, 182, 0.8)" }),
+    stroke: new Stroke({ color: "#8e44ad", width: 2 }),
+  }),
+});
+
+const EGENGEOMETRI_LINE_STYLE = new Style({
+  stroke: new Stroke({
+    color: "#9b59b6",
+    width: 4,
+    lineDash: [8, 4],
+  }),
+});
+
+const EGENGEOMETRI_POLYGON_STYLE = new Style({
+  fill: new Fill({ color: "rgba(155, 89, 182, 0.3)" }),
+  stroke: new Stroke({ color: "#8e44ad", width: 2 }),
+});
+
 export default function MapView({
   selectedTypes,
   polygon,
@@ -71,6 +93,7 @@ export default function MapView({
   const drawSource = useRef(new VectorSource());
   const veglenkeSource = useRef(new VectorSource());
   const highlightSource = useRef(new VectorSource());
+  const egengeometriSource = useRef(new VectorSource());
   const overlayRef = useRef<Overlay | null>(null);
   const drawInteraction = useRef<Draw | null>(null);
   const selectInteraction = useRef<Select | null>(null);
@@ -103,6 +126,19 @@ export default function MapView({
       style: HIGHLIGHT_STYLE,
     });
 
+    const egengeometriLayer = new VectorLayer({
+      source: egengeometriSource.current,
+      style: (feature) => {
+        const geomType = feature.getGeometry()?.getType();
+        if (geomType === "Point" || geomType === "MultiPoint") {
+          return EGENGEOMETRI_POINT_STYLE;
+        } else if (geomType === "Polygon" || geomType === "MultiPolygon") {
+          return EGENGEOMETRI_POLYGON_STYLE;
+        }
+        return EGENGEOMETRI_LINE_STYLE;
+      },
+    });
+
     const overlay = new Overlay({
       element: popupRef.current!,
       autoPan: { animation: { duration: 250 } },
@@ -111,7 +147,7 @@ export default function MapView({
 
     const map = new OLMap({
       target: mapRef.current,
-      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer, highlightLayer],
+      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer, highlightLayer, egengeometriLayer],
       overlays: [overlay],
       view: new View({
         center: fromLonLat([lon, lat]),
@@ -228,37 +264,53 @@ export default function MapView({
 
   useEffect(() => {
     highlightSource.current.clear();
+    egengeometriSource.current.clear();
     
     if (!hoveredVegobjekt || !veglenkesekvenser) return;
     
     const stedfesting = hoveredVegobjekt.stedfesting as Stedfesting | undefined;
-    if (!stedfesting) return;
-    
-    const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser);
-    
-    for (const clipped of clippedGeometries) {
-      const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
-        const vsId = f.get("veglenkesekvensId");
-        const vl = f.get("veglenke") as Veglenke | undefined;
-        return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer;
-      });
+    if (stedfesting) {
+      const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser);
       
-      if (!veglenkeFeature) continue;
-      
-      const geom = veglenkeFeature.getGeometry() as LineString | undefined;
-      if (!geom) continue;
-      
-      try {
-        const coords = geom.getCoordinates();
-        const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction);
+      for (const clipped of clippedGeometries) {
+        const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
+          const vsId = f.get("veglenkesekvensId");
+          const vl = f.get("veglenke") as Veglenke | undefined;
+          return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer;
+        });
         
-        if (slicedCoords.length >= 2) {
-          const slicedGeom = new LineString(slicedCoords);
-          const highlightFeature = new Feature({ geometry: slicedGeom });
-          highlightSource.current.addFeature(highlightFeature);
+        if (!veglenkeFeature) continue;
+        
+        const geom = veglenkeFeature.getGeometry() as LineString | undefined;
+        if (!geom) continue;
+        
+        try {
+          const coords = geom.getCoordinates();
+          const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction);
+          
+          if (slicedCoords.length >= 2) {
+            const slicedGeom = new LineString(slicedCoords);
+            const highlightFeature = new Feature({ geometry: slicedGeom });
+            highlightSource.current.addFeature(highlightFeature);
+          }
+        } catch (e) {
+          console.warn("Failed to slice geometry", e);
         }
+      }
+    }
+    
+    const geometriEgenskaper = getGeometriEgenskaper(hoveredVegobjekt);
+    const wktFormat = new WKT();
+    for (const geometri of geometriEgenskaper) {
+      try {
+        const geom = wktFormat.readGeometry(geometri.wkt, {
+          dataProjection: `EPSG:${geometri.srid}`,
+          featureProjection: "EPSG:3857",
+        });
+        const feature = new Feature({ geometry: geom });
+        egengeometriSource.current.addFeature(feature);
       } catch (e) {
-        console.warn("Failed to slice geometry", e);
+        console.warn("Failed to parse geometri-egenskap", e);
       }
     }
   }, [hoveredVegobjekt, veglenkesekvenser]);
@@ -302,6 +354,7 @@ export default function MapView({
     drawSource.current.clear();
     veglenkeSource.current.clear();
     highlightSource.current.clear();
+    egengeometriSource.current.clear();
     setSelectedFeature(null);
     overlayRef.current?.setPosition(undefined);
     onClearResults();

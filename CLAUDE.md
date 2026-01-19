@@ -119,3 +119,9 @@ When calling NVDB APIs via curl or similar, include the `X-Client` header:
 ```sh
 curl -H "X-Client: nvdb-vis-vegobjekter" "https://nvdbapiles.atlas.vegvesen.no/..."
 ```
+
+### Uberiket API
+
+The uberiket API base URL is: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1`
+
+Always use the uberiket API when fetching vegobjekter data.

@@ -103,7 +103,7 @@ export default function App() {
   const {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
-  } = useVegobjekter(selectedTypes, veglenkeResult?.veglenkesekvenser);
+  } = useVegobjekter(selectedTypes, veglenkeResult?.veglenkesekvenser, polygon);
 
   const handleTypeToggle = useCallback((type: Vegobjekttype) => {
     setSelectedTypes((prev) => {

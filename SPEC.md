@@ -106,9 +106,18 @@ nvdb-vis-vegobjekter/
 
 Query parameters:
 - `polygon`: UTM33 polygon coordinates
-- `stedfesting`: Filter by position on veglenkesekvens (e.g., "0-1@123456")
+- `stedfesting`: Filter by position on veglenkesekvens (e.g., "0.4-0.6@123456")
 - `inkluder`: Include stedfesting, egenskaper, gyldighetsperiode, barn
 - `antall`: Limit results
+
+### Veglenke Position Calculation
+
+Each veglenke has a position range within its veglenkesekvens:
+- Veglenkesekvens has `porter` array with `{nummer, posisjon}` entries
+- Veglenke has `startport` and `sluttport` (port numbers)
+- Position range is calculated by looking up the port positions: find porter where `nummer` matches `startport`/`sluttport`, then use their `posisjon` values
+
+When querying vegobjekter, only the veglenker that geometrically overlap with the drawn polygon are included. The stedfesting filter uses the exact position ranges of these overlapping veglenker (e.g., `0.2-0.4@123,0.6-0.8@456`).
 
 ## User Flow
 
@@ -200,7 +209,29 @@ To determine if a vegobjekt is on a specific veglenke:
 
 ## Future Enhancements (Out of Scope)
 
-- Support for egengeometri (object's own geometry)
 - Export selected objects
 - Time-based queries
 - More than 10 veglenker per query
+
+## Geometri-egenskaper (Egengeometri)
+
+Some vegobjekter have geometry properties (geometri-egenskaper) that represent the object's own geometry, independent of the road network. These are visualized separately from the stedfesting-based highlighting.
+
+### Data Structure
+```typescript
+interface GeometriEgenskap {
+  type: 'GeometriEgenskap';
+  verdi: {
+    wkt: string;      // WKT geometry (POINT, LINESTRING, POLYGON, etc.)
+    srid: number;     // Coordinate reference system (e.g., 5973 = UTM33)
+    lengde?: number;  // Length in meters (for lines)
+  };
+}
+```
+
+### Visualization
+- Geometri-egenskaper are rendered on the map with a distinct style (purple)
+- Point geometries are shown as circles
+- Line geometries are shown as dashed lines  
+- Polygon geometries are shown with semi-transparent fill
+- Hovering over a vegobjekt highlights both its stedfesting AND its geometri-egenskaper
