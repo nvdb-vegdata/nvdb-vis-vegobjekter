@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --hot ./server.ts",
+    "build": "bun build ./index.html --outdir ./dist",
     "generate:api": "bun run generate:datakatalog && bun run generate:uberiket && bun run generate:cleanup",
     "generate:datakatalog": "bunx openapi-generator-cli generate -i specs/datakatalog.json -g typescript-axios -o src/api/generated/datakatalog --global-property=models,apis,supportingFiles=index.ts:base.ts:common.ts:configuration.ts --additional-properties=supportsES6=true,withSeparateModelsAndApi=true,modelPackage=models,apiPackage=api",
     "generate:uberiket": "bunx openapi-generator-cli generate -i specs/uberiket.json -g typescript-axios -o src/api/generated/uberiket --global-property=models,apis,supportingFiles=index.ts:base.ts:common.ts:configuration.ts --additional-properties=supportsES6=true,withSeparateModelsAndApi=true,modelPackage=models,apiPackage=api",
