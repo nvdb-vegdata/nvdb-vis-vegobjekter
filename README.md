@@ -1,0 +1,28 @@
+# NVDB Vegobjekt Visualisering
+
+Proof of concept for visualisering av vegobjekter fra NVDB ved hjelp av [Uberiket API](https://nvdb.atlas.vegvesen.no/docs/category/uberiket).
+
+## Funksjonalitet
+
+- Søk og velg vegobjekttyper fra Datakatalogen
+- Tegn polygon på kartet for å avgrense område
+- Henter veglenker og vegobjekter innenfor valgt område
+- Klikk på veglenke for å se tilknyttede vegobjekter
+- Detaljvisning av egenskaper, stedfesting og relasjoner
+- URL-synkronisering av kartvisning, polygon og valgte typer
+
+## Kjøring lokalt
+
+```bash
+bun install
+bun run dev
+```
+
+Åpne http://localhost:3000
+
+## Teknologi
+
+- Bun
+- React + TypeScript
+- OpenLayers
+- TanStack Query
