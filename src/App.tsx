@@ -8,6 +8,7 @@ import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
 import { useVegobjekter } from "./hooks/useVegobjekter";
 import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
 import type { Vegobjekttype } from "./api/datakatalogClient";
+import type { Vegobjekt } from "./api/uberiketClient";
 import { Polygon } from "ol/geom";
 
 function polygonToUtm33(polygon: Polygon): string {
@@ -59,6 +60,7 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useState<Vegobjekttype[]>([]);
   const [polygon, setPolygon] = useState<Polygon | null>(getInitialPolygon);
   const [focusedVegobjekt, setFocusedVegobjekt] = useState<{ typeId: number; id: number } | null>(null);
+  const [hoveredVegobjekt, setHoveredVegobjekt] = useState<Vegobjekt | null>(null);
   const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
 
   useEffect(() => {
@@ -129,6 +131,10 @@ export default function App() {
     setFocusedVegobjekt(null);
   }, []);
 
+  const handleVegobjektHover = useCallback((vegobjekt: Vegobjekt | null) => {
+    setHoveredVegobjekt(vegobjekt);
+  }, []);
+
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
   const totalVeglenker = veglenkeResult?.veglenkesekvenser.reduce(
@@ -181,6 +187,7 @@ export default function App() {
           onClearResults={handleClearResults}
           isLoadingVeglenker={veglenkerLoading}
           onVegobjektClick={handleVegobjektClick}
+          hoveredVegobjekt={hoveredVegobjekt}
         />
       </main>
 
@@ -192,6 +199,7 @@ export default function App() {
             isLoading={vegobjekterLoading}
             focusedVegobjekt={focusedVegobjekt}
             onVegobjektFocused={handleVegobjektFocused}
+            onVegobjektHover={handleVegobjektHover}
           />
         ) : (
           <div className="sidebar-right-help">

@@ -44,6 +44,7 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 - **Projections**: proj4 for UTM33 support
 - **HTTP Client**: Axios
 - **Data Fetching**: TanStack Query (React Query)
+- **Geometry Manipulation**: Turf.js (@turf/along, @turf/length, @turf/helpers)
 - **Styling**: Plain CSS
 
 ### API Integration
@@ -76,6 +77,8 @@ nvdb-vis-vegobjekter/
 │   │   │   └── ObjectTypeSelector.tsx
 │   │   └── VegobjektList/
 │   │       └── VegobjektList.tsx
+│   ├── utils/
+│   │   └── geometryUtils.ts   # Turf.js-based line slicing for stedfesting
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── index.css
@@ -131,6 +134,7 @@ Query parameters:
 5. **Inspect Vegobjekter**
    - Click on a veglenke to see related vegobjekter
    - Sidebar shows collapsible list of vegobjekter grouped by type
+   - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
    - Each vegobjekt displays:
      - ID
      - Gyldighetsperiode (validity period)

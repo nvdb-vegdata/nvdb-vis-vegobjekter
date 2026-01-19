@@ -6,7 +6,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import OSM from "ol/source/OSM";
 import { Draw, Select } from "ol/interaction";
-import { Polygon } from "ol/geom";
+import { Polygon, LineString } from "ol/geom";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
@@ -23,6 +23,7 @@ import {
   type Vegobjekt,
   type Stedfesting,
 } from "../../api/uberiketClient";
+import { getClippedGeometries, sliceLineStringByFraction } from "../../utils/geometryUtils";
 import "ol/ol.css";
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
@@ -38,6 +39,7 @@ interface Props {
   onClearResults: () => void;
   isLoadingVeglenker?: boolean;
   onVegobjektClick?: (typeId: number, vegobjektId: number) => void;
+  hoveredVegobjekt?: Vegobjekt | null;
 }
 
 const VEGLENKE_STYLE = new Style({
@@ -46,6 +48,10 @@ const VEGLENKE_STYLE = new Style({
 
 const VEGLENKE_SELECTED_STYLE = new Style({
   stroke: new Stroke({ color: "#e74c3c", width: 6 }),
+});
+
+const HIGHLIGHT_STYLE = new Style({
+  stroke: new Stroke({ color: "#f39c12", width: 8 }),
 });
 
 export default function MapView({
@@ -57,12 +63,14 @@ export default function MapView({
   onClearResults,
   isLoadingVeglenker,
   onVegobjektClick,
+  hoveredVegobjekt,
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<OLMap | null>(null);
   const drawSource = useRef(new VectorSource());
   const veglenkeSource = useRef(new VectorSource());
+  const highlightSource = useRef(new VectorSource());
   const overlayRef = useRef<Overlay | null>(null);
   const drawInteraction = useRef<Draw | null>(null);
   const selectInteraction = useRef<Select | null>(null);
@@ -90,6 +98,11 @@ export default function MapView({
       style: VEGLENKE_STYLE,
     });
 
+    const highlightLayer = new VectorLayer({
+      source: highlightSource.current,
+      style: HIGHLIGHT_STYLE,
+    });
+
     const overlay = new Overlay({
       element: popupRef.current!,
       autoPan: { animation: { duration: 250 } },
@@ -98,7 +111,7 @@ export default function MapView({
 
     const map = new OLMap({
       target: mapRef.current,
-      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer],
+      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer, highlightLayer],
       overlays: [overlay],
       view: new View({
         center: fromLonLat([lon, lat]),
@@ -213,6 +226,43 @@ export default function MapView({
     }
   }, [veglenkesekvenser]);
 
+  useEffect(() => {
+    highlightSource.current.clear();
+    
+    if (!hoveredVegobjekt || !veglenkesekvenser) return;
+    
+    const stedfesting = hoveredVegobjekt.stedfesting as Stedfesting | undefined;
+    if (!stedfesting) return;
+    
+    const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser);
+    
+    for (const clipped of clippedGeometries) {
+      const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
+        const vsId = f.get("veglenkesekvensId");
+        const vl = f.get("veglenke") as Veglenke | undefined;
+        return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer;
+      });
+      
+      if (!veglenkeFeature) continue;
+      
+      const geom = veglenkeFeature.getGeometry() as LineString | undefined;
+      if (!geom) continue;
+      
+      try {
+        const coords = geom.getCoordinates();
+        const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction);
+        
+        if (slicedCoords.length >= 2) {
+          const slicedGeom = new LineString(slicedCoords);
+          const highlightFeature = new Feature({ geometry: slicedGeom });
+          highlightSource.current.addFeature(highlightFeature);
+        }
+      } catch (e) {
+        console.warn("Failed to slice geometry", e);
+      }
+    }
+  }, [hoveredVegobjekt, veglenkesekvenser]);
+
   const startDrawing = useCallback(() => {
     if (!mapInstance.current) return;
 
@@ -251,6 +301,7 @@ export default function MapView({
   const clearAll = useCallback(() => {
     drawSource.current.clear();
     veglenkeSource.current.clear();
+    highlightSource.current.clear();
     setSelectedFeature(null);
     overlayRef.current?.setPosition(undefined);
     onClearResults();

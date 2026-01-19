@@ -10,6 +10,7 @@ interface Props {
   isLoading?: boolean;
   focusedVegobjekt?: { typeId: number; id: number } | null;
   onVegobjektFocused?: () => void;
+  onVegobjektHover?: (vegobjekt: Vegobjekt | null) => void;
 }
 
 interface VegobjektDetails {
@@ -74,17 +75,23 @@ function VegobjektItem({
   isHighlighted,
   onToggle,
   itemRef,
+  onMouseEnter,
+  onMouseLeave,
 }: { 
   details: VegobjektDetails;
   isExpanded: boolean;
   isHighlighted: boolean;
   onToggle: () => void;
   itemRef?: React.RefObject<HTMLDivElement | null>;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }) {
   return (
     <div 
       ref={itemRef} 
       className={`vegobjekt-item${isHighlighted ? " vegobjekt-highlight" : ""}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div 
         className="vegobjekt-header" 
@@ -157,11 +164,13 @@ function TypeGroup({
   objects,
   focusedVegobjektId,
   onVegobjektFocused,
+  onVegobjektHover,
 }: { 
   type: Vegobjekttype; 
   objects: Vegobjekt[];
   focusedVegobjektId?: number;
   onVegobjektFocused?: () => void;
+  onVegobjektHover?: (vegobjekt: Vegobjekt | null) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -188,9 +197,10 @@ function TypeGroup({
     }
   }, [focusedVegobjektId, onVegobjektFocused]);
 
-  const processedObjects = objects.map((obj) => 
-    processVegobjekt(obj, type.id, vegobjekttype)
-  );
+  const processedObjects = objects.map((obj) => ({
+    vegobjekt: obj,
+    details: processVegobjekt(obj, type.id, vegobjekttype),
+  }));
 
   const toggleItem = (id: number) => {
     setExpandedItems((prev) => {
@@ -217,7 +227,7 @@ function TypeGroup({
 
       {expanded && (
         <div className="vegobjekt-type-content">
-          {processedObjects.map((details) => (
+          {processedObjects.map(({ vegobjekt, details }) => (
             <VegobjektItem 
               key={details.id} 
               details={details}
@@ -225,6 +235,8 @@ function TypeGroup({
               isHighlighted={highlightedId === details.id}
               onToggle={() => toggleItem(details.id)}
               itemRef={focusedVegobjektId === details.id ? focusedItemRef : undefined}
+              onMouseEnter={() => onVegobjektHover?.(vegobjekt)}
+              onMouseLeave={() => onVegobjektHover?.(null)}
             />
           ))}
         </div>
@@ -239,6 +251,7 @@ export default function VegobjektList({
   isLoading,
   focusedVegobjekt,
   onVegobjektFocused,
+  onVegobjektHover,
 }: Props) {
   const typesWithObjects = selectedTypes.filter((type) => {
     const objects = vegobjekterByType.get(type.id);
@@ -278,6 +291,7 @@ export default function VegobjektList({
               objects={vegobjekterByType.get(type.id) ?? []}
               focusedVegobjektId={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.id : undefined}
               onVegobjektFocused={onVegobjektFocused}
+              onVegobjektHover={onVegobjektHover}
             />
           ))
         )}
