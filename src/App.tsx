@@ -59,7 +59,7 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useState<Vegobjekttype[]>([]);
   const [polygon, setPolygon] = useState<Polygon | null>(getInitialPolygon);
   const [focusedVegobjekt, setFocusedVegobjekt] = useState<{ typeId: number; id: number } | null>(null);
-  const { data: allTypes } = useVegobjekttyper();
+  const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
 
   useEffect(() => {
     if (!allTypes || selectedTypeIds.length === 0) return;
@@ -129,7 +129,7 @@ export default function App() {
     setFocusedVegobjekt(null);
   }, []);
 
-  const isLoading = veglenkerLoading || vegobjekterLoading;
+  const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
   const totalVeglenker = veglenkeResult?.veglenkesekvenser.reduce(
     (sum, vs) => sum + (vs.veglenker?.length ?? 0),
@@ -157,7 +157,9 @@ export default function App() {
         </div>
 
         <div className="status-bar">
-          {isLoading ? (
+          {datakatalogLoading ? (
+            "Laster datakatalog..."
+          ) : isLoading ? (
             "Laster data..."
           ) : (
             <>

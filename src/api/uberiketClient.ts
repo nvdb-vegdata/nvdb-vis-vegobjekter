@@ -77,7 +77,7 @@ export async function hentVeglenkesekvenser(
 
 export async function hentVegobjekter(
   typeId: number,
-  stedfesting: string[],
+  stedfesting: string,
   dato?: string,
   antall = 1000
 ): Promise<VegobjekterSide> {
@@ -87,7 +87,7 @@ export async function hentVegobjekter(
       antall,
       inkluder: ["alle"],
       dato,
-      stedfesting,
+      stedfesting: [stedfesting],
     },
   });
 
@@ -98,8 +98,8 @@ export async function hentVegobjekter(
   return response.data as VegobjekterSide;
 }
 
-export function getStedfestingFilter(veglenkesekvensId: number): string {
-  return `0-1@${veglenkesekvensId}`;
+export function getStedfestingFilter(veglenkesekvensIds: number[]): string {
+  return veglenkesekvensIds.join(",");
 }
 
 export function getVegobjektPositions(

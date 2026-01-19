@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { Vegobjekttype, Egenskapstype } from "../../api/datakatalogClient";
-import { getVegobjekttypeMedEgenskapstyper, getEgenskapstypeById, getEnumVerdiById } from "../../api/datakatalogClient";
+import { getVegobjekttypeById, getEgenskapstypeById, getEnumVerdiById } from "../../api/datakatalogClient";
 import type { Vegobjekt, Stedfesting, EgenskapVerdi, EnumEgenskap } from "../../api/uberiketClient";
 import { formatStedfesting, getEgenskapDisplayValue } from "../../api/uberiketClient";
 
@@ -166,9 +166,9 @@ function TypeGroup({
   const [expanded, setExpanded] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
-  const [vegobjekttype, setVegobjekttype] = useState<Vegobjekttype | undefined>();
-  const [loading, setLoading] = useState(false);
   const focusedItemRef = useRef<HTMLDivElement | null>(null);
+
+  const vegobjekttype = getVegobjekttypeById(type.id);
 
   useEffect(() => {
     if (focusedVegobjektId !== undefined) {
@@ -187,15 +187,6 @@ function TypeGroup({
       return () => clearTimeout(timer);
     }
   }, [focusedVegobjektId, onVegobjektFocused]);
-
-  useEffect(() => {
-    if (expanded && !vegobjekttype && !loading) {
-      setLoading(true);
-      getVegobjekttypeMedEgenskapstyper(type.id)
-        .then(setVegobjekttype)
-        .finally(() => setLoading(false));
-    }
-  }, [expanded, type.id, vegobjekttype, loading]);
 
   const processedObjects = objects.map((obj) => 
     processVegobjekt(obj, type.id, vegobjekttype)
@@ -226,7 +217,6 @@ function TypeGroup({
 
       {expanded && (
         <div className="vegobjekt-type-content">
-          {loading && <div className="vegobjekt-loading">Laster egenskapstyper...</div>}
           {processedObjects.map((details) => (
             <VegobjektItem 
               key={details.id} 

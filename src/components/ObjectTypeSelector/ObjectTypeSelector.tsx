@@ -54,13 +54,28 @@ export default function ObjectTypeSelector({ selectedTypes, onTypeToggle }: Prop
     <div>
       <div className="section-header">Vegobjekttyper</div>
       
-      <input
-        type="text"
-        className="search-input"
-        placeholder="Søk etter vegobjekttype..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+      <label className="search-label" htmlFor="type-search">
+        Søk på navn eller ID
+      </label>
+      <div className="search-input-wrapper">
+        <input
+          id="type-search"
+          type="text"
+          className="search-input"
+          placeholder="Eks.: fartsgrense, 105"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button
+            className="search-clear-btn"
+            onClick={() => setSearchQuery("")}
+            aria-label="Tøm søk"
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       {selectedTypes.length > 0 && (
         <div className="selected-count">

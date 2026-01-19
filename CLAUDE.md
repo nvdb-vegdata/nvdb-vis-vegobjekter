@@ -4,6 +4,8 @@ globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
 alwaysApply: false
 ---
 
+When adding new features, update SPEC.md first.
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
@@ -109,3 +111,11 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+
+## NVDB API
+
+When calling NVDB APIs via curl or similar, include the `X-Client` header:
+
+```sh
+curl -H "X-Client: nvdb-vis-vegobjekter" "https://nvdbapiles.atlas.vegvesen.no/..."
+```

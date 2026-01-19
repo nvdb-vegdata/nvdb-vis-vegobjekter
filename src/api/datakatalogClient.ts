@@ -1,9 +1,5 @@
 import { client } from "./generated/datakatalog/client.gen";
-import {
-  getVegobjekttyper as sdkGetVegobjekttyper,
-  getVegobjekttype as sdkGetVegobjekttype,
-} from "./generated/datakatalog/sdk.gen";
-import { zVegobjekttype } from "./generated/datakatalog/zod.gen";
+import { getVegobjekttyper as sdkGetVegobjekttyper } from "./generated/datakatalog/sdk.gen";
 import type {
   Vegobjekttype,
   Egenskapstype,
@@ -27,7 +23,7 @@ client.setConfig({
 export type { Vegobjekttype, Egenskapstype };
 
 let cachedTypes: Vegobjekttype[] | null = null;
-const cachedTypesWithEgenskapstyper = new Map<number, Vegobjekttype>();
+let cachedTypesById: Map<number, Vegobjekttype> | null = null;
 
 export type EnumVerdi = EnumverdiHeltall | EnumverdiTekst | EnumverdiFlyttall;
 
@@ -41,48 +37,21 @@ export async function getVegobjekttyper(): Promise<Vegobjekttype[]> {
     return cachedTypes;
   }
 
-  const response = await sdkGetVegobjekttyper();
+  const response = await sdkGetVegobjekttyper({
+    query: { inkluder: ["alle"] },
+  });
 
   if (response.error) {
     throw new Error(`Failed to fetch vegobjekttyper: ${response.error}`);
   }
 
   cachedTypes = response.data ?? [];
+  cachedTypesById = new Map(cachedTypes.map((t) => [t.id, t]));
   return cachedTypes;
 }
 
-export async function getVegobjekttype(id: number): Promise<Vegobjekttype> {
-  const response = await sdkGetVegobjekttype({
-    path: { vegobjekttypeid: id },
-  });
-
-  if (response.error) {
-    throw new Error(`Failed to fetch vegobjekttype: ${response.error}`);
-  }
-
-  return zVegobjekttype.parse(response.data);
-}
-
-export async function getVegobjekttypeMedEgenskapstyper(
-  id: number
-): Promise<Vegobjekttype> {
-  const cached = cachedTypesWithEgenskapstyper.get(id);
-  if (cached) {
-    return cached;
-  }
-
-  const response = await sdkGetVegobjekttype({
-    path: { vegobjekttypeid: id },
-    query: { inkluder: ["egenskapstyper"] },
-  });
-
-  if (response.error) {
-    throw new Error(`Failed to fetch vegobjekttype: ${response.error}`);
-  }
-
-  const result = zVegobjekttype.parse(response.data);
-  cachedTypesWithEgenskapstyper.set(id, result);
-  return result;
+export function getVegobjekttypeById(id: number): Vegobjekttype | undefined {
+  return cachedTypesById?.get(id);
 }
 
 export function getEgenskapstypeById(

@@ -11,15 +11,16 @@ export function useVegobjekter(
   selectedTypes: Vegobjekttype[],
   veglenkesekvenser: Veglenkesekvens[] | undefined
 ) {
-  const stedfestingFilters = veglenkesekvenser?.map((vs) => getStedfestingFilter(vs.id)) ?? [];
-  const enabled = selectedTypes.length > 0 && stedfestingFilters.length > 0;
+  const veglenkesekvensIds = veglenkesekvenser?.map((vs) => vs.id) ?? [];
+  const stedfestingFilter = veglenkesekvensIds.length > 0 ? getStedfestingFilter(veglenkesekvensIds) : "";
+  const enabled = selectedTypes.length > 0 && stedfestingFilter.length > 0;
   const today = getTodayDate();
 
   const queries = useQueries({
     queries: selectedTypes.map((type) => ({
-      queryKey: ["vegobjekter", type.id, stedfestingFilters, today],
+      queryKey: ["vegobjekter", type.id, stedfestingFilter, today],
       queryFn: async () => {
-        const result = await hentVegobjekter(type.id, stedfestingFilters, today);
+        const result = await hentVegobjekter(type.id, stedfestingFilter, today);
         return {
           typeId: type.id,
           vegobjekter: result.vegobjekter,

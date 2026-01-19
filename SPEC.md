@@ -43,12 +43,14 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 - **Map Library**: OpenLayers 9+
 - **Projections**: proj4 for UTM33 support
 - **HTTP Client**: Axios
+- **Data Fetching**: TanStack Query (React Query)
 - **Styling**: Plain CSS
 
 ### API Integration
 - **Datakatalog API**: `https://nvdbapiles.atlas.vegvesen.no/datakatalog/api/v1/`
-  - Get all road object types (cached on load)
-  - Get detailed vegobjekttype with egenskapstyper (for name/enum mapping)
+  - Get all road object types with full details (`inkluder=alle`) - cached on load
+  - Includes egenskapstyper and tillatte_verdier for enum resolution
+  - Synchronous lookup via `getVegobjekttypeById()` after initial load
   
 - **Uberiket API**: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1/`
   - Query veglenkesekvenser by polygon
@@ -91,8 +93,7 @@ nvdb-vis-vegobjekter/
 ### Datakatalog API
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /api/v1/vegobjekttyper` | List all road object types (cached) |
-| `GET /api/v1/vegobjekttyper/{id}?inkluder=egenskapstyper` | Get type details with property definitions |
+| `GET /api/v1/vegobjekttyper?inkluder=alle` | List all road object types with full details (egenskapstyper, tillatte_verdier) |
 
 ### Uberiket API
 | Endpoint | Purpose |
@@ -110,7 +111,8 @@ Query parameters:
 
 1. **Load Application**
    - Map loads centered on Norway
-   - Object types load from Datakatalog API and are cached
+   - Full datakatalog loads with `inkluder=alle` (shows "Laster datakatalog..." indicator)
+   - All vegobjekttyper with egenskapstyper and tillatte_verdier are cached for synchronous lookup
 
 2. **Select Object Types**
    - User searches/browses and selects types of interest
@@ -127,6 +129,7 @@ Query parameters:
    - For each selected type, queries vegobjekter with stedfesting filter
 
 5. **Inspect Vegobjekter**
+   - Click on a veglenke to see related vegobjekter
    - Sidebar shows collapsible list of vegobjekter grouped by type
    - Each vegobjekt displays:
      - ID
@@ -135,6 +138,13 @@ Query parameters:
      - Barn (child object references)
      - Egenskaper (properties with names mapped from datakatalog)
    - Enum values are resolved to their display names
+
+## URL Synchronization
+
+The application synchronizes state with the URL for shareable links:
+- **Map view**: Center coordinates and zoom level
+- **Polygon**: Drawn selection polygon coordinates
+- **Selected types**: List of selected vegobjekttype IDs
 
 ## Data Model
 
@@ -174,9 +184,10 @@ interface VegobjektDisplay {
 ```
 
 ### Egenskap Mapping
-- Fetch vegobjekttype with `inkluder=egenskapstyper` to get property definitions
+- Full datakatalog is fetched once on load with `inkluder=alle`
+- Vegobjekttype lookup is synchronous via cached Map (`getVegobjekttypeById()`)
 - Map egenskap ID to name using `egenskapstyper[].id` -> `egenskapstyper[].navn`
-- For enum types, map value ID to display value using `tillatte_verdier[].id` -> `tillatte_verdier[].verdi`
+- For enum types, map value ID to display value using `tillatte_verdier[].id` -> `tillatte_verdier[].kortnavn`
 
 ## Overlap Check
 To determine if a vegobjekt is on a specific veglenke:
@@ -189,4 +200,3 @@ To determine if a vegobjekt is on a specific veglenke:
 - Export selected objects
 - Time-based queries
 - More than 10 veglenker per query
-- Click on veglenke to highlight related vegobjekter

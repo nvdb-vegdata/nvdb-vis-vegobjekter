@@ -2,6 +2,8 @@
 
 Proof of concept for visualisering av vegobjekter fra NVDB ved hjelp av [Uberiket API](https://nvdb.atlas.vegvesen.no/docs/category/uberiket).
 
+**Demo:** https://nvdb-vegdata.github.io/nvdb-vis-vegobjekter/
+
 ## Funksjonalitet
 
 - Søk og velg vegobjekttyper fra Datakatalogen
