@@ -62,9 +62,9 @@ export type Egenskapstype = {
     sosinvdbnavn?: string;
     sorteringsnummer: number;
     avledet: boolean;
+    sensitivitet: number;
     skrivebeskyttet: boolean;
     obligatorisk_verdi: boolean;
-    sensitivitet: number;
     gruppesorteringsnummer?: number;
     grunnrissreferanse?: string;
     høydereferanse?: string;
@@ -344,9 +344,9 @@ export type Stedfesting = {
     sosinvdbnavn?: string;
     sorteringsnummer: number;
     avledet: boolean;
+    sensitivitet: number;
     skrivebeskyttet: boolean;
     obligatorisk_verdi: boolean;
-    sensitivitet: number;
     gruppesorteringsnummer?: number;
     grunnrissreferanse?: string;
     høydereferanse?: string;

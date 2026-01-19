@@ -627,6 +627,89 @@ export type EndringssettHendelserSide = {
     metadata: SideMetadata;
 };
 
+export type HentVegobjekterMultiTypeData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Kommaseparert liste med vegobjekttype-IDer
+         */
+        typeIder: Array<number>;
+        /**
+         * Antall som skal returneres i respons. Må være et heltall mellom 1 og 1000
+         */
+        antall?: number;
+        /**
+         * Hent kun vegobjekter med angitte IDer
+         */
+        ider?: Array<number>;
+        /**
+         * Velg hvilke data som skal inkluderes i responsen
+         */
+        inkluder?: Array<InkluderIVegobjekt>;
+        /**
+         * Hent vegobjekter etterfølgende [vegobjektId]-[versjon]
+         */
+        start?: string;
+        /**
+         * Hvis satt, hentes bare vegobjektversjoner som var gyldige på denne datoen
+         */
+        dato?: string;
+        /**
+         * Finn vegobjekter med stedfestinger som overlapper gitte utstrekninger (komma-separert liste).
+         *
+         * Eksempel: 0-0.5@123,125,1.0@126
+         *
+         */
+        stedfesting?: Array<string>;
+        /**
+         * Filtrer vegobjekter på [vegsystemreferanse](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/introduksjon/Vegsystemreferanse). Kommaseparert liste. Legg til kommunenummer i starten av vegsystemreferansen for KSP-veger.
+         *
+         * MERK:
+         * - Meterverdier, trafikantgruppe, kryssystem og sideanlegg støttes ikke.
+         * - Inkluderer både vegobjekter stedfestet på hovednivå (VT, VTKB) og detaljert nivå (KB, KF)
+         *
+         * Eksempel: `EV6S1D1`
+         */
+        vegsystemreferanse?: Array<string>;
+    };
+    url: '/api/v1/vegobjekter';
+};
+
+export type HentVegobjekterMultiTypeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetail;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetail;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetail;
+    /**
+     * Not Found
+     */
+    404: ProblemDetail;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetail;
+};
+
+export type HentVegobjekterMultiTypeError = HentVegobjekterMultiTypeErrors[keyof HentVegobjekterMultiTypeErrors];
+
+export type HentVegobjekterMultiTypeResponses = {
+    /**
+     * OK
+     */
+    200: VegobjekterSide;
+};
+
+export type HentVegobjekterMultiTypeResponse = HentVegobjekterMultiTypeResponses[keyof HentVegobjekterMultiTypeResponses];
+
 export type HentVegobjekterData = {
     body?: never;
     path: {

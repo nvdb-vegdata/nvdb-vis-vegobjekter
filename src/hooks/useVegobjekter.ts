@@ -1,4 +1,4 @@
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import WKT from "ol/format/WKT";
 import type { Polygon } from "ol/geom";
@@ -74,34 +74,34 @@ export function useVegobjekter(
 
   const enabled = selectedTypes.length > 0 && stedfestingFilter.length > 0;
   const today = getTodayDate();
+  const typeIds = useMemo(
+    () => selectedTypes.map((type) => type.id).sort((a, b) => a - b),
+    [selectedTypes]
+  );
+  const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
 
-  const queries = useQueries({
-    queries: selectedTypes.map((type) => ({
-      queryKey: ["vegobjekter", type.id, stedfestingFilter, today],
-      queryFn: async () => {
-        const result = await hentVegobjekter(type.id, stedfestingFilter, today);
-        return {
-          typeId: type.id,
-          vegobjekter: result.vegobjekter,
-        };
-      },
-      enabled,
-    })),
+  const query = useQuery({
+    queryKey: ["vegobjekter", typeIdList, stedfestingFilter, today],
+    queryFn: async () => hentVegobjekter(typeIds, stedfestingFilter, today),
+    enabled,
   });
 
-  const isLoading = queries.some((q) => q.isLoading);
-  const isError = queries.some((q) => q.isError);
+  const vegobjekterByType = new Map<number, Vegobjekt[]>(
+    selectedTypes.map((type) => [type.id, [] as Vegobjekt[]])
+  );
 
-  const vegobjekterByType = new Map<number, Vegobjekt[]>();
-  for (const query of queries) {
-    if (query.data) {
-      vegobjekterByType.set(query.data.typeId, query.data.vegobjekter);
+  for (const vegobjekt of query.data?.vegobjekter ?? []) {
+    const list = vegobjekterByType.get(vegobjekt.typeId);
+    if (list) {
+      list.push(vegobjekt);
+    } else {
+      vegobjekterByType.set(vegobjekt.typeId, [vegobjekt]);
     }
   }
 
   return {
     vegobjekterByType,
-    isLoading,
-    isError,
+    isLoading: query.isLoading,
+    isError: query.isError,
   };
 }

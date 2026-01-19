@@ -1,7 +1,7 @@
 import { client } from "./generated/uberiket/client.gen";
 import {
   hentVeglenkesekvenser as sdkHentVeglenkesekvenser,
-  hentVegobjekter as sdkHentVegobjekter,
+  hentVegobjekterMultiType as sdkHentVegobjekterMultiType,
 } from "./generated/uberiket/sdk.gen";
 import type {
   Veglenkesekvens,
@@ -79,14 +79,14 @@ export async function hentVeglenkesekvenser(
 }
 
 export async function hentVegobjekter(
-  typeId: number,
+  typeIds: number[],
   stedfesting: string,
   dato?: string,
   antall = 1000
 ): Promise<VegobjekterSide> {
-  const response = await sdkHentVegobjekter({
-    path: { typeId },
+  const response = await sdkHentVegobjekterMultiType({
     query: {
+      typeIder: typeIds,
       antall,
       inkluder: ["alle"],
       dato,

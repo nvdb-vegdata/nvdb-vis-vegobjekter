@@ -10,7 +10,7 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 2. **Draw Polygon** - User draws a small polygon on the map
 3. **Fetch Veglenker** - App queries veglenkesekvenser within the polygon (limit 10)
 4. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
-5. **Fetch Vegobjekter** - For each selected type, fetch vegobjekter using stedfesting filter
+5. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter
 6. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
@@ -55,11 +55,12 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
   
 - **Uberiket API**: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1/`
   - Query veglenkesekvenser by polygon
-  - Query vegobjekter by type and stedfesting filter
+  - Query vegobjekter by comma-separated type IDs and stedfesting filter
 
 ### Code Generation
-- Use `@openapitools/openapi-generator-cli@7.14.0`
-- Generate TypeScript-Axios clients for both APIs
+- Use `@hey-api/openapi-ts` for TypeScript client generation
+- Specs are fetched from API docs endpoints via `bun run fetch:specs`
+- Run `bunx openapi-ts` to regenerate clients after spec updates
 
 ## Project Structure
 
@@ -102,7 +103,7 @@ nvdb-vis-vegobjekter/
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /api/v1/vegnett/veglenkesekvenser` | Query road segments by polygon |
-| `GET /api/v1/vegobjekter/{typeId}` | Query road objects by stedfesting |
+| `GET /api/v1/vegobjekter?typeIder=...` | Query road objects by type IDs and stedfesting filter |
 
 Query parameters:
 - `polygon`: UTM33 polygon coordinates
@@ -138,7 +139,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 4. **Query and Display**
    - App queries veglenkesekvenser within polygon (limit 10)
    - Veglenker with geometry overlapping polygon are rendered on map
-   - For each selected type, queries vegobjekter with stedfesting filter
+   - Queries vegobjekter with stedfesting filter and comma-separated type IDs
 
 5. **Inspect Vegobjekter**
    - Click on a veglenke to see related vegobjekter
