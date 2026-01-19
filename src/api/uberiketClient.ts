@@ -1,88 +1,101 @@
-import { Configuration, VegnettApi, VegobjekterApi } from "./generated/uberiket";
+import { client } from "./generated/uberiket/client.gen";
 import {
-  InkluderIVeglenkesekvenser,
-  InkluderIVegobjekt,
-  type Veglenkesekvens,
-  type Veglenke,
-  type VeglenkesekvenserSide,
-  type Vegobjekt,
-  type VegobjekterSide,
-  type StedfestingLinje,
-  type StedfestingPunkt,
-} from "./generated/uberiket/models";
+  hentVeglenkesekvenser as sdkHentVeglenkesekvenser,
+  hentVegobjekter as sdkHentVegobjekter,
+} from "./generated/uberiket/sdk.gen";
+import type {
+  Veglenkesekvens,
+  Veglenke,
+  VeglenkesekvenserSide,
+  Vegobjekt,
+  VegobjekterSide,
+  StedfestingLinje,
+  StedfestingPunkt,
+  StedfestingLinjer,
+  StedfestingPunkter,
+  StedfestingSving,
+  StedfestingMangler,
+  EgenskapVerdi,
+  EnumEgenskap,
+  TekstEgenskap,
+  HeltallEgenskap,
+  FlyttallEgenskap,
+  BoolskEgenskap,
+  DatoEgenskap,
+  GeometriEgenskap,
+} from "./generated/uberiket/types.gen";
 
 const BASE_URL = "https://nvdbapiles.atlas.vegvesen.no/uberiket";
 
-const config = new Configuration({
-  basePath: BASE_URL,
+client.setConfig({
+  baseUrl: BASE_URL,
+  headers: {
+    "X-Client": "nvdb-vis-vegobjekter",
+  },
 });
 
-const vegnettApi = new VegnettApi(config);
-const vegobjekterApi = new VegobjekterApi(config);
-
-export type { Veglenkesekvens, Veglenke, Vegobjekt, StedfestingLinje, StedfestingPunkt };
-
-export interface StedfestingLinjer {
-  type: "StedfestingLinjer";
-  linjer: StedfestingLinje[];
-}
-
-export interface StedfestingPunkter {
-  type: "StedfestingPunkter";
-  punkter: StedfestingPunkt[];
-}
-
-export interface StedfestingSving {
-  type: "StedfestingSving";
-  id: number;
-  startpunkt: StedfestingPunkt;
-  sluttpunkt: StedfestingPunkt;
-}
-
-export interface StedfestingMangler {
-  type: "StedfestingMangler";
-}
-
-export type VegobjektStedfesting =
+export type Stedfesting =
   | StedfestingLinjer
   | StedfestingPunkter
   | StedfestingSving
   | StedfestingMangler;
 
-export interface VegobjektMedStedfesting extends Omit<Vegobjekt, "stedfesting"> {
-  stedfesting?: VegobjektStedfesting;
-}
+export type {
+  Veglenkesekvens,
+  Veglenke,
+  Vegobjekt,
+  VegobjekterSide,
+  VeglenkesekvenserSide,
+  StedfestingLinje,
+  StedfestingPunkt,
+  StedfestingLinjer,
+  StedfestingPunkter,
+  StedfestingSving,
+  StedfestingMangler,
+  EgenskapVerdi,
+  EnumEgenskap,
+};
 
 export async function hentVeglenkesekvenser(
   polygon: string,
   antall = 10
 ): Promise<VeglenkesekvenserSide> {
-  const response = await vegnettApi.hentVeglenkesekvenser(
-    antall,
-    undefined,
-    undefined,
-    undefined,
-    polygon,
-    new Set([InkluderIVeglenkesekvenser.Alle])
-  );
-  return response.data;
+  const response = await sdkHentVeglenkesekvenser({
+    query: {
+      antall,
+      polygon,
+      inkluder: ["alle"],
+    },
+  });
+
+  if (response.error) {
+    throw new Error(`Failed to fetch veglenkesekvenser: ${response.error}`);
+  }
+
+  return response.data as VeglenkesekvenserSide;
 }
 
 export async function hentVegobjekter(
   typeId: number,
   stedfesting: string[],
+  dato?: string,
   antall = 1000
 ): Promise<VegobjekterSide> {
-  const response = await vegobjekterApi.hentVegobjekter(
-    typeId,
-    antall,
-    undefined,
-    new Set([InkluderIVegobjekt.Stedfesting]),
-    undefined,
-    undefined,
-    stedfesting
-  );
-  return response.data;
+  const response = await sdkHentVegobjekter({
+    path: { typeId },
+    query: {
+      antall,
+      inkluder: ["alle"],
+      dato,
+      stedfesting,
+    },
+  });
+
+  if (response.error) {
+    throw new Error(`Failed to fetch vegobjekter: ${response.error}`);
+  }
+
+  return response.data as VegobjekterSide;
 }
 
 export function getStedfestingFilter(veglenkesekvensId: number): string {
@@ -90,7 +103,7 @@ export function getStedfestingFilter(veglenkesekvensId: number): string {
 }
 
 export function getVegobjektPositions(
-  stedfesting: VegobjektStedfesting | undefined,
+  stedfesting: Stedfesting | undefined,
   veglenkesekvensId: number
 ): { start: number; slutt: number }[] {
   if (!stedfesting) return [];
@@ -108,10 +121,20 @@ export function getVegobjektPositions(
 
     case "StedfestingSving":
       if (stedfesting.startpunkt.id === veglenkesekvensId) {
-        return [{ start: stedfesting.startpunkt.posisjon, slutt: stedfesting.startpunkt.posisjon }];
+        return [
+          {
+            start: stedfesting.startpunkt.posisjon,
+            slutt: stedfesting.startpunkt.posisjon,
+          },
+        ];
       }
       if (stedfesting.sluttpunkt.id === veglenkesekvensId) {
-        return [{ start: stedfesting.sluttpunkt.posisjon, slutt: stedfesting.sluttpunkt.posisjon }];
+        return [
+          {
+            start: stedfesting.sluttpunkt.posisjon,
+            slutt: stedfesting.sluttpunkt.posisjon,
+          },
+        ];
       }
       return [];
 
@@ -121,7 +144,7 @@ export function getVegobjektPositions(
 }
 
 export function isOnVeglenke(
-  stedfesting: VegobjektStedfesting | undefined,
+  stedfesting: Stedfesting | undefined,
   veglenkesekvensId: number,
   veglenkeStart: number,
   veglenkeEnd: number
@@ -130,4 +153,50 @@ export function isOnVeglenke(
   return positions.some(
     (pos) => pos.slutt >= veglenkeStart && pos.start <= veglenkeEnd
   );
+}
+
+export function formatStedfesting(
+  stedfesting: Stedfesting | undefined
+): string[] {
+  if (!stedfesting) return [];
+
+  switch (stedfesting.type) {
+    case "StedfestingLinjer":
+      return stedfesting.linjer.map(
+        (l) =>
+          `${l.startposisjon.toFixed(3)}-${l.sluttposisjon.toFixed(3)}@${l.id}`
+      );
+
+    case "StedfestingPunkter":
+      return stedfesting.punkter.map((p) => `${p.posisjon.toFixed(3)}@${p.id}`);
+
+    case "StedfestingSving":
+      return [
+        `Sving: ${stedfesting.startpunkt.posisjon.toFixed(3)}@${stedfesting.startpunkt.id} -> ${stedfesting.sluttpunkt.posisjon.toFixed(3)}@${stedfesting.sluttpunkt.id}`,
+      ];
+
+    default:
+      return ["Mangler stedfesting"];
+  }
+}
+
+export function getEgenskapDisplayValue(egenskap: EgenskapVerdi): string {
+  switch (egenskap.type) {
+    case "TekstEgenskap":
+      return (egenskap as TekstEgenskap).verdi;
+    case "HeltallEgenskap":
+      return String((egenskap as HeltallEgenskap).verdi);
+    case "FlyttallEgenskap":
+      return String((egenskap as FlyttallEgenskap).verdi);
+    case "BoolskEgenskap":
+      return (egenskap as BoolskEgenskap).verdi ? "Ja" : "Nei";
+    case "DatoEgenskap":
+      return (egenskap as DatoEgenskap).verdi;
+    case "EnumEgenskap":
+      return `enum:${(egenskap as EnumEgenskap).verdi}`;
+    case "GeometriEgenskap":
+      return "[Geometri]";
+    default:
+      return "[Ukjent type]";
+  }
 }

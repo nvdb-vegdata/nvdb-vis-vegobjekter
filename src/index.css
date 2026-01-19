@@ -12,6 +12,7 @@ html, body, #root {
 .app {
   display: flex;
   height: 100%;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -51,6 +52,66 @@ html, body, #root {
   flex: 1;
   height: 100%;
   position: relative;
+}
+
+.sidebar-right {
+  width: 350px;
+  min-width: 350px;
+  height: 100%;
+  background: #f5f5f5;
+  border-left: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.sidebar-right-help {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-right-header {
+  padding: 16px;
+  background: #2c3e50;
+  color: white;
+}
+
+.sidebar-right-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sidebar-right-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.help-section {
+  margin-bottom: 24px;
+}
+
+.help-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.help-section ol,
+.help-section ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #555;
+}
+
+.help-section li {
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
 .search-input {
@@ -173,7 +234,7 @@ html, body, #root {
 .draw-controls {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 50px;
   z-index: 1000;
   display: flex;
   gap: 8px;
@@ -303,4 +364,279 @@ html, body, #root {
   border-width: 11px;
   left: 48px;
   margin-left: -11px;
+}
+
+/* VegobjektList styles */
+.vegobjekt-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.vegobjekt-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #2c3e50;
+  color: white;
+}
+
+.vegobjekt-list-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.vegobjekt-list-count {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.vegobjekt-list-empty {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+.vegobjekt-list-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: scroll;
+  padding: 16px;
+}
+
+.vegobjekt-type-group {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.vegobjekt-type-group:last-child {
+  margin-bottom: 0;
+}
+
+.vegobjekt-type-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vegobjekt-type-header:hover {
+  background: #ecf0f1;
+}
+
+.vegobjekt-expand {
+  width: 16px;
+  font-weight: bold;
+  color: #666;
+  font-size: 14px;
+}
+
+.vegobjekt-type-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.vegobjekt-type-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.vegobjekt-type-content {
+  border-top: 1px solid #ddd;
+}
+
+.vegobjekt-loading {
+  padding: 12px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+}
+
+.vegobjekt-item {
+  border-bottom: 1px solid #eee;
+}
+
+.vegobjekt-item:last-child {
+  border-bottom: none;
+}
+
+.vegobjekt-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vegobjekt-header:hover {
+  background: #f8f9fa;
+}
+
+.vegobjekt-id {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vegobjekt-version {
+  font-size: 11px;
+  color: #888;
+  margin-left: 8px;
+}
+
+.vegobjekt-details {
+  padding: 8px 12px 12px 28px;
+  background: #fafafa;
+  font-size: 12px;
+}
+
+.vegobjekt-section {
+  margin-bottom: 10px;
+}
+
+.vegobjekt-section:last-child {
+  margin-bottom: 0;
+}
+
+.vegobjekt-section-title {
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.vegobjekt-property {
+  margin-bottom: 2px;
+  color: #333;
+}
+
+.vegobjekt-stedfesting {
+  font-family: monospace;
+  font-size: 11px;
+  background: #e8e8e8;
+  padding: 2px 4px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.vegobjekt-barn-type {
+  font-weight: 500;
+  color: #666;
+}
+
+.vegobjekt-egenskap-name {
+  color: #666;
+}
+
+.vegobjekt-egenskap-value {
+  color: #333;
+}
+
+/* Loading indicators */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.spinner-large {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.map-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  gap: 12px;
+}
+
+.map-loading-overlay .spinner {
+  border-top-color: #2c3e50;
+}
+
+.map-loading-text {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.sidebar-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ecf0f1;
+  font-size: 13px;
+  color: #666;
+}
+
+.inline-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Popup vegobjekt link */
+.popup-vegobjekt-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #3498db;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+.popup-vegobjekt-link:hover {
+  color: #2980b9;
+}
+
+/* Vegobjekt highlight animation */
+@keyframes highlight-pop {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(52, 152, 219, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+  }
+}
+
+.vegobjekt-highlight {
+  animation: highlight-pop 1.5s ease-out;
+  background-color: #e3f2fd;
 }

@@ -7,7 +7,7 @@ import VectorSource from "ol/source/Vector";
 import OSM from "ol/source/OSM";
 import { Draw, Select } from "ol/interaction";
 import { Polygon } from "ol/geom";
-import { fromLonLat, transform } from "ol/proj";
+import { fromLonLat, toLonLat } from "ol/proj";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
 import Feature from "ol/Feature";
@@ -16,31 +16,28 @@ import WKT from "ol/format/WKT";
 import Overlay from "ol/Overlay";
 import { click } from "ol/events/condition";
 import type { Vegobjekttype } from "../../api/datakatalogClient";
-import type { VeglenkeData } from "../../App";
 import {
-  hentVeglenkesekvenser,
-  hentVegobjekter,
-  getStedfestingFilter,
   isOnVeglenke,
   type Veglenke,
-  type VegobjektMedStedfesting,
-  type VegobjektStedfesting,
+  type Veglenkesekvens,
+  type Vegobjekt,
+  type Stedfesting,
 } from "../../api/uberiketClient";
 import "ol/ol.css";
 
-// Register UTM33N projection
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+proj4.defs("EPSG:5973", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
 register(proj4);
 
 interface Props {
   selectedTypes: Vegobjekttype[];
   polygon: Polygon | null;
   onPolygonDrawn: (polygon: Polygon | null) => void;
-  veglenkeData: VeglenkeData | null;
-  onDataLoaded: (data: VeglenkeData) => void;
+  veglenkesekvenser: Veglenkesekvens[] | undefined;
+  vegobjekterByType: Map<number, Vegobjekt[]>;
   onClearResults: () => void;
-  setIsLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  isLoadingVeglenker?: boolean;
+  onVegobjektClick?: (typeId: number, vegobjektId: number) => void;
 }
 
 const VEGLENKE_STYLE = new Style({
@@ -51,27 +48,15 @@ const VEGLENKE_SELECTED_STYLE = new Style({
   stroke: new Stroke({ color: "#e74c3c", width: 6 }),
 });
 
-function polygonToUtm33(polygon: Polygon): string {
-  const coords = polygon.getCoordinates()[0];
-  if (!coords) return "";
-  
-  const utm33Coords = coords.map((coord) => {
-    const [x, y] = transform(coord, "EPSG:3857", "EPSG:25833");
-    return `${Math.round(x!)} ${Math.round(y!)}`;
-  });
-  
-  return utm33Coords.join(", ");
-}
-
 export default function MapView({
   selectedTypes,
   polygon,
   onPolygonDrawn,
-  veglenkeData,
-  onDataLoaded,
+  veglenkesekvenser,
+  vegobjekterByType,
   onClearResults,
-  setIsLoading,
-  setError,
+  isLoadingVeglenker,
+  onVegobjektClick,
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -86,6 +71,11 @@ export default function MapView({
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const lon = parseFloat(params.get("lon") || "10.0");
+    const lat = parseFloat(params.get("lat") || "64.0");
+    const zoom = parseFloat(params.get("z") || "5");
 
     const drawLayer = new VectorLayer({
       source: drawSource.current,
@@ -111,8 +101,8 @@ export default function MapView({
       layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer],
       overlays: [overlay],
       view: new View({
-        center: fromLonLat([10.0, 64.0]),
-        zoom: 5,
+        center: fromLonLat([lon, lat]),
+        zoom: zoom,
       }),
     });
 
@@ -142,29 +132,73 @@ export default function MapView({
     selectInteraction.current = select;
     mapInstance.current = map;
 
+    map.on("pointermove", (e) => {
+      const hit = map.hasFeatureAtPixel(e.pixel, {
+        layerFilter: (layer) => layer === veglenkeLayer,
+      });
+      map.getTargetElement().style.cursor = hit ? "pointer" : "";
+    });
+
+    let updateUrlTimeout: ReturnType<typeof setTimeout> | null = null;
+    map.on("moveend", () => {
+      if (updateUrlTimeout) clearTimeout(updateUrlTimeout);
+      updateUrlTimeout = setTimeout(() => {
+        const view = map.getView();
+        const center = toLonLat(view.getCenter()!);
+        const z = view.getZoom();
+        const url = new URL(window.location.href);
+        url.searchParams.set("lon", center[0]!.toFixed(5));
+        url.searchParams.set("lat", center[1]!.toFixed(5));
+        url.searchParams.set("z", z!.toFixed(1));
+        window.history.replaceState({}, "", url);
+      }, 200);
+    });
+
     return () => {
+      if (updateUrlTimeout) clearTimeout(updateUrlTimeout);
       map.setTarget(undefined);
       mapInstance.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (!veglenkeData) {
+    if (!mapInstance.current || !polygon) return;
+    if (drawSource.current.getFeatures().length > 0) return;
+    const feature = new Feature({ geometry: polygon });
+    drawSource.current.addFeature(feature);
+  }, [polygon]);
+
+  useEffect(() => {
+    if (!veglenkesekvenser) {
       veglenkeSource.current.clear();
       return;
     }
 
     veglenkeSource.current.clear();
     const wktFormat = new WKT();
+    const today = new Date().toISOString().split("T")[0]!;
 
-    for (const vs of veglenkeData.veglenkesekvenser) {
+    const drawnFeatures = drawSource.current.getFeatures();
+    const drawnPolygon = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null;
+
+    for (const vs of veglenkesekvenser) {
       for (const vl of vs.veglenker ?? []) {
+        const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato;
+        if (sluttdato && sluttdato < today) {
+          continue;
+        }
+
         if (vl.geometri?.wkt) {
           try {
             const geom = wktFormat.readGeometry(vl.geometri.wkt, {
               dataProjection: `EPSG:${vl.geometri.srid}`,
               featureProjection: "EPSG:3857",
             });
+
+            if (drawnPolygon && !geom.intersectsExtent(drawnPolygon.getExtent())) {
+              continue;
+            }
+
             const feature = new Feature({
               geometry: geom,
               veglenkesekvensId: vs.id,
@@ -177,13 +211,16 @@ export default function MapView({
         }
       }
     }
-  }, [veglenkeData]);
+  }, [veglenkesekvenser]);
 
   const startDrawing = useCallback(() => {
     if (!mapInstance.current) return;
 
     drawSource.current.clear();
-    onPolygonDrawn(null);
+    veglenkeSource.current.clear();
+    setSelectedFeature(null);
+    overlayRef.current?.setPosition(undefined);
+    onClearResults();
 
     const draw = new Draw({
       source: drawSource.current,
@@ -201,7 +238,7 @@ export default function MapView({
     mapInstance.current.addInteraction(draw);
     drawInteraction.current = draw;
     setIsDrawing(true);
-  }, [onPolygonDrawn]);
+  }, [onPolygonDrawn, onClearResults]);
 
   const cancelDrawing = useCallback(() => {
     if (drawInteraction.current && mapInstance.current) {
@@ -219,67 +256,15 @@ export default function MapView({
     onClearResults();
   }, [onClearResults]);
 
-  const fetchData = useCallback(async () => {
-    if (!polygon || selectedTypes.length === 0) return;
-
-    setIsLoading(true);
-    setError(null);
-    veglenkeSource.current.clear();
-    setSelectedFeature(null);
-    overlayRef.current?.setPosition(undefined);
-
-    try {
-      const utm33Polygon = polygonToUtm33(polygon);
-      const veglenkeResult = await hentVeglenkesekvenser(utm33Polygon, 10);
-
-      if (veglenkeResult.veglenkesekvenser.length === 0) {
-        setError("Ingen veglenker funnet i området");
-        setIsLoading(false);
-        return;
-      }
-
-      const vegobjekterByType = new Map<number, VegobjektMedStedfesting[]>();
-
-      for (const type of selectedTypes) {
-        const stedfestingFilters = veglenkeResult.veglenkesekvenser.map((vs) =>
-          getStedfestingFilter(vs.id)
-        );
-
-        try {
-          const objResult = await hentVegobjekter(type.id, stedfestingFilters);
-          vegobjekterByType.set(
-            type.id,
-            objResult.vegobjekter as VegobjektMedStedfesting[]
-          );
-        } catch (e) {
-          console.warn(`Failed to fetch vegobjekter for type ${type.id}`, e);
-          vegobjekterByType.set(type.id, []);
-        }
-      }
-
-      onDataLoaded({
-        veglenkesekvenser: veglenkeResult.veglenkesekvenser,
-        vegobjekterByType,
-      });
-    } catch (err) {
-      console.error(err);
-      setError("Kunne ikke hente data fra NVDB");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [polygon, selectedTypes, onDataLoaded, setIsLoading, setError]);
-
   const getVegobjekterOnVeglenke = useCallback(
-    (veglenkesekvensId: number, veglenke: Veglenke) => {
-      if (!veglenkeData) return [];
-
-      const result: { type: Vegobjekttype; objects: VegobjektMedStedfesting[] }[] = [];
+    (veglenkesekvensId: number) => {
+      const result: { type: Vegobjekttype; objects: Vegobjekt[] }[] = [];
 
       for (const type of selectedTypes) {
-        const objects = veglenkeData.vegobjekterByType.get(type.id) ?? [];
+        const objects = vegobjekterByType.get(type.id) ?? [];
         const matching = objects.filter((obj) =>
           isOnVeglenke(
-            obj.stedfesting as VegobjektStedfesting | undefined,
+            obj.stedfesting as Stedfesting | undefined,
             veglenkesekvensId,
             0,
             1
@@ -292,17 +277,14 @@ export default function MapView({
 
       return result;
     },
-    [veglenkeData, selectedTypes]
+    [vegobjekterByType, selectedTypes]
   );
 
-  const selectedVeglenkesekvensId = selectedFeature?.get("veglenkesekvensId") as
-    | number
-    | undefined;
+  const selectedVeglenkesekvensId = selectedFeature?.get("veglenkesekvensId") as number | undefined;
   const selectedVeglenke = selectedFeature?.get("veglenke") as Veglenke | undefined;
-  const vegobjekterOnSelected =
-    selectedVeglenkesekvensId && selectedVeglenke
-      ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId, selectedVeglenke)
-      : [];
+  const vegobjekterOnSelected = selectedVeglenkesekvensId
+    ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId)
+    : [];
 
   return (
     <>
@@ -312,12 +294,7 @@ export default function MapView({
             <button className="btn btn-primary" onClick={startDrawing}>
               Tegn område
             </button>
-            {polygon && selectedTypes.length > 0 && (
-              <button className="btn btn-primary" onClick={fetchData}>
-                Hent data ({selectedTypes.length} type(r))
-              </button>
-            )}
-            {(polygon || veglenkeData) && (
+            {(polygon || veglenkesekvenser) && (
               <button className="btn btn-danger" onClick={clearAll}>
                 Nullstill
               </button>
@@ -332,11 +309,16 @@ export default function MapView({
 
       <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
 
+      <div className="map-loading-overlay" style={{ display: isLoadingVeglenker ? undefined : "none" }}>
+        <div className="spinner spinner-large" />
+        <div className="map-loading-text">Henter veglenker...</div>
+      </div>
+
       <div ref={popupRef} className="ol-popup">
         {selectedFeature && (
           <div className="popup-content">
             <div className="popup-title">
-              Veglenkesekvens {selectedVeglenkesekvensId}
+              Veglenke {selectedVeglenkesekvensId}:{selectedVeglenke?.nummer}
             </div>
             {vegobjekterOnSelected.length === 0 ? (
               <p style={{ fontSize: 12, color: "#666" }}>
@@ -350,7 +332,14 @@ export default function MapView({
                   </div>
                   <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
                     {objects.slice(0, 5).map((obj) => (
-                      <li key={obj.id}>ID: {obj.id}</li>
+                      <li key={obj.id}>
+                        <button
+                          className="popup-vegobjekt-link"
+                          onClick={() => onVegobjektClick?.(type.id, obj.id)}
+                        >
+                          ID: {obj.id}
+                        </button>
+                      </li>
                     ))}
                     {objects.length > 5 && (
                       <li>...og {objects.length - 5} til</li>
@@ -362,25 +351,6 @@ export default function MapView({
           </div>
         )}
       </div>
-
-      {veglenkeData && selectedTypes.length > 0 && (
-        <div
-          className="legend"
-          style={{ position: "absolute", bottom: 20, right: 20, zIndex: 1000 }}
-        >
-          <div className="legend-title">Vegobjekter i området</div>
-          {selectedTypes.map((type) => {
-            const count = veglenkeData.vegobjekterByType.get(type.id)?.length ?? 0;
-            return (
-              <div key={type.id} className="legend-item">
-                <span>
-                  {type.navn}: {count}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </>
   );
 }
