@@ -17,7 +17,7 @@ function rangesOverlap(
   const overlapStart = Math.max(range1Start, range2Start);
   const overlapEnd = Math.min(range1End, range2End);
   
-  if (overlapStart > overlapEnd) {
+  if (overlapStart >= overlapEnd) {
     return null;
   }
   

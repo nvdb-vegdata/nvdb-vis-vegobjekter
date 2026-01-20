@@ -135,10 +135,10 @@ export default function ObjectTypeSelector() {
       </div>
 
       <div className="search-row">
+        <label className="search-label" htmlFor="type-search">
+          Søk på navn eller ID
+        </label>
         <div className="search-input-wrapper">
-          <label className="search-label" htmlFor="type-search">
-            Søk på navn eller ID
-          </label>
           <input
             id="type-search"
             type="text"

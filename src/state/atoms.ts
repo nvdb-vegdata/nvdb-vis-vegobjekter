@@ -54,5 +54,8 @@ export const strekningInputAtom = atom<string>(getInitialStrekning())
 export const focusedVegobjektAtom = atom<{ typeId: number; id: number } | null>(
   null,
 )
+export const locateVegobjektAtom = atom<{ vegobjekt: Vegobjekt; token: number } | null>(
+  null,
+)
 export const hoveredVegobjektAtom = atom<Vegobjekt | null>(null)
 export const vegobjekterErrorAtom = atom<string | null>(null)

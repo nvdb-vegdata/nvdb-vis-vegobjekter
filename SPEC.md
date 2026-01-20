@@ -154,6 +154,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Click on a veglenke to see related vegobjekter
    - Sidebar shows collapsible list of vegobjekter grouped by type
    - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
+   - Locate button recenters the map on the vegobjekt's stedfesting geometry
    - Each vegobjekt displays:
      - ID
      - Gyldighetsperiode (validity period)

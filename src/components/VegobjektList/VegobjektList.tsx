@@ -8,6 +8,7 @@ import {
   selectedTypesAtom,
   focusedVegobjektAtom,
   hoveredVegobjektAtom,
+  locateVegobjektAtom,
   vegobjekterErrorAtom,
 } from "../../state/atoms";
 
@@ -92,6 +93,7 @@ function VegobjektItem({
   itemRef?: React.RefObject<HTMLDivElement | null>;
 }) {
   const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom);
+  const setLocateVegobjekt = useSetAtom(locateVegobjektAtom);
 
   const uberiketUrl = `${UBERIKET_API_BASE_URL}/api/v1/vegobjekter/${details.typeId}/${details.id}`;
   const lesApiUrl = `${NVDB_API_BASE_URL}/vegobjekt?id=${details.id}`;
@@ -113,6 +115,26 @@ function VegobjektItem({
         {details.versjonId && (
           <span className="vegobjekt-version">v{details.versjonId}</span>
         )}
+        <button
+          type="button"
+          className="vegobjekt-locate-btn"
+          aria-label="Finn i kart"
+          title="Finn i kart"
+          onClick={(event) => {
+            event.stopPropagation();
+            setLocateVegobjekt({ vegobjekt, token: Date.now() });
+          }}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M12 2a7 7 0 0 1 7 7c0 4.2-5.1 10.1-6.4 11.5a.8.8 0 0 1-1.2 0C10.1 19.1 5 13.2 5 9a7 7 0 0 1 7-7Zm0 4.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z"
+            />
+          </svg>
+        </button>
       </div>
       
       {isExpanded && (

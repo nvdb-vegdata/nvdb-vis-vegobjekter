@@ -1,7 +1,7 @@
 import { test, expect, describe } from "bun:test";
 import { getPointAtFraction, sliceLineStringByFraction, getClippedGeometries } from "./geometryUtils";
 import type { VeglenkesekvensMedPosisjoner } from "../api/uberiketClient";
-import type { StedfestingPunkter } from "../api/generated/uberiket/types.gen";
+import type { StedfestingLinjer, StedfestingPunkter } from "../api/generated/uberiket/types.gen";
 
 describe("getPointAtFraction", () => {
   test("returns first point at fraction 0", () => {
@@ -162,6 +162,27 @@ describe("getClippedGeometries", () => {
     };
 
     const result = getClippedGeometries(stedfesting, veglenkesekvenser);
+    expect(result.length).toBe(0);
+  });
+
+  test("excludes line overlap when sharing endpoint", () => {
+    // Arrange
+    const veglenkesekvenser: VeglenkesekvensMedPosisjoner[] = [{
+      id: 123,
+      veglenker: [
+        { nummer: 1, startposisjon: 0.4, sluttposisjon: 0.6 } as any,
+      ],
+    } as any];
+
+    const stedfesting: StedfestingLinjer = {
+      type: "StedfestingLinjer",
+      linjer: [{ id: 123, startposisjon: 0.2, sluttposisjon: 0.4, retning: "MED", sideposisjon: "V", kjorefelt: [] }],
+    };
+
+    // Act
+    const result = getClippedGeometries(stedfesting, veglenkesekvenser);
+
+    // Assert
     expect(result.length).toBe(0);
   });
 });
