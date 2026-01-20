@@ -57,18 +57,29 @@ function getOverlappingVeglenkeRanges(
   return ranges;
 }
 
-export function useVegobjekter(
-  selectedTypes: Vegobjekttype[],
-  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined,
-  polygon: Polygon | null
-) {
+type VegobjekterParams = {
+  selectedTypes: Vegobjekttype[];
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined;
+  polygon: Polygon | null;
+  vegsystemreferanse?: string | null;
+};
+
+export function useVegobjekter({
+  selectedTypes,
+  veglenkesekvenser,
+  polygon,
+  vegsystemreferanse,
+}: VegobjekterParams) {
+  const trimmedStrekning = vegsystemreferanse?.trim() ?? "";
   const stedfestingFilter = useMemo(() => {
-    if (!veglenkesekvenser || !polygon) return "";
+    if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return "";
     const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon);
     return buildStedfestingFilter(ranges);
-  }, [veglenkesekvenser, polygon]);
+  }, [veglenkesekvenser, polygon, trimmedStrekning]);
 
-  const enabled = selectedTypes.length > 0 && stedfestingFilter.length > 0;
+  const enabled =
+    selectedTypes.length > 0 &&
+    (trimmedStrekning.length > 0 || stedfestingFilter.length > 0);
   const today = getTodayDate();
   const typeIds = useMemo(
     () => selectedTypes.map((type) => type.id).sort((a, b) => a - b),
@@ -77,8 +88,13 @@ export function useVegobjekter(
   const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
 
   const query = useQuery({
-    queryKey: ["vegobjekter", typeIdList, stedfestingFilter, today],
-    queryFn: async () => hentVegobjekter(typeIds, stedfestingFilter, today),
+    queryKey: ["vegobjekter", typeIdList, stedfestingFilter, trimmedStrekning, today],
+    queryFn: async () => {
+      if (trimmedStrekning.length > 0) {
+        return hentVegobjekter({ typeIds, vegsystemreferanse: trimmedStrekning, dato: today });
+      }
+      return hentVegobjekter({ typeIds, stedfesting: stedfestingFilter, dato: today });
+    },
     enabled,
   });
 

@@ -154,7 +154,7 @@ export default function ObjectTypeSelector() {
       )}
 
       <ul className="object-type-list">
-        {filteredTypes.slice(0, 100).map((type) => (
+        {filteredTypes.map((type) => (
           <li
             key={type.id}
             className={`object-type-item ${isSelected(type) ? 'selected' : ''}`}
@@ -167,8 +167,10 @@ export default function ObjectTypeSelector() {
               onChange={() => {}}
             />
             <div className="object-type-info">
-              <div className="object-type-name">{type.navn}</div>
-              <div className="object-type-id">ID: {type.id}</div>
+              <div className="object-type-header">
+                <div className="object-type-name">{type.navn}</div>
+                <div className="object-type-id">ID: {type.id}</div>
+              </div>
               {type.beskrivelse && (
                 <div
                   className="object-type-description"
@@ -181,12 +183,6 @@ export default function ObjectTypeSelector() {
           </li>
         ))}
       </ul>
-
-      {filteredTypes.length > 100 && (
-        <div className="selected-count">
-          Viser 100 av {filteredTypes.length} typer. Bruk søk for å finne flere.
-        </div>
-      )}
     </div>
   )
 }

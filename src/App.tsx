@@ -15,6 +15,8 @@ import {
   selectedTypesAtom,
   polygonAtom,
   veglenkesekvensLimitAtom,
+  searchModeAtom,
+  strekningAtom,
 } from "./state/atoms";
 
 function polygonToUtm33(polygon: Polygon): string {
@@ -39,6 +41,8 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
   const polygon = useAtomValue(polygonAtom);
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
+  const searchMode = useAtomValue(searchModeAtom);
+  const strekning = useAtomValue(strekningAtom);
   const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
 
   useEffect(() => {
@@ -55,10 +59,15 @@ export default function App() {
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (polygon) {
+    if (searchMode === "polygon" && polygon) {
       url.searchParams.set("polygon", polygonToWkt(polygon));
     } else {
       url.searchParams.delete("polygon");
+    }
+    if (searchMode === "strekning" && strekning.trim().length > 0) {
+      url.searchParams.set("strekning", strekning.trim());
+    } else {
+      url.searchParams.delete("strekning");
     }
     if (selectedTypes.length > 0) {
       url.searchParams.set("types", selectedTypes.map((t) => t.id).join(","));
@@ -66,23 +75,32 @@ export default function App() {
       url.searchParams.delete("types");
     }
     window.history.replaceState({}, "", url);
-  }, [polygon, selectedTypes]);
+  }, [polygon, selectedTypes, searchMode, strekning]);
 
   const polygonUtm33 = useMemo(
-    () => (polygon ? polygonToUtm33(polygon) : null),
-    [polygon]
+    () => (searchMode === "polygon" && polygon ? polygonToUtm33(polygon) : null),
+    [polygon, searchMode]
   );
 
   const {
     data: veglenkeResult,
     isLoading: veglenkerLoading,
     error: veglenkerError,
-  } = useVeglenkesekvenser(polygonUtm33, veglenkesekvensLimit);
+  } = useVeglenkesekvenser({
+    polygonUtm33,
+    vegsystemreferanse: searchMode === "strekning" ? strekning : null,
+    limit: veglenkesekvensLimit,
+  });
 
   const {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
-  } = useVegobjekter(selectedTypes, veglenkeResult?.veglenkesekvenser, polygon);
+  } = useVegobjekter({
+    selectedTypes,
+    veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
+    polygon: searchMode === "polygon" ? polygon : null,
+    vegsystemreferanse: searchMode === "strekning" ? strekning : null,
+  });
 
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
@@ -101,7 +119,7 @@ export default function App() {
       <aside className="sidebar">
         <header className="sidebar-header">
           <h1>NVDB Vegobjekt Visualisering</h1>
-          <p>Velg objekttyper og tegn et område på kartet</p>
+          <p>Velg objekttyper og tegn et område eller søk på strekning</p>
         </header>
 
         <div className="sidebar-content">
@@ -147,8 +165,10 @@ export default function App() {
                 <h3>Kom i gang</h3>
                 <ol>
                   <li>Velg en eller flere vegobjekttyper fra listen til venstre</li>
-                  <li>Klikk "Tegn område" og tegn en polygon på kartet</li>
-                  <li>Vegobjektene i området vises her</li>
+                  <li>
+                    Klikk "Tegn område" for polygon, eller velg "Søk på strekning", skriv inn vegsystemreferanse og trykk "Søk"
+                  </li>
+                  <li>Vegobjektene i området eller strekningen vises her</li>
                 </ol>
               </div>
               <div className="help-section">

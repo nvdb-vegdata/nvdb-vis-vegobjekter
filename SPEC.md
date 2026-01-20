@@ -7,11 +7,12 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
-2. **Draw Polygon** - User draws a small polygon on the map
-3. **Fetch Veglenker** - App queries veglenkesekvenser within the polygon (configurable limit, default 20)
-4. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
-5. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter
-6. **Inspect** - View detailed vegobjekt information in a collapsible list
+2. **Choose Search Mode** - Toggle between drawing a polygon or searching by vegsystemreferanse (strekning)
+3. **Define Area/Route** - Draw a small polygon, or enter a vegsystemreferanse (e.g., "FV6666 S1")
+4. **Fetch Veglenker** - Query veglenkesekvenser by polygon or vegsystemreferanse (configurable limit, default 20)
+5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
+6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter, or use vegsystemreferanse when searching by strekning
+7. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
 
@@ -54,8 +55,9 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
   - Synchronous lookup via `getVegobjekttypeById()` after initial load
   
 - **Uberiket API**: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1/`
-  - Query veglenkesekvenser by polygon
-  - Query vegobjekter by comma-separated type IDs and stedfesting filter
+- Query veglenkesekvenser by polygon or vegsystemreferanse
+- Query vegobjekter by comma-separated type IDs and either stedfesting filter or vegsystemreferanse
+
 
 ### Code Generation
 - Use `@hey-api/openapi-ts` for TypeScript client generation
@@ -107,6 +109,7 @@ nvdb-vis-vegobjekter/
 
 Query parameters:
 - `polygon`: UTM33 polygon coordinates
+- `vegsystemreferanse`: Vegsystemreferanse string (e.g., "FV6666 S1")
 - `stedfesting`: Filter by position on veglenkesekvens (e.g., "0.4-0.6@123456")
 - `inkluder`: Include stedfesting, egenskaper, gyldighetsperiode, barn
 - `antall`: Limit results
@@ -133,15 +136,18 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Selected types appear as removable chips for quick deselection
    - Must select at least one type before querying
 
-3. **Draw Selection Polygon**
-   - User clicks "Tegn område" button
-   - Draws a small polygon on map (recommended: small area)
+3. **Choose Search Mode**
+   - User toggles between polygon mode and strekning mode
+
+4. **Define Area/Route**
+   - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area)
+   - Strekning mode: enter a vegsystemreferanse (e.g., "FV6666 S1") and click "Søk"
    - Polygon is converted to UTM33 coordinates
 
-4. **Query and Display**
-   - App queries veglenkesekvenser within polygon (configurable limit, default 20)
+5. **Query and Display**
+   - App queries veglenkesekvenser by polygon or vegsystemreferanse (configurable limit, default 20)
    - Veglenker with geometry overlapping polygon are rendered on map
-   - Queries vegobjekter with stedfesting filter and comma-separated type IDs
+   - Queries vegobjekter with stedfesting filter for polygon mode, or vegsystemreferanse for strekning mode
 
 5. **Inspect Vegobjekter**
    - Click on a veglenke to see related vegobjekter
@@ -159,7 +165,8 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 
 The application synchronizes state with the URL for shareable links:
 - **Map view**: Center coordinates and zoom level
-- **Polygon**: Drawn selection polygon coordinates
+- **Polygon**: Drawn selection polygon coordinates (polygon mode)
+- **Strekning**: Vegsystemreferanse query (strekning mode)
 - **Selected types**: List of selected vegobjekttype IDs
 
 ## Data Model

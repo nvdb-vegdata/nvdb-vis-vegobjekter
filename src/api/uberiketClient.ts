@@ -59,14 +59,22 @@ export type {
   Geometristruktur,
 };
 
-export async function hentVeglenkesekvenser(
-  polygon: string,
-  antall = 10
-): Promise<VeglenkesekvenserSide> {
+type VeglenkesekvenserQuery = {
+  polygon?: string;
+  vegsystemreferanse?: string;
+  antall?: number;
+};
+
+export async function hentVeglenkesekvenser({
+  polygon,
+  vegsystemreferanse,
+  antall = 10,
+}: VeglenkesekvenserQuery): Promise<VeglenkesekvenserSide> {
   const response = await sdkHentVeglenkesekvenser({
     query: {
       antall,
       polygon,
+      vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
       inkluder: ["alle"],
     },
   });
@@ -78,19 +86,29 @@ export async function hentVeglenkesekvenser(
   return response.data as VeglenkesekvenserSide;
 }
 
-export async function hentVegobjekter(
-  typeIds: number[],
-  stedfesting: string,
-  dato?: string,
-  antall = 1000
-): Promise<VegobjekterSide> {
+type VegobjekterQuery = {
+  typeIds: number[];
+  stedfesting?: string;
+  vegsystemreferanse?: string;
+  dato?: string;
+  antall?: number;
+};
+
+export async function hentVegobjekter({
+  typeIds,
+  stedfesting,
+  vegsystemreferanse,
+  dato,
+  antall = 1000,
+}: VegobjekterQuery): Promise<VegobjekterSide> {
   const response = await sdkHentVegobjekterMultiType({
     query: {
       typeIder: [typeIds.join(",")] as unknown as number[],
       antall,
       inkluder: ["alle"],
       dato,
-      stedfesting: [stedfesting],
+      stedfesting: stedfesting ? [stedfesting] : undefined,
+      vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
     },
   });
 
@@ -159,10 +177,63 @@ export function getVeglenkePositionRange(
 }
 
 export function buildStedfestingFilter(ranges: VeglenkeRange[]): string {
-  return ranges
-    .map((r) => `${r.startposisjon}-${r.sluttposisjon}@${r.veglenkesekvensId}`)
-    .join(",");
+  const grouped = new Map<number, VeglenkeRange[]>()
+
+  for (const range of ranges) {
+    const existing = grouped.get(range.veglenkesekvensId)
+    if (existing) {
+      existing.push(range)
+    } else {
+      grouped.set(range.veglenkesekvensId, [range])
+    }
+  }
+
+  const merged: VeglenkeRange[] = []
+
+  for (const [veglenkesekvensId, items] of grouped.entries()) {
+    const sorted = items
+      .slice()
+      .sort((a, b) => a.startposisjon - b.startposisjon)
+
+    let current = sorted[0]
+    if (!current) continue
+
+    let currentStart = Math.min(current.startposisjon, current.sluttposisjon)
+    let currentEnd = Math.max(current.startposisjon, current.sluttposisjon)
+
+    for (let i = 1; i < sorted.length; i += 1) {
+      const next = sorted[i]!
+      const nextStart = Math.min(next.startposisjon, next.sluttposisjon)
+      const nextEnd = Math.max(next.startposisjon, next.sluttposisjon)
+
+      if (currentEnd === nextStart) {
+        currentEnd = nextEnd
+        continue
+      }
+
+      merged.push({
+        veglenkesekvensId,
+        startposisjon: currentStart,
+        sluttposisjon: currentEnd,
+      })
+      currentStart = nextStart
+      currentEnd = nextEnd
+    }
+
+    merged.push({
+      veglenkesekvensId,
+      startposisjon: currentStart,
+      sluttposisjon: currentEnd,
+    })
+  }
+
+  return merged
+    .map((range) =>
+      `${range.startposisjon}-${range.sluttposisjon}@${range.veglenkesekvensId}`,
+    )
+    .join(',')
 }
+
 
 export function getVegobjektPositions(
   stedfesting: Stedfesting | undefined,
