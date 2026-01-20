@@ -427,10 +427,14 @@ body,
   height: 40px;
 }
 
-.strekning-hint {
+.strekning-error {
   margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
   font-size: 12px;
-  color: #666;
+  color: #c0392b;
 }
 
 .status-bar {

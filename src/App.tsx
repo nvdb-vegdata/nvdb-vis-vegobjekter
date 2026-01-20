@@ -163,6 +163,9 @@ export default function App() {
     0
   );
 
+  const showSidebarHelp =
+    !veglenkeResult || (!allTypesSelected && selectedTypes.length === 0);
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -199,17 +202,7 @@ export default function App() {
       </main>
 
       <aside className="sidebar-right">
-        {veglenkeResult ? (
-          <VegobjektList
-            vegobjekterByType={vegobjekterByType}
-            isLoading={vegobjekterLoading}
-            hasNextPage={vegobjekterHasNextPage}
-            isFetchingNextPage={vegobjekterFetchingNextPage}
-            onFetchNextPage={() => {
-              void fetchNextVegobjekterPage();
-            }}
-          />
-        ) : (
+        {showSidebarHelp ? (
           <div className="sidebar-right-help">
             <div className="sidebar-right-header">
               <h2>Vegobjekter</h2>
@@ -235,6 +228,16 @@ export default function App() {
               </div>
             </div>
           </div>
+        ) : (
+          <VegobjektList
+            vegobjekterByType={vegobjekterByType}
+            isLoading={vegobjekterLoading}
+            hasNextPage={vegobjekterHasNextPage}
+            isFetchingNextPage={vegobjekterFetchingNextPage}
+            onFetchNextPage={() => {
+              void fetchNextVegobjekterPage();
+            }}
+          />
         )}
       </aside>
 

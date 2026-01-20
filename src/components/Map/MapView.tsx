@@ -100,6 +100,25 @@ const EGENGEOMETRI_POLYGON_STYLE = new Style({
   stroke: new Stroke({ color: '#8e44ad', width: 2 }),
 })
 
+const VEGSYSTEMREFERANSE_REGEX =
+  /^(?:(\d{4})\s*)?([ERFKPS])(?:([VAPF])\s*)?(\d+)(?:\s*S(\d+(?:-\d+)?))?(?:\s*D(\d+(?:-\d+)?))?\s*$/i
+
+function isValidVegsystemreferanse(value: string): boolean {
+  const match = VEGSYSTEMREFERANSE_REGEX.exec(value.trim())
+  if (!match) return false
+  const kommune = match[1]
+  const kategori = match[2]?.toUpperCase() ?? ''
+  const strekning = match[5]
+  const delstrekning = match[6]
+  if (kommune && !['K', 'P', 'S'].includes(kategori)) {
+    return false
+  }
+  if (delstrekning && !strekning) {
+    return false
+  }
+  return true
+}
+
 export default function MapView({
   veglenkesekvenser,
   vegobjekterByType,
@@ -108,8 +127,9 @@ export default function MapView({
   const selectedTypes = useAtomValue(selectedTypesAtom)
   const [polygon, setPolygon] = useAtom(polygonAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
-  const [strekning, setStrekning] = useAtom(strekningAtom)
+  const [, setStrekning] = useAtom(strekningAtom)
   const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
+  const [strekningError, setStrekningError] = useState<string | null>(null)
   const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
   const locateVegobjekt = useAtomValue(locateVegobjektAtom)
@@ -563,13 +583,23 @@ export default function MapView({
   const handleStrekningChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setStrekningInput(event.target.value)
+      setStrekningError(null)
     },
-    [setStrekningInput],
+    [setStrekningError, setStrekningInput],
   )
 
   const handleStrekningSearch = useCallback(() => {
-    setStrekning(strekningInput.trim())
-  }, [setStrekning, strekningInput])
+    const trimmed = strekningInput.trim()
+    if (trimmed.length === 0) return
+    if (!isValidVegsystemreferanse(trimmed)) {
+      setStrekningError(
+        'Ugyldig vegsystemreferanse. Bruk f.eks. FV6 S1D1 (KSP kan ha kommunenummer). Kryssdel/sideanleggsdel og meterverdier er ikke støttet.',
+      )
+      return
+    }
+    setStrekningError(null)
+    setStrekning(trimmed)
+  }, [setStrekning, setStrekningError, strekningInput])
 
   const handleStrekningKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -586,7 +616,8 @@ export default function MapView({
   const clearStrekning = useCallback(() => {
     setStrekningInput('')
     setStrekning('')
-  }, [setStrekningInput, setStrekning])
+    setStrekningError(null)
+  }, [setStrekningInput, setStrekning, setStrekningError])
 
   const getVegobjekterOnVeglenke = useCallback(
     (veglenkesekvensId: number, veglenke?: VeglenkeMedPosisjon) => {
@@ -626,6 +657,11 @@ export default function MapView({
   const vegobjekterOnSelected = selectedVeglenkesekvensId
     ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId, selectedVeglenke)
     : []
+
+  const trimmedStrekningInput = strekningInput.trim()
+  const isStrekningValid =
+    trimmedStrekningInput.length === 0 ||
+    isValidVegsystemreferanse(trimmedStrekningInput)
 
   return (
     <>
@@ -689,13 +725,13 @@ export default function MapView({
                 className="btn btn-primary"
                 type="button"
                 onClick={handleStrekningSearch}
-                disabled={strekningInput.trim().length === 0}
+                disabled={trimmedStrekningInput.length === 0 || !isStrekningValid}
               >
                 Søk
               </button>
             </div>
-            {strekning && strekning.trim() !== strekningInput.trim() && (
-              <div className="strekning-hint">Søket bruker: {strekning}</div>
+            {strekningError && (
+              <div className="strekning-error">{strekningError}</div>
             )}
           </div>
         )}
