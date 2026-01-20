@@ -8,7 +8,7 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 
 1. **Select Object Types** - User selects which road object types they want to find
 2. **Draw Polygon** - User draws a small polygon on the map
-3. **Fetch Veglenker** - App queries veglenkesekvenser within the polygon (limit 10)
+3. **Fetch Veglenker** - App queries veglenkesekvenser within the polygon (configurable limit, default 20)
 4. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
 5. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter
 6. **Inspect** - View detailed vegobjekt information in a collapsible list
@@ -129,6 +129,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 
 2. **Select Object Types**
    - User searches/browses and selects types of interest
+   - Selected types appear as removable chips for quick deselection
    - Must select at least one type before querying
 
 3. **Draw Selection Polygon**
@@ -137,7 +138,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Polygon is converted to UTM33 coordinates
 
 4. **Query and Display**
-   - App queries veglenkesekvenser within polygon (limit 10)
+   - App queries veglenkesekvenser within polygon (configurable limit, default 20)
    - Veglenker with geometry overlapping polygon are rendered on map
    - Queries vegobjekter with stedfesting filter and comma-separated type IDs
 

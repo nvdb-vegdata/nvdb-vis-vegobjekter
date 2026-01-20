@@ -5,19 +5,18 @@ import type { Polygon } from "ol/geom";
 import {
   hentVegobjekter,
   buildStedfestingFilter,
-  getVeglenkePositionRange,
   type Vegobjekt,
   type VeglenkeRange,
+  type VeglenkesekvensMedPosisjoner,
 } from "../api/uberiketClient";
 import type { Vegobjekttype } from "../api/datakatalogClient";
-import type { Veglenkesekvens } from "../api/uberiketClient";
 
 function getTodayDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 function getOverlappingVeglenkeRanges(
-  veglenkesekvenser: Veglenkesekvens[],
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[],
   polygon: Polygon
 ): VeglenkeRange[] {
   const ranges: VeglenkeRange[] = [];
@@ -26,7 +25,7 @@ function getOverlappingVeglenkeRanges(
   const polygonExtent = polygon.getExtent();
 
   for (const vs of veglenkesekvenser) {
-    for (const vl of vs.veglenker ?? []) {
+    for (const vl of vs.veglenker) {
       const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato;
       if (sluttdato && sluttdato < today) {
         continue;
@@ -44,14 +43,11 @@ function getOverlappingVeglenkeRanges(
           continue;
         }
 
-        const posRange = getVeglenkePositionRange(vs, vl);
-        if (posRange) {
-          ranges.push({
-            veglenkesekvensId: vs.id,
-            startposisjon: posRange.start,
-            sluttposisjon: posRange.end,
-          });
-        }
+        ranges.push({
+          veglenkesekvensId: vs.id,
+          startposisjon: vl.startposisjon,
+          sluttposisjon: vl.sluttposisjon,
+        });
       } catch (e) {
         console.warn("Failed to parse veglenke geometry", e);
       }
@@ -63,7 +59,7 @@ function getOverlappingVeglenkeRanges(
 
 export function useVegobjekter(
   selectedTypes: Vegobjekttype[],
-  veglenkesekvenser: Veglenkesekvens[] | undefined,
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined,
   polygon: Polygon | null
 ) {
   const stedfestingFilter = useMemo(() => {

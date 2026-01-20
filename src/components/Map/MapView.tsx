@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import OLMap from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
@@ -6,7 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import OSM from "ol/source/OSM";
 import { Draw, Select } from "ol/interaction";
-import { Polygon, LineString } from "ol/geom";
+import { Polygon, LineString, Point } from "ol/geom";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { register } from "ol/proj/proj4";
 import proj4 from "proj4";
@@ -15,16 +16,22 @@ import { Style, Fill, Stroke, Circle as CircleStyle } from "ol/style";
 import WKT from "ol/format/WKT";
 import Overlay from "ol/Overlay";
 import { click } from "ol/events/condition";
-import type { Vegobjekttype } from "../../api/datakatalogClient";
+import { getVegobjekttypeById } from "../../api/datakatalogClient";
 import {
   isOnVeglenke,
   getGeometriEgenskaper,
-  type Veglenke,
-  type Veglenkesekvens,
+  type VeglenkeMedPosisjon,
+  type VeglenkesekvensMedPosisjoner,
   type Vegobjekt,
   type Stedfesting,
 } from "../../api/uberiketClient";
-import { getClippedGeometries, sliceLineStringByFraction } from "../../utils/geometryUtils";
+import { getClippedGeometries, sliceLineStringByFraction, getPointAtFraction } from "../../utils/geometryUtils";
+import {
+  selectedTypesAtom,
+  polygonAtom,
+  focusedVegobjektAtom,
+  hoveredVegobjektAtom,
+} from "../../state/atoms";
 import "ol/ol.css";
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
@@ -32,15 +39,9 @@ proj4.defs("EPSG:5973", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 
 register(proj4);
 
 interface Props {
-  selectedTypes: Vegobjekttype[];
-  polygon: Polygon | null;
-  onPolygonDrawn: (polygon: Polygon | null) => void;
-  veglenkesekvenser: Veglenkesekvens[] | undefined;
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined;
   vegobjekterByType: Map<number, Vegobjekt[]>;
-  onClearResults: () => void;
   isLoadingVeglenker?: boolean;
-  onVegobjektClick?: (typeId: number, vegobjektId: number) => void;
-  hoveredVegobjekt?: Vegobjekt | null;
 }
 
 const VEGLENKE_STYLE = new Style({
@@ -53,6 +54,14 @@ const VEGLENKE_SELECTED_STYLE = new Style({
 
 const HIGHLIGHT_STYLE = new Style({
   stroke: new Stroke({ color: "#f39c12", width: 8 }),
+});
+
+const HIGHLIGHT_POINT_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 10,
+    fill: new Fill({ color: "rgba(243, 156, 18, 0.8)" }),
+    stroke: new Stroke({ color: "#e67e22", width: 3 }),
+  }),
 });
 
 const EGENGEOMETRI_POINT_STYLE = new Style({
@@ -77,16 +86,15 @@ const EGENGEOMETRI_POLYGON_STYLE = new Style({
 });
 
 export default function MapView({
-  selectedTypes,
-  polygon,
-  onPolygonDrawn,
   veglenkesekvenser,
   vegobjekterByType,
-  onClearResults,
   isLoadingVeglenker,
-  onVegobjektClick,
-  hoveredVegobjekt,
 }: Props) {
+  const selectedTypes = useAtomValue(selectedTypesAtom);
+  const [polygon, setPolygon] = useAtom(polygonAtom);
+  const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom);
+  const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom);
+
   const mapRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<OLMap | null>(null);
@@ -123,7 +131,13 @@ export default function MapView({
 
     const highlightLayer = new VectorLayer({
       source: highlightSource.current,
-      style: HIGHLIGHT_STYLE,
+      style: (feature) => {
+        const geomType = feature.getGeometry()?.getType();
+        if (geomType === "Point") {
+          return HIGHLIGHT_POINT_STYLE;
+        }
+        return HIGHLIGHT_STYLE;
+      },
     });
 
     const egengeometriLayer = new VectorLayer({
@@ -271,30 +285,39 @@ export default function MapView({
     const stedfesting = hoveredVegobjekt.stedfesting as Stedfesting | undefined;
     if (stedfesting) {
       const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser);
-      
+
       for (const clipped of clippedGeometries) {
         const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
           const vsId = f.get("veglenkesekvensId");
-          const vl = f.get("veglenke") as Veglenke | undefined;
+          const vl = f.get("veglenke") as VeglenkeMedPosisjon | undefined;
           return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer;
         });
-        
+
         if (!veglenkeFeature) continue;
-        
+
         const geom = veglenkeFeature.getGeometry() as LineString | undefined;
         if (!geom) continue;
-        
+
         try {
           const coords = geom.getCoordinates();
-          const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction);
-          
-          if (slicedCoords.length >= 2) {
-            const slicedGeom = new LineString(slicedCoords);
-            const highlightFeature = new Feature({ geometry: slicedGeom });
+          const isPoint = clipped.startFraction === clipped.endFraction;
+
+          if (isPoint) {
+            const pointCoord = getPointAtFraction(coords, clipped.startFraction);
+            const pointGeom = new Point(pointCoord);
+            const highlightFeature = new Feature({ geometry: pointGeom });
             highlightSource.current.addFeature(highlightFeature);
+          } else {
+            const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction);
+
+            if (slicedCoords.length >= 2) {
+              const slicedGeom = new LineString(slicedCoords);
+              const highlightFeature = new Feature({ geometry: slicedGeom });
+              highlightSource.current.addFeature(highlightFeature);
+            }
           }
         } catch (e) {
-          console.warn("Failed to slice geometry", e);
+          console.warn("Failed to create highlight geometry", e);
         }
       }
     }
@@ -315,6 +338,16 @@ export default function MapView({
     }
   }, [hoveredVegobjekt, veglenkesekvenser]);
 
+  const clearAll = useCallback(() => {
+    drawSource.current.clear();
+    veglenkeSource.current.clear();
+    highlightSource.current.clear();
+    egengeometriSource.current.clear();
+    setSelectedFeature(null);
+    overlayRef.current?.setPosition(undefined);
+    setPolygon(null);
+  }, [setPolygon]);
+
   const startDrawing = useCallback(() => {
     if (!mapInstance.current) return;
 
@@ -322,7 +355,7 @@ export default function MapView({
     veglenkeSource.current.clear();
     setSelectedFeature(null);
     overlayRef.current?.setPosition(undefined);
-    onClearResults();
+    setPolygon(null);
 
     const draw = new Draw({
       source: drawSource.current,
@@ -332,7 +365,7 @@ export default function MapView({
     draw.on("drawend", (event) => {
       const feature = event.feature;
       const geom = feature.getGeometry() as Polygon;
-      onPolygonDrawn(geom);
+      setPolygon(geom);
       mapInstance.current?.removeInteraction(draw);
       setIsDrawing(false);
     });
@@ -340,7 +373,7 @@ export default function MapView({
     mapInstance.current.addInteraction(draw);
     drawInteraction.current = draw;
     setIsDrawing(true);
-  }, [onPolygonDrawn, onClearResults]);
+  }, [setPolygon]);
 
   const cancelDrawing = useCallback(() => {
     if (drawInteraction.current && mapInstance.current) {
@@ -350,19 +383,13 @@ export default function MapView({
     setIsDrawing(false);
   }, []);
 
-  const clearAll = useCallback(() => {
-    drawSource.current.clear();
-    veglenkeSource.current.clear();
-    highlightSource.current.clear();
-    egengeometriSource.current.clear();
-    setSelectedFeature(null);
-    overlayRef.current?.setPosition(undefined);
-    onClearResults();
-  }, [onClearResults]);
+  const handleVegobjektClick = useCallback((typeId: number, vegobjektId: number) => {
+    setFocusedVegobjekt({ typeId, id: vegobjektId });
+  }, [setFocusedVegobjekt]);
 
   const getVegobjekterOnVeglenke = useCallback(
     (veglenkesekvensId: number) => {
-      const result: { type: Vegobjekttype; objects: Vegobjekt[] }[] = [];
+      const result: { type: { id: number; navn?: string }; objects: Vegobjekt[] }[] = [];
 
       for (const type of selectedTypes) {
         const objects = vegobjekterByType.get(type.id) ?? [];
@@ -385,7 +412,7 @@ export default function MapView({
   );
 
   const selectedVeglenkesekvensId = selectedFeature?.get("veglenkesekvensId") as number | undefined;
-  const selectedVeglenke = selectedFeature?.get("veglenke") as Veglenke | undefined;
+  const selectedVeglenke = selectedFeature?.get("veglenke") as VeglenkeMedPosisjon | undefined;
   const vegobjekterOnSelected = selectedVeglenkesekvensId
     ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId)
     : [];
@@ -439,7 +466,7 @@ export default function MapView({
                       <li key={obj.id}>
                         <button
                           className="popup-vegobjekt-link"
-                          onClick={() => onVegobjektClick?.(type.id, obj.id)}
+                          onClick={() => handleVegobjektClick(type.id, obj.id)}
                         >
                           ID: {obj.id}
                         </button>

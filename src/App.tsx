@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useMemo, useEffect } from "react";
+import { useAtom, useAtomValue } from "jotai";
 import { transform } from "ol/proj";
 import WKT from "ol/format/WKT";
 import MapView from "./components/Map/MapView";
@@ -8,8 +9,13 @@ import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
 import { useVegobjekter } from "./hooks/useVegobjekter";
 import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
 import type { Vegobjekttype } from "./api/datakatalogClient";
-import type { Vegobjekt } from "./api/uberiketClient";
 import { Polygon } from "ol/geom";
+import {
+  selectedTypeIdsAtom,
+  selectedTypesAtom,
+  polygonAtom,
+  veglenkesekvensLimitAtom,
+} from "./state/atoms";
 
 function polygonToUtm33(polygon: Polygon): string {
   const coords = polygon.getCoordinates()[0];
@@ -28,39 +34,11 @@ function polygonToWkt(polygon: Polygon): string {
   return format.writeGeometry(polygon);
 }
 
-function wktToPolygon(wkt: string): Polygon | null {
-  try {
-    const format = new WKT();
-    const geom = format.readGeometry(wkt);
-    if (geom instanceof Polygon) {
-      return geom;
-    }
-  } catch {
-    console.warn("Failed to parse WKT from URL");
-  }
-  return null;
-}
-
-function getInitialTypeIds(): number[] {
-  const params = new URLSearchParams(window.location.search);
-  const typesParam = params.get("types");
-  if (!typesParam) return [];
-  return typesParam.split(",").map(Number).filter((n) => !isNaN(n) && n > 0);
-}
-
-function getInitialPolygon(): Polygon | null {
-  const params = new URLSearchParams(window.location.search);
-  const wkt = params.get("polygon");
-  if (!wkt) return null;
-  return wktToPolygon(wkt);
-}
-
 export default function App() {
-  const [selectedTypeIds, setSelectedTypeIds] = useState<number[]>(getInitialTypeIds);
-  const [selectedTypes, setSelectedTypes] = useState<Vegobjekttype[]>([]);
-  const [polygon, setPolygon] = useState<Polygon | null>(getInitialPolygon);
-  const [focusedVegobjekt, setFocusedVegobjekt] = useState<{ typeId: number; id: number } | null>(null);
-  const [hoveredVegobjekt, setHoveredVegobjekt] = useState<Vegobjekt | null>(null);
+  const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom);
+  const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
+  const polygon = useAtomValue(polygonAtom);
+  const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
   const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
 
   useEffect(() => {
@@ -72,7 +50,7 @@ export default function App() {
       setSelectedTypes(types);
       setSelectedTypeIds([]);
     }
-  }, [allTypes, selectedTypeIds]);
+  }, [allTypes, selectedTypeIds, setSelectedTypes, setSelectedTypeIds]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -98,42 +76,12 @@ export default function App() {
     data: veglenkeResult,
     isLoading: veglenkerLoading,
     error: veglenkerError,
-  } = useVeglenkesekvenser(polygonUtm33);
+  } = useVeglenkesekvenser(polygonUtm33, veglenkesekvensLimit);
 
   const {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
   } = useVegobjekter(selectedTypes, veglenkeResult?.veglenkesekvenser, polygon);
-
-  const handleTypeToggle = useCallback((type: Vegobjekttype) => {
-    setSelectedTypes((prev) => {
-      const exists = prev.some((t) => t.id === type.id);
-      if (exists) {
-        return prev.filter((t) => t.id !== type.id);
-      }
-      return [...prev, type];
-    });
-  }, []);
-
-  const handlePolygonDrawn = useCallback((drawnPolygon: Polygon | null) => {
-    setPolygon(drawnPolygon);
-  }, []);
-
-  const handleClearResults = useCallback(() => {
-    setPolygon(null);
-  }, []);
-
-  const handleVegobjektClick = useCallback((typeId: number, id: number) => {
-    setFocusedVegobjekt({ typeId, id });
-  }, []);
-
-  const handleVegobjektFocused = useCallback(() => {
-    setFocusedVegobjekt(null);
-  }, []);
-
-  const handleVegobjektHover = useCallback((vegobjekt: Vegobjekt | null) => {
-    setHoveredVegobjekt(vegobjekt);
-  }, []);
 
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
@@ -156,10 +104,7 @@ export default function App() {
         </header>
 
         <div className="sidebar-content">
-          <ObjectTypeSelector
-            selectedTypes={selectedTypes}
-            onTypeToggle={handleTypeToggle}
-          />
+          <ObjectTypeSelector />
         </div>
 
         <div className="status-bar">
@@ -179,27 +124,17 @@ export default function App() {
 
       <main className="map-container">
         <MapView
-          selectedTypes={selectedTypes}
-          polygon={polygon}
-          onPolygonDrawn={handlePolygonDrawn}
           veglenkesekvenser={veglenkeResult?.veglenkesekvenser}
           vegobjekterByType={vegobjekterByType}
-          onClearResults={handleClearResults}
           isLoadingVeglenker={veglenkerLoading}
-          onVegobjektClick={handleVegobjektClick}
-          hoveredVegobjekt={hoveredVegobjekt}
         />
       </main>
 
       <aside className="sidebar-right">
         {veglenkeResult ? (
           <VegobjektList
-            selectedTypes={selectedTypes}
             vegobjekterByType={vegobjekterByType}
             isLoading={vegobjekterLoading}
-            focusedVegobjekt={focusedVegobjekt}
-            onVegobjektFocused={handleVegobjektFocused}
-            onVegobjektHover={handleVegobjektHover}
           />
         ) : (
           <div className="sidebar-right-help">
@@ -234,9 +169,6 @@ export default function App() {
           style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}
         >
           Kunne ikke hente data fra NVDB
-          <button onClick={handleClearResults} style={{ marginLeft: 8 }}>
-            ×
-          </button>
         </div>
       )}
     </div>

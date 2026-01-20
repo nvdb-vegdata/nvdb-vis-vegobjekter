@@ -111,6 +111,35 @@ export interface VeglenkeRange {
   sluttposisjon: number;
 }
 
+export interface VeglenkeMedPosisjon extends Veglenke {
+  startposisjon: number;
+  sluttposisjon: number;
+}
+
+export interface VeglenkesekvensMedPosisjoner extends Omit<Veglenkesekvens, 'veglenker'> {
+  veglenker: VeglenkeMedPosisjon[];
+}
+
+export function enrichVeglenkesekvens(vs: Veglenkesekvens): VeglenkesekvensMedPosisjoner {
+  const porter = vs.porter ?? [];
+  const veglenker: VeglenkeMedPosisjon[] = (vs.veglenker ?? []).map(vl => {
+    const startPort = porter.find(p => p.nummer === vl.startport);
+    const endPort = porter.find(p => p.nummer === vl.sluttport);
+    const startPos = startPort?.posisjon ?? 0;
+    const endPos = endPort?.posisjon ?? 1;
+    return {
+      ...vl,
+      startposisjon: Math.min(startPos, endPos),
+      sluttposisjon: Math.max(startPos, endPos),
+    };
+  });
+  return { ...vs, veglenker };
+}
+
+export function enrichVeglenkesekvenser(vss: Veglenkesekvens[]): VeglenkesekvensMedPosisjoner[] {
+  return vss.map(enrichVeglenkesekvens);
+}
+
 export function getVeglenkePositionRange(
   veglenkesekvens: Veglenkesekvens,
   veglenke: Veglenke

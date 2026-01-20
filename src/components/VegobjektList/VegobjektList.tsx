@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import type { Vegobjekttype, Egenskapstype } from "../../api/datakatalogClient";
 import { getVegobjekttypeById, getEgenskapstypeById, getEnumVerdiById } from "../../api/datakatalogClient";
 import type { Vegobjekt, Stedfesting, EgenskapVerdi, EnumEgenskap } from "../../api/uberiketClient";
 import { formatStedfesting, getEgenskapDisplayValue } from "../../api/uberiketClient";
+import {
+  selectedTypesAtom,
+  focusedVegobjektAtom,
+  hoveredVegobjektAtom,
+} from "../../state/atoms";
 
 interface Props {
-  selectedTypes: Vegobjekttype[];
   vegobjekterByType: Map<number, Vegobjekt[]>;
   isLoading?: boolean;
-  focusedVegobjekt?: { typeId: number; id: number } | null;
-  onVegobjektFocused?: () => void;
-  onVegobjektHover?: (vegobjekt: Vegobjekt | null) => void;
 }
 
 interface VegobjektDetails {
@@ -71,27 +73,27 @@ function processVegobjekt(
 
 function VegobjektItem({ 
   details, 
+  vegobjekt,
   isExpanded,
   isHighlighted,
   onToggle,
   itemRef,
-  onMouseEnter,
-  onMouseLeave,
 }: { 
   details: VegobjektDetails;
+  vegobjekt: Vegobjekt;
   isExpanded: boolean;
   isHighlighted: boolean;
   onToggle: () => void;
   itemRef?: React.RefObject<HTMLDivElement | null>;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
 }) {
+  const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom);
+
   return (
     <div 
       ref={itemRef} 
       className={`vegobjekt-item${isHighlighted ? " vegobjekt-highlight" : ""}`}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={() => setHoveredVegobjekt(vegobjekt)}
+      onMouseLeave={() => setHoveredVegobjekt(null)}
     >
       <div 
         className="vegobjekt-header" 
@@ -163,19 +165,16 @@ function TypeGroup({
   type, 
   objects,
   focusedVegobjektId,
-  onVegobjektFocused,
-  onVegobjektHover,
 }: { 
   type: Vegobjekttype; 
   objects: Vegobjekt[];
   focusedVegobjektId?: number;
-  onVegobjektFocused?: () => void;
-  onVegobjektHover?: (vegobjekt: Vegobjekt | null) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const focusedItemRef = useRef<HTMLDivElement | null>(null);
+  const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom);
 
   const vegobjekttype = getVegobjekttypeById(type.id);
 
@@ -187,7 +186,7 @@ function TypeGroup({
       
       setTimeout(() => {
         focusedItemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-        onVegobjektFocused?.();
+        setFocusedVegobjekt(null);
       }, 100);
 
       const timer = setTimeout(() => {
@@ -195,7 +194,7 @@ function TypeGroup({
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [focusedVegobjektId, onVegobjektFocused]);
+  }, [focusedVegobjektId, setFocusedVegobjekt]);
 
   const processedObjects = objects.map((obj) => ({
     vegobjekt: obj,
@@ -231,12 +230,11 @@ function TypeGroup({
             <VegobjektItem 
               key={details.id} 
               details={details}
+              vegobjekt={vegobjekt}
               isExpanded={expandedItems.has(details.id)}
               isHighlighted={highlightedId === details.id}
               onToggle={() => toggleItem(details.id)}
               itemRef={focusedVegobjektId === details.id ? focusedItemRef : undefined}
-              onMouseEnter={() => onVegobjektHover?.(vegobjekt)}
-              onMouseLeave={() => onVegobjektHover?.(null)}
             />
           ))}
         </div>
@@ -246,13 +244,12 @@ function TypeGroup({
 }
 
 export default function VegobjektList({ 
-  selectedTypes, 
   vegobjekterByType, 
   isLoading,
-  focusedVegobjekt,
-  onVegobjektFocused,
-  onVegobjektHover,
 }: Props) {
+  const selectedTypes = useAtomValue(selectedTypesAtom);
+  const focusedVegobjekt = useAtomValue(focusedVegobjektAtom);
+
   const typesWithObjects = selectedTypes.filter((type) => {
     const objects = vegobjekterByType.get(type.id);
     return objects && objects.length > 0;
@@ -290,8 +287,6 @@ export default function VegobjektList({
               type={type}
               objects={vegobjekterByType.get(type.id) ?? []}
               focusedVegobjektId={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.id : undefined}
-              onVegobjektFocused={onVegobjektFocused}
-              onVegobjektHover={onVegobjektHover}
             />
           ))
         )}

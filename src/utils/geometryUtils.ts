@@ -1,4 +1,4 @@
-import type { Veglenke, Veglenkesekvens, Stedfesting } from "../api/uberiketClient";
+import type { Stedfesting, VeglenkesekvensMedPosisjoner, VeglenkeMedPosisjon } from "../api/uberiketClient";
 import { getVegobjektPositions } from "../api/uberiketClient";
 
 export interface ClippedGeometry {
@@ -6,16 +6,6 @@ export interface ClippedGeometry {
   veglenkeNummer: number;
   startFraction: number;
   endFraction: number;
-}
-
-function getVeglenkeRange(veglenke: Veglenke): { start: number; end: number } {
-  if (veglenke.superstedfesting) {
-    return {
-      start: veglenke.superstedfesting.startposisjon,
-      end: veglenke.superstedfesting.sluttposisjon,
-    };
-  }
-  return { start: 0, end: 1 };
 }
 
 function rangesOverlap(
@@ -27,41 +17,60 @@ function rangesOverlap(
   const overlapStart = Math.max(range1Start, range2Start);
   const overlapEnd = Math.min(range1End, range2End);
   
-  if (overlapStart >= overlapEnd) {
+  if (overlapStart > overlapEnd) {
     return null;
   }
   
   return { overlapStart, overlapEnd };
 }
 
+function pointInRange(point: number, rangeStart: number, rangeEnd: number): boolean {
+  return point >= rangeStart && point <= rangeEnd;
+}
+
 export function getClippedGeometries(
   stedfesting: Stedfesting | undefined,
-  veglenkesekvenser: Veglenkesekvens[]
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[]
 ): ClippedGeometry[] {
   if (!stedfesting) return [];
   
   const results: ClippedGeometry[] = [];
-  
+
   for (const vs of veglenkesekvenser) {
     const positions = getVegobjektPositions(stedfesting, vs.id);
     if (positions.length === 0) continue;
     
     for (const pos of positions) {
-      for (const vl of vs.veglenker ?? []) {
-        const vlRange = getVeglenkeRange(vl);
-        const overlap = rangesOverlap(vlRange.start, vlRange.end, pos.start, pos.slutt);
+      const isPoint = pos.start === pos.slutt;
+      
+      for (const vl of vs.veglenker) {
+        const vlLength = vl.sluttposisjon - vl.startposisjon;
+        if (vlLength === 0) continue;
         
-        if (overlap) {
-          const vlLength = vlRange.end - vlRange.start;
-          const startFraction = (overlap.overlapStart - vlRange.start) / vlLength;
-          const endFraction = (overlap.overlapEnd - vlRange.start) / vlLength;
+        if (isPoint) {
+          if (pointInRange(pos.start, vl.startposisjon, vl.sluttposisjon)) {
+            const fraction = (pos.start - vl.startposisjon) / vlLength;
+            results.push({
+              veglenkesekvensId: vs.id,
+              veglenkeNummer: vl.nummer,
+              startFraction: fraction,
+              endFraction: fraction,
+            });
+          }
+        } else {
+          const overlap = rangesOverlap(vl.startposisjon, vl.sluttposisjon, pos.start, pos.slutt);
           
-          results.push({
-            veglenkesekvensId: vs.id,
-            veglenkeNummer: vl.nummer,
-            startFraction,
-            endFraction,
-          });
+          if (overlap) {
+            const startFraction = (overlap.overlapStart - vl.startposisjon) / vlLength;
+            const endFraction = (overlap.overlapEnd - vl.startposisjon) / vlLength;
+            
+            results.push({
+              veglenkesekvensId: vs.id,
+              veglenkeNummer: vl.nummer,
+              startFraction,
+              endFraction,
+            });
+          }
         }
       }
     }
@@ -164,4 +173,14 @@ export function sliceLineStringByFraction(
   }
 
   return result;
+}
+
+export function getPointAtFraction(coords: number[][], fraction: number): number[] {
+  if (coords.length < 2) return coords[0] ?? [0, 0];
+  
+  const totalLength = getLineLength(coords);
+  if (totalLength === 0) return coords[0]!;
+  
+  const targetDistance = fraction * totalLength;
+  return getPointAtDistance(coords, targetDistance);
 }
