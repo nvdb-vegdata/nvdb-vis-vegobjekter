@@ -630,11 +630,11 @@ export type EndringssettHendelserSide = {
 export type HentVegobjekterMultiTypeData = {
     body?: never;
     path?: never;
-    query: {
+    query?: {
         /**
          * Kommaseparert liste med vegobjekttype-IDer
          */
-        typeIder: Array<number>;
+        typeIder?: Array<number>;
         /**
          * Antall som skal returneres i respons. Må være et heltall mellom 1 og 1000
          */

@@ -512,8 +512,8 @@ export const zEndringssettHendelserSide = z.object({
 export const zHentVegobjekterMultiTypeData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.object({
-        typeIder: z.array(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    query: z.optional(z.object({
+        typeIder: z.optional(z.array(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }))),
         antall: z.optional(z.int().gte(1).lte(1000)),
         ider: z.optional(z.array(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }))),
         inkluder: z.optional(z.array(zInkluderIVegobjekt)),
@@ -521,7 +521,7 @@ export const zHentVegobjekterMultiTypeData = z.object({
         dato: z.optional(z.iso.date()),
         stedfesting: z.optional(z.array(z.string())),
         vegsystemreferanse: z.optional(z.array(z.string()))
-    })
+    }))
 });
 
 /**

@@ -21,7 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * Hent vegobjekter fra flere typer
  */
-export const hentVegobjekterMultiType = <ThrowOnError extends boolean = false>(options: Options<HentVegobjekterMultiTypeData, ThrowOnError>) => (options.client ?? client).get<HentVegobjekterMultiTypeResponses, HentVegobjekterMultiTypeErrors, ThrowOnError>({
+export const hentVegobjekterMultiType = <ThrowOnError extends boolean = false>(options?: Options<HentVegobjekterMultiTypeData, ThrowOnError>) => (options?.client ?? client).get<HentVegobjekterMultiTypeResponses, HentVegobjekterMultiTypeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter',
     ...options
