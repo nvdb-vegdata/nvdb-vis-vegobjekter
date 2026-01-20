@@ -20,6 +20,7 @@ import {
   searchModeAtom,
   strekningAtom,
   vegobjekterErrorAtom,
+  DEFAULT_VEGLENKESEKVENSER_LIMIT,
 } from "./state/atoms";
 
 function polygonToUtm33(polygon: Polygon): string {
@@ -81,8 +82,20 @@ export default function App() {
     } else {
       url.searchParams.delete("types");
     }
+    if (veglenkesekvensLimit !== DEFAULT_VEGLENKESEKVENSER_LIMIT) {
+      url.searchParams.set("veglenkesekvenslimit", veglenkesekvensLimit.toString());
+    } else {
+      url.searchParams.delete("veglenkesekvenslimit");
+    }
     window.history.replaceState({}, "", url);
-  }, [allTypesSelected, polygon, selectedTypes, searchMode, strekning]);
+  }, [
+    allTypesSelected,
+    polygon,
+    selectedTypes,
+    searchMode,
+    strekning,
+    veglenkesekvensLimit,
+  ]);
 
   const polygonUtm33 = useMemo(
     () => (searchMode === "polygon" && polygon ? polygonToUtm33(polygon) : null),

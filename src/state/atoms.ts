@@ -49,11 +49,23 @@ function getInitialSearchMode(): SearchMode {
   return strekning.length > 0 ? 'strekning' : 'polygon'
 }
 
+function getInitialVeglenkesekvensLimit(): number {
+  const params = new URLSearchParams(window.location.search)
+  const limitParam = params.get('veglenkesekvenslimit')
+  if (!limitParam) return DEFAULT_VEGLENKESEKVENSER_LIMIT
+  const parsedLimit = Number(limitParam)
+  if (!Number.isFinite(parsedLimit)) return DEFAULT_VEGLENKESEKVENSER_LIMIT
+  const allowedLimits = new Set([10, 20, 50, 100])
+  return allowedLimits.has(parsedLimit)
+    ? parsedLimit
+    : DEFAULT_VEGLENKESEKVENSER_LIMIT
+}
+
 export const selectedTypeIdsAtom = atom<number[]>(getInitialTypeIds())
 export const selectedTypesAtom = atom<Vegobjekttype[]>([])
 export const allTypesSelectedAtom = atom(getInitialAllTypesSelected())
 export const polygonAtom = atom<Polygon | null>(getInitialPolygon())
-export const veglenkesekvensLimitAtom = atom(DEFAULT_VEGLENKESEKVENSER_LIMIT)
+export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
 export const strekningAtom = atom<string>(getInitialStrekning())
 export const strekningInputAtom = atom<string>(getInitialStrekning())
