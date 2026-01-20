@@ -94,6 +94,24 @@ type VegobjekterQuery = {
   antall?: number;
 };
 
+export class VegobjekterRequestError extends Error {
+  status?: number;
+  detail?: string;
+
+  constructor(message: string, status?: number, detail?: string) {
+    super(message);
+    this.name = "VegobjekterRequestError";
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+export function isVegobjekterRequestError(
+  error: unknown
+): error is VegobjekterRequestError {
+  return error instanceof VegobjekterRequestError;
+}
+
 export async function hentVegobjekter({
   typeIds,
   stedfesting,
@@ -113,7 +131,19 @@ export async function hentVegobjekter({
   });
 
   if (response.error) {
-    throw new Error(`Failed to fetch vegobjekter: ${response.error}`);
+    const status =
+      typeof response.error === "object" && response.error
+        ? (response.error as { status?: number }).status
+        : undefined;
+    const detail =
+      typeof response.error === "object" && response.error
+        ? (response.error as { detail?: string }).detail
+        : undefined;
+    throw new VegobjekterRequestError(
+      `Failed to fetch vegobjekter: ${response.error}`,
+      status,
+      detail
+    );
   }
 
   return response.data as VegobjekterSide;

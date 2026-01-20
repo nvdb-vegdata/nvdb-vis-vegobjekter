@@ -1,5 +1,8 @@
 import { client } from "./generated/datakatalog/client.gen";
-import { getVegobjekttyper as sdkGetVegobjekttyper } from "./generated/datakatalog/sdk.gen";
+import {
+  getKategorier as sdkGetKategorier,
+  getVegobjekttyper as sdkGetVegobjekttyper,
+} from "./generated/datakatalog/sdk.gen";
 import type {
   Vegobjekttype,
   Egenskapstype,
@@ -9,6 +12,7 @@ import type {
   EnumverdiHeltall,
   EnumverdiTekst,
   EnumverdiFlyttall,
+  Kategori,
 } from "./generated/datakatalog/types.gen";
 
 const BASE_URL = "https://nvdbapiles.atlas.vegvesen.no/datakatalog";
@@ -20,10 +24,11 @@ client.setConfig({
   },
 });
 
-export type { Vegobjekttype, Egenskapstype };
+export type { Vegobjekttype, Egenskapstype, Kategori };
 
 let cachedTypes: Vegobjekttype[] | null = null;
 let cachedTypesById: Map<number, Vegobjekttype> | null = null;
+let cachedKategorier: Kategori[] | null = null;
 
 export type EnumVerdi = EnumverdiHeltall | EnumverdiTekst | EnumverdiFlyttall;
 
@@ -52,6 +57,21 @@ export async function getVegobjekttyper(): Promise<Vegobjekttype[]> {
   cachedTypes = response.data ?? [];
   cachedTypesById = new Map(cachedTypes.map((t) => [t.id, t]));
   return cachedTypes;
+}
+
+export async function getKategorier(): Promise<Kategori[]> {
+  if (cachedKategorier) {
+    return cachedKategorier;
+  }
+
+  const response = await sdkGetKategorier();
+
+  if (response.error) {
+    throw new Error(`Failed to fetch kategorier: ${response.error}`);
+  }
+
+  cachedKategorier = response.data ?? [];
+  return cachedKategorier;
 }
 
 export function getVegobjekttypeById(id: number): Vegobjekttype | undefined {

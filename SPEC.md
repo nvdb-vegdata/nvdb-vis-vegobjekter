@@ -131,7 +131,8 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - All vegobjekttyper with egenskapstyper and tillatte_verdier are cached for synchronous lookup
 
 2. **Select Object Types**
-   - User searches/browses and selects types of interest
+   - User searches by name or ID and selects types of interest
+   - Category dropdown loads categories from datakatalog and selects all types in the chosen category
    - Skjermede (sensitive) vegobjekttyper er ikke tilgjengelige i listen
    - Selected types appear as removable chips for quick deselection
    - Must select at least one type before querying

@@ -1,5 +1,5 @@
-import { useMemo, useEffect } from "react";
 import { useAtom, useAtomValue } from "jotai";
+import { useEffect, useMemo, useState } from "react";
 import { transform } from "ol/proj";
 import WKT from "ol/format/WKT";
 import MapView from "./components/Map/MapView";
@@ -9,6 +9,7 @@ import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
 import { useVegobjekter } from "./hooks/useVegobjekter";
 import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
 import { isSelectableVegobjekttype, type Vegobjekttype } from "./api/datakatalogClient";
+import { isVegobjekterRequestError } from "./api/uberiketClient";
 import { Polygon } from "ol/geom";
 import {
   selectedTypeIdsAtom,
@@ -39,6 +40,7 @@ function polygonToWkt(polygon: Polygon): string {
 export default function App() {
   const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom);
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
+  const [vegobjekterToast, setVegobjekterToast] = useState<string | null>(null);
   const polygon = useAtomValue(polygonAtom);
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
   const searchMode = useAtomValue(searchModeAtom);
@@ -95,12 +97,28 @@ export default function App() {
   const {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
+    error: vegobjekterError,
   } = useVegobjekter({
     selectedTypes,
     veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
     polygon: searchMode === "polygon" ? polygon : null,
     vegsystemreferanse: searchMode === "strekning" ? strekning : null,
   });
+
+  useEffect(() => {
+    if (!isVegobjekterRequestError(vegobjekterError)) return;
+    if (vegobjekterError.status !== 400) return;
+
+    setVegobjekterToast(
+      "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer."
+    );
+
+    const timeoutId = window.setTimeout(() => {
+      setVegobjekterToast(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [vegobjekterError]);
 
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
@@ -191,6 +209,9 @@ export default function App() {
         >
           Kunne ikke hente data fra NVDB
         </div>
+      )}
+      {vegobjekterToast && (
+        <div className="toast toast-warning">{vegobjekterToast}</div>
       )}
     </div>
   );

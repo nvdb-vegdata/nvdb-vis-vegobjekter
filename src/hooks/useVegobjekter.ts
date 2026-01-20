@@ -115,5 +115,6 @@ export function useVegobjekter({
     vegobjekterByType,
     isLoading: query.isLoading,
     isError: query.isError,
+    error: query.error,
   };
 }

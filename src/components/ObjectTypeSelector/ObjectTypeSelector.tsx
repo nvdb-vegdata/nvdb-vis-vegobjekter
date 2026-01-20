@@ -1,8 +1,10 @@
 import { useAtom } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
 import {
+  getKategorier,
   getVegobjekttyper,
   isSelectableVegobjekttype,
+  type Kategori,
   type Vegobjekttype,
 } from '../../api/datakatalogClient'
 import { selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
@@ -13,7 +15,9 @@ export default function ObjectTypeSelector() {
   )
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
   const [allTypes, setAllTypes] = useState<Vegobjekttype[]>([])
+  const [categories, setCategories] = useState<Kategori[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,13 +25,23 @@ export default function ObjectTypeSelector() {
     async function loadTypes() {
       try {
         setIsLoading(true)
-        const types = await getVegobjekttyper()
+        const [types, kategoriList] = await Promise.all([
+          getVegobjekttyper(),
+          getKategorier(),
+        ])
         const visibleTypes = types
           .filter(isSelectableVegobjekttype)
           .sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? ''))
+        const sortedCategories = [...kategoriList].sort((a, b) => {
+          if (a.sorteringsnummer !== b.sorteringsnummer) {
+            return a.sorteringsnummer - b.sorteringsnummer
+          }
+          return (a.navn ?? '').localeCompare(b.navn ?? '')
+        })
         setAllTypes(visibleTypes)
+        setCategories(sortedCategories)
       } catch (err) {
-        setError('Kunne ikke laste vegobjekttyper')
+        setError('Kunne ikke laste vegobjekttyper eller kategorier')
         console.error(err)
       } finally {
         setIsLoading(false)
@@ -37,13 +51,13 @@ export default function ObjectTypeSelector() {
   }, [])
 
   const filteredTypes = useMemo(() => {
-    if (!searchQuery.trim()) return allTypes
-    const query = searchQuery.toLowerCase()
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return allTypes
     return allTypes.filter(
-      (t) =>
-        t.navn?.toLowerCase().includes(query) ||
-        t.id.toString().includes(query) ||
-        t.beskrivelse?.toLowerCase().includes(query),
+      (type) =>
+        type.navn?.toLowerCase().includes(query) ||
+        type.id.toString().includes(query) ||
+        type.beskrivelse?.toLowerCase().includes(query),
     )
   }, [allTypes, searchQuery])
 
@@ -51,6 +65,7 @@ export default function ObjectTypeSelector() {
     selectedTypes.some((t) => t.id === type.id)
 
   const handleTypeToggle = (type: Vegobjekttype) => {
+    setSelectedCategoryId('')
     setSelectedTypes((prev) => {
       const exists = prev.some((t) => t.id === type.id)
       if (exists) {
@@ -60,11 +75,34 @@ export default function ObjectTypeSelector() {
     })
   }
 
+  const handleCategorySelect = (value: string) => {
+    if (!value) {
+      setSelectedCategoryId('')
+      return
+    }
+
+    const categoryId = Number(value)
+    if (!Number.isFinite(categoryId)) {
+      setSelectedCategoryId('')
+      return
+    }
+
+    setSelectedCategoryId(value)
+
+    const categoryTypes = allTypes.filter((type) =>
+      type.kategorier.some((kategori) => kategori.id === categoryId),
+    )
+
+    setSelectedTypes(categoryTypes)
+  }
+
   const handleTypeRemove = (typeId: number) => {
+    setSelectedCategoryId('')
     setSelectedTypes((prev) => prev.filter((type) => type.id !== typeId))
   }
 
   const handleClearTypes = () => {
+    setSelectedCategoryId('')
     setSelectedTypes([])
   }
 
@@ -121,8 +159,38 @@ export default function ObjectTypeSelector() {
         </div>
       </div>
 
-      {selectedTypes.length > 0 && (
+      <div className="category-row">
+        <label className="search-label" htmlFor="category-select">
+          Velg kategori
+        </label>
+        <select
+          id="category-select"
+          className="category-select"
+          value={selectedCategoryId}
+          onChange={(e) => handleCategorySelect(e.target.value)}
+        >
+          <option value="">Velg kategori</option>
+          {categories.map((kategori) => (
+            <option key={kategori.id} value={kategori.id}>
+              {(kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`) +
+                ` (#${kategori.id})`}
+            </option>
+          ))}
+        </select>
+      </div>
+
+        {selectedTypes.length > 0 && (
         <>
+          <div className="selected-summary">
+            <div className="selected-count">{selectedTypes.length} valgt</div>
+            <button
+              type="button"
+              className="clear-types-btn"
+              onClick={handleClearTypes}
+            >
+              Fjern alle
+            </button>
+          </div>
           <div className="selected-chips">
             {selectedTypes.map((type) => (
               <button
@@ -140,18 +208,9 @@ export default function ObjectTypeSelector() {
               </button>
             ))}
           </div>
-          <div className="selected-summary">
-            <div className="selected-count">{selectedTypes.length} valgt</div>
-            <button
-              type="button"
-              className="clear-types-btn"
-              onClick={handleClearTypes}
-            >
-              Fjern alle
-            </button>
-          </div>
         </>
       )}
+
 
       <ul className="object-type-list">
         {filteredTypes.map((type) => (

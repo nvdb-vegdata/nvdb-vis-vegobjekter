@@ -184,6 +184,24 @@ body,
   margin-bottom: 0;
 }
 
+.category-row {
+  margin-bottom: 12px;
+}
+
+.category-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+}
+
+.category-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
 .limit-select {
   min-width: 70px;
   padding: 4px 6px;
@@ -422,6 +440,24 @@ body,
   border-radius: 4px;
   color: #c00;
   margin-bottom: 16px;
+}
+
+.toast {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  max-width: 320px;
+}
+
+.toast-warning {
+  background: #fff4e5;
+  border: 1px solid #f0b429;
+  color: #7a4a00;
 }
 
 .section-header {
