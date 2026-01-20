@@ -393,6 +393,27 @@ body,
   margin-bottom: 8px;
 }
 
+.selected-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.clear-types-btn {
+  border: none;
+  background: none;
+  color: #3498db;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.clear-types-btn:hover {
+  color: #1f6fb2;
+  text-decoration: underline;
+}
+
 .selected-chips {
   display: flex;
   flex-wrap: wrap;

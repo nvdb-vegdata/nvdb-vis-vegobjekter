@@ -8,7 +8,7 @@ import VegobjektList from "./components/VegobjektList/VegobjektList";
 import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
 import { useVegobjekter } from "./hooks/useVegobjekter";
 import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
-import type { Vegobjekttype } from "./api/datakatalogClient";
+import { isSelectableVegobjekttype, type Vegobjekttype } from "./api/datakatalogClient";
 import { Polygon } from "ol/geom";
 import {
   selectedTypeIdsAtom,
@@ -45,11 +45,12 @@ export default function App() {
     if (!allTypes || selectedTypeIds.length === 0) return;
     const types = selectedTypeIds
       .map((id) => allTypes.find((t) => t.id === id))
-      .filter((t): t is Vegobjekttype => t !== undefined);
+      .filter((t): t is Vegobjekttype => t !== undefined)
+      .filter(isSelectableVegobjekttype);
     if (types.length > 0) {
       setSelectedTypes(types);
-      setSelectedTypeIds([]);
     }
+    setSelectedTypeIds([]);
   }, [allTypes, selectedTypeIds, setSelectedTypes, setSelectedTypeIds]);
 
   useEffect(() => {

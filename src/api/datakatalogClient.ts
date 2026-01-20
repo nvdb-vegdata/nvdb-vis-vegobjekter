@@ -32,6 +32,10 @@ export type EgenskapstypeMedEnum =
   | EgenskapstypeTekstenum
   | EgenskapstypeFlyttallenum;
 
+export function isSelectableVegobjekttype(type: Vegobjekttype): boolean {
+  return !type.sensitiv;
+}
+
 export async function getVegobjekttyper(): Promise<Vegobjekttype[]> {
   if (cachedTypes) {
     return cachedTypes;

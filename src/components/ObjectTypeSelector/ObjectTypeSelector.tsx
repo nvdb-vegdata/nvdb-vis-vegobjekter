@@ -2,6 +2,7 @@ import { useAtom } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
 import {
   getVegobjekttyper,
+  isSelectableVegobjekttype,
   type Vegobjekttype,
 } from '../../api/datakatalogClient'
 import { selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
@@ -21,9 +22,10 @@ export default function ObjectTypeSelector() {
       try {
         setIsLoading(true)
         const types = await getVegobjekttyper()
-        setAllTypes(
-          types.sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? '')),
-        )
+        const visibleTypes = types
+          .filter(isSelectableVegobjekttype)
+          .sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? ''))
+        setAllTypes(visibleTypes)
       } catch (err) {
         setError('Kunne ikke laste vegobjekttyper')
         console.error(err)
@@ -60,6 +62,10 @@ export default function ObjectTypeSelector() {
 
   const handleTypeRemove = (typeId: number) => {
     setSelectedTypes((prev) => prev.filter((type) => type.id !== typeId))
+  }
+
+  const handleClearTypes = () => {
+    setSelectedTypes([])
   }
 
   if (isLoading) {
@@ -134,7 +140,16 @@ export default function ObjectTypeSelector() {
               </button>
             ))}
           </div>
-          <div className="selected-count">{selectedTypes.length} valgt</div>
+          <div className="selected-summary">
+            <div className="selected-count">{selectedTypes.length} valgt</div>
+            <button
+              type="button"
+              className="clear-types-btn"
+              onClick={handleClearTypes}
+            >
+              Fjern alle
+            </button>
+          </div>
         </>
       )}
 

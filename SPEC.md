@@ -129,6 +129,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 
 2. **Select Object Types**
    - User searches/browses and selects types of interest
+   - Skjermede (sensitive) vegobjekttyper er ikke tilgjengelige i listen
    - Selected types appear as removable chips for quick deselection
    - Must select at least one type before querying
 

@@ -86,7 +86,7 @@ export async function hentVegobjekter(
 ): Promise<VegobjekterSide> {
   const response = await sdkHentVegobjekterMultiType({
     query: {
-      typeIder: typeIds,
+      typeIder: [typeIds.join(",")] as unknown as number[],
       antall,
       inkluder: ["alle"],
       dato,
