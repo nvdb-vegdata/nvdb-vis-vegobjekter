@@ -16,6 +16,10 @@ interface Props {
   isLoading?: boolean;
 }
 
+const NVDB_API_BASE_URL = "https://nvdbapiles.atlas.vegvesen.no";
+const UBERIKET_API_BASE_URL = `${NVDB_API_BASE_URL}/uberiket`;
+const VEGKART_BASE_URL = "https://vegkart.atlas.vegvesen.no";
+
 interface VegobjektDetails {
   id: number;
   typeId: number;
@@ -89,6 +93,10 @@ function VegobjektItem({
 }) {
   const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom);
 
+  const uberiketUrl = `${UBERIKET_API_BASE_URL}/api/v1/vegobjekter/${details.typeId}/${details.id}`;
+  const lesApiUrl = `${NVDB_API_BASE_URL}/vegobjekt?id=${details.id}`;
+  const vegkartUrl = `${VEGKART_BASE_URL}#valgt:${details.id}`;
+
   return (
     <div 
       ref={itemRef} 
@@ -144,6 +152,23 @@ function VegobjektItem({
               ))}
             </div>
           )}
+
+          <div className="vegobjekt-section">
+            <div className="vegobjekt-section-title">Lenker</div>
+            <div className="vegobjekt-property">
+              <a href={uberiketUrl} target="_blank" rel="noopener noreferrer">
+                Uberiket API
+              </a>
+              {" | "}
+              <a href={vegkartUrl} target="_blank" rel="noopener noreferrer">
+                Vegkart
+              </a>
+              {" | "}
+              <a href={lesApiUrl} target="_blank" rel="noopener noreferrer">
+                Les API V4
+              </a>
+            </div>
+          </div>
 
           {details.egenskaper.length > 0 && (
             <div className="vegobjekt-section">
