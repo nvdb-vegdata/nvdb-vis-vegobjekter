@@ -92,6 +92,7 @@ type VegobjekterQuery = {
   vegsystemreferanse?: string;
   dato?: string;
   antall?: number;
+  start?: string;
 };
 
 export class VegobjekterRequestError extends Error {
@@ -118,6 +119,7 @@ export async function hentVegobjekter({
   vegsystemreferanse,
   dato,
   antall = 1000,
+  start,
 }: VegobjekterQuery): Promise<VegobjekterSide> {
   const response = await sdkHentVegobjekterMultiType({
     query: {
@@ -125,6 +127,7 @@ export async function hentVegobjekter({
       antall,
       inkluder: ["alle"],
       dato,
+      start,
       stedfesting: stedfesting ? [stedfesting] : undefined,
       vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
     },

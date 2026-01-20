@@ -15,6 +15,9 @@ import {
 interface Props {
   vegobjekterByType: Map<number, Vegobjekt[]>;
   isLoading?: boolean;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onFetchNextPage: () => void;
 }
 
 const NVDB_API_BASE_URL = "https://nvdbapiles.atlas.vegvesen.no";
@@ -294,6 +297,9 @@ function TypeGroup({
 export default function VegobjektList({ 
   vegobjekterByType, 
   isLoading,
+  hasNextPage,
+  isFetchingNextPage,
+  onFetchNextPage,
 }: Props) {
   const selectedTypes = useAtomValue(selectedTypesAtom);
   const focusedVegobjekt = useAtomValue(focusedVegobjektAtom);
@@ -311,13 +317,25 @@ export default function VegobjektList({
     <div className="vegobjekt-list">
       <div className="vegobjekt-list-header">
         <span className="vegobjekt-list-title">Vegobjekter</span>
-        {isLoading ? (
-          <span className="inline-spinner">
-            <span className="spinner spinner-small" />
-          </span>
-        ) : (
-          <span className="vegobjekt-list-count">{totalCount} totalt</span>
-        )}
+        <div className="vegobjekt-list-actions">
+          {isLoading ? (
+            <span className="inline-spinner">
+              <span className="spinner spinner-small" />
+            </span>
+          ) : (
+            <span className="vegobjekt-list-count">{totalCount} totalt</span>
+          )}
+          {hasNextPage && !isLoading && (
+            <button
+              type="button"
+              className="btn btn-primary btn-small"
+              onClick={onFetchNextPage}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage ? "Henter..." : "Neste side"}
+            </button>
+          )}
+        </div>
       </div>
       <div className="vegobjekt-list-content">
         {isLoading ? (

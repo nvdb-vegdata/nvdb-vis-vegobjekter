@@ -103,6 +103,9 @@ export default function App() {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
     error: vegobjekterError,
+    hasNextPage: vegobjekterHasNextPage,
+    fetchNextPage: fetchNextVegobjekterPage,
+    isFetchingNextPage: vegobjekterFetchingNextPage,
   } = useVegobjekter({
     selectedTypes,
     allTypesSelected,
@@ -187,6 +190,11 @@ export default function App() {
           <VegobjektList
             vegobjekterByType={vegobjekterByType}
             isLoading={vegobjekterLoading}
+            hasNextPage={vegobjekterHasNextPage}
+            isFetchingNextPage={vegobjekterFetchingNextPage}
+            onFetchNextPage={() => {
+              void fetchNextVegobjekterPage();
+            }}
           />
         ) : (
           <div className="sidebar-right-help">

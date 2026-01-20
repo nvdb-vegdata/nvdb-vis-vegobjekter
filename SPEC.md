@@ -11,7 +11,7 @@ A static web application for visualizing road objects (vegobjekter) from the Nor
 3. **Define Area/Route** - Draw a small polygon, or enter a vegsystemreferanse (e.g., "FV6666 S1")
 4. **Fetch Veglenker** - Query veglenkesekvenser by polygon or vegsystemreferanse (configurable limit, default 20)
 5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
-6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter, or use vegsystemreferanse when searching by strekning
+6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter, or use vegsystemreferanse when searching by strekning. If `metadata.neste` is present, fetch subsequent pages using the `start` token.
 7. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
@@ -113,6 +113,7 @@ Query parameters:
 - `stedfesting`: Filter by position on veglenkesekvens (e.g., "0.4-0.6@123456")
 - `inkluder`: Include stedfesting, egenskaper, gyldighetsperiode, barn
 - `antall`: Limit results
+- `start`: Pagination token from `metadata.neste.start` for the next page
 
 ### Veglenke Position Calculation
 

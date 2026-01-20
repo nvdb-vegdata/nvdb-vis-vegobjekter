@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import WKT from "ol/format/WKT";
 import type { Polygon } from "ol/geom";
@@ -89,23 +89,37 @@ export function useVegobjekter({
   );
   const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
 
-  const query = useQuery({
+  const query = useInfiniteQuery({
     queryKey: ["vegobjekter", allTypesSelected ? "all" : typeIdList, stedfestingFilter, trimmedStrekning, today],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }: { pageParam?: string }) => {
       const typeIdsParam = allTypesSelected ? undefined : typeIds;
       if (trimmedStrekning.length > 0) {
-        return hentVegobjekter({ typeIds: typeIdsParam, vegsystemreferanse: trimmedStrekning, dato: today });
+        return hentVegobjekter({
+          typeIds: typeIdsParam,
+          vegsystemreferanse: trimmedStrekning,
+          dato: today,
+          start: pageParam,
+        });
       }
-      return hentVegobjekter({ typeIds: typeIdsParam, stedfesting: stedfestingFilter, dato: today });
+      return hentVegobjekter({
+        typeIds: typeIdsParam,
+        stedfesting: stedfestingFilter,
+        dato: today,
+        start: pageParam,
+      });
     },
     enabled,
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.metadata.neste?.start,
   });
 
   const vegobjekterByType = new Map<number, Vegobjekt[]>(
     selectedTypes.map((type) => [type.id, [] as Vegobjekt[]])
   );
 
-  for (const vegobjekt of query.data?.vegobjekter ?? []) {
+  const allVegobjekter = query.data?.pages.flatMap((page) => page.vegobjekter) ?? [];
+
+  for (const vegobjekt of allVegobjekter) {
     const list = vegobjekterByType.get(vegobjekt.typeId);
     if (list) {
       list.push(vegobjekt);
@@ -119,5 +133,8 @@ export function useVegobjekter({
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    hasNextPage: query.hasNextPage ?? false,
+    fetchNextPage: query.fetchNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
   };
 }
