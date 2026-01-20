@@ -658,6 +658,13 @@ body,
   font-size: 13px;
 }
 
+.vegobjekt-list-warning {
+  background: #fff4e5;
+  border: 1px solid #f0b429;
+  border-radius: 6px;
+  color: #7a4a00;
+}
+
 .vegobjekt-list-content {
   flex: 1;
   min-height: 0;

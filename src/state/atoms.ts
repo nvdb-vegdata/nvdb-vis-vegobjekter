@@ -55,3 +55,4 @@ export const focusedVegobjektAtom = atom<{ typeId: number; id: number } | null>(
   null,
 )
 export const hoveredVegobjektAtom = atom<Vegobjekt | null>(null)
+export const vegobjekterErrorAtom = atom<string | null>(null)

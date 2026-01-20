@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { transform } from "ol/proj";
 import WKT from "ol/format/WKT";
 import MapView from "./components/Map/MapView";
@@ -18,6 +18,7 @@ import {
   veglenkesekvensLimitAtom,
   searchModeAtom,
   strekningAtom,
+  vegobjekterErrorAtom,
 } from "./state/atoms";
 
 function polygonToUtm33(polygon: Polygon): string {
@@ -40,7 +41,7 @@ function polygonToWkt(polygon: Polygon): string {
 export default function App() {
   const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom);
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
-  const [vegobjekterToast, setVegobjekterToast] = useState<string | null>(null);
+  const [, setVegobjekterError] = useAtom(vegobjekterErrorAtom);
   const polygon = useAtomValue(polygonAtom);
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
   const searchMode = useAtomValue(searchModeAtom);
@@ -105,20 +106,29 @@ export default function App() {
     vegsystemreferanse: searchMode === "strekning" ? strekning : null,
   });
 
-  useEffect(() => {
-    if (!isVegobjekterRequestError(vegobjekterError)) return;
-    if (vegobjekterError.status !== 400) return;
+  const vegobjekterErrorMessage = useMemo(() => {
+    if (!vegobjekterError) return null;
+    if (
+      isVegobjekterRequestError(vegobjekterError) &&
+      vegobjekterError.status === 400
+    ) {
+      return "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.";
+    }
 
-    setVegobjekterToast(
-      "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer."
-    );
+    if (
+      vegobjekterError instanceof TypeError ||
+      (vegobjekterError instanceof Error &&
+        vegobjekterError.message.toLowerCase().includes("failed to fetch"))
+    ) {
+      return "Vegobjektsøket feilet. Prøv et mindre område eller færre typer.";
+    }
 
-    const timeoutId = window.setTimeout(() => {
-      setVegobjekterToast(null);
-    }, 5000);
-
-    return () => window.clearTimeout(timeoutId);
+    return null;
   }, [vegobjekterError]);
+
+  useEffect(() => {
+    setVegobjekterError(vegobjekterErrorMessage);
+  }, [setVegobjekterError, vegobjekterErrorMessage]);
 
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
 
@@ -209,9 +219,6 @@ export default function App() {
         >
           Kunne ikke hente data fra NVDB
         </div>
-      )}
-      {vegobjekterToast && (
-        <div className="toast toast-warning">{vegobjekterToast}</div>
       )}
     </div>
   );

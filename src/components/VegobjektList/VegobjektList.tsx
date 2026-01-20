@@ -8,6 +8,7 @@ import {
   selectedTypesAtom,
   focusedVegobjektAtom,
   hoveredVegobjektAtom,
+  vegobjekterErrorAtom,
 } from "../../state/atoms";
 
 interface Props {
@@ -249,6 +250,7 @@ export default function VegobjektList({
 }: Props) {
   const selectedTypes = useAtomValue(selectedTypesAtom);
   const focusedVegobjekt = useAtomValue(focusedVegobjektAtom);
+  const errorMessage = useAtomValue(vegobjekterErrorAtom);
 
   const typesWithObjects = selectedTypes.filter((type) => {
     const objects = vegobjekterByType.get(type.id);
@@ -275,6 +277,10 @@ export default function VegobjektList({
           <div className="sidebar-loading">
             <span className="spinner spinner-small" />
             <span>Henter vegobjekter...</span>
+          </div>
+        ) : errorMessage ? (
+          <div className="vegobjekt-list-empty vegobjekt-list-warning">
+            {errorMessage}
           </div>
         ) : typesWithObjects.length === 0 ? (
           <div className="vegobjekt-list-empty">
