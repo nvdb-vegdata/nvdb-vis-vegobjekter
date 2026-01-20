@@ -12,6 +12,7 @@ import { isSelectableVegobjekttype, type Vegobjekttype } from "./api/datakatalog
 import { isVegobjekterRequestError } from "./api/uberiketClient";
 import { Polygon } from "ol/geom";
 import {
+  allTypesSelectedAtom,
   selectedTypeIdsAtom,
   selectedTypesAtom,
   polygonAtom,
@@ -41,6 +42,7 @@ function polygonToWkt(polygon: Polygon): string {
 export default function App() {
   const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom);
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
+  const allTypesSelected = useAtomValue(allTypesSelectedAtom);
   const [, setVegobjekterError] = useAtom(vegobjekterErrorAtom);
   const polygon = useAtomValue(polygonAtom);
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
@@ -72,13 +74,15 @@ export default function App() {
     } else {
       url.searchParams.delete("strekning");
     }
-    if (selectedTypes.length > 0) {
+    if (allTypesSelected) {
+      url.searchParams.set("types", "all");
+    } else if (selectedTypes.length > 0) {
       url.searchParams.set("types", selectedTypes.map((t) => t.id).join(","));
     } else {
       url.searchParams.delete("types");
     }
     window.history.replaceState({}, "", url);
-  }, [polygon, selectedTypes, searchMode, strekning]);
+  }, [allTypesSelected, polygon, selectedTypes, searchMode, strekning]);
 
   const polygonUtm33 = useMemo(
     () => (searchMode === "polygon" && polygon ? polygonToUtm33(polygon) : null),
@@ -101,6 +105,7 @@ export default function App() {
     error: vegobjekterError,
   } = useVegobjekter({
     selectedTypes,
+    allTypesSelected,
     veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
     polygon: searchMode === "polygon" ? polygon : null,
     vegsystemreferanse: searchMode === "strekning" ? strekning : null,
@@ -161,7 +166,7 @@ export default function App() {
             "Laster data..."
           ) : (
             <>
-              {selectedTypes.length} type(r) valgt
+              {allTypesSelected ? "Alle typer valgt" : `${selectedTypes.length} type(r) valgt`}
               {totalVeglenker > 0 && ` | ${totalVeglenker} veglenke(r)`}
               {totalVegobjekter > 0 && ` | ${totalVegobjekter} objekt(er)`}
             </>

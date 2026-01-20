@@ -87,7 +87,7 @@ export async function hentVeglenkesekvenser({
 }
 
 type VegobjekterQuery = {
-  typeIds: number[];
+  typeIds?: number[];
   stedfesting?: string;
   vegsystemreferanse?: string;
   dato?: string;
@@ -121,7 +121,7 @@ export async function hentVegobjekter({
 }: VegobjekterQuery): Promise<VegobjekterSide> {
   const response = await sdkHentVegobjekterMultiType({
     query: {
-      typeIder: [typeIds.join(",")] as unknown as number[],
+      typeIder: typeIds ? [typeIds.join(",")] as unknown as number[] : undefined,
       antall,
       inkluder: ["alle"],
       dato,

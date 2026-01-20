@@ -7,13 +7,18 @@ import {
   type Kategori,
   type Vegobjekttype,
 } from '../../api/datakatalogClient'
-import { selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
+import {
+  allTypesSelectedAtom,
+  selectedTypesAtom,
+  veglenkesekvensLimitAtom,
+} from '../../state/atoms'
 
 export default function ObjectTypeSelector() {
   const [veglenkesekvensLimit, setVeglenkesekvensLimit] = useAtom(
     veglenkesekvensLimitAtom,
   )
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
+  const [allTypesSelected, setAllTypesSelected] = useAtom(allTypesSelectedAtom)
   const [allTypes, setAllTypes] = useState<Vegobjekttype[]>([])
   const [categories, setCategories] = useState<Kategori[]>([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -50,6 +55,11 @@ export default function ObjectTypeSelector() {
     loadTypes()
   }, [])
 
+  useEffect(() => {
+    if (!allTypesSelected || allTypes.length === 0) return
+    setSelectedTypes(allTypes)
+  }, [allTypes, allTypesSelected, setSelectedTypes])
+
   const filteredTypes = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return allTypes
@@ -61,11 +71,15 @@ export default function ObjectTypeSelector() {
     )
   }, [allTypes, searchQuery])
 
+  const ALL_CATEGORY_ID = 38
+
   const isSelected = (type: Vegobjekttype) =>
     selectedTypes.some((t) => t.id === type.id)
 
   const handleTypeToggle = (type: Vegobjekttype) => {
+    if (allTypesSelected) return
     setSelectedCategoryId('')
+    setAllTypesSelected(false)
     setSelectedTypes((prev) => {
       const exists = prev.some((t) => t.id === type.id)
       if (exists) {
@@ -78,16 +92,26 @@ export default function ObjectTypeSelector() {
   const handleCategorySelect = (value: string) => {
     if (!value) {
       setSelectedCategoryId('')
+      setAllTypesSelected(false)
       return
     }
 
     const categoryId = Number(value)
     if (!Number.isFinite(categoryId)) {
       setSelectedCategoryId('')
+      setAllTypesSelected(false)
       return
     }
 
     setSelectedCategoryId(value)
+
+    if (categoryId === ALL_CATEGORY_ID) {
+      setAllTypesSelected(true)
+      setSelectedTypes(allTypes)
+      return
+    }
+
+    setAllTypesSelected(false)
 
     const categoryTypes = allTypes.filter((type) =>
       type.kategorier.some((kategori) => kategori.id === categoryId),
@@ -97,12 +121,15 @@ export default function ObjectTypeSelector() {
   }
 
   const handleTypeRemove = (typeId: number) => {
+    if (allTypesSelected) return
     setSelectedCategoryId('')
+    setAllTypesSelected(false)
     setSelectedTypes((prev) => prev.filter((type) => type.id !== typeId))
   }
 
   const handleClearTypes = () => {
     setSelectedCategoryId('')
+    setAllTypesSelected(false)
     setSelectedTypes([])
   }
 
@@ -182,7 +209,9 @@ export default function ObjectTypeSelector() {
         {selectedTypes.length > 0 && (
         <>
           <div className="selected-summary">
-            <div className="selected-count">{selectedTypes.length} valgt</div>
+            <div className="selected-count">
+              {allTypesSelected ? "Alle valgt" : `${selectedTypes.length} valgt`}
+            </div>
             <button
               type="button"
               className="clear-types-btn"
@@ -192,21 +221,33 @@ export default function ObjectTypeSelector() {
             </button>
           </div>
           <div className="selected-chips">
-            {selectedTypes.map((type) => (
+            {allTypesSelected ? (
               <button
-                key={type.id}
                 type="button"
                 className="selected-chip"
-                onClick={() => handleTypeRemove(type.id)}
-                aria-label={`Fjern ${type.navn ?? `type ${type.id}`}`}
+                onClick={handleClearTypes}
+                aria-label="Fjern alle"
               >
-                <span className="selected-chip-label">
-                  {type.navn ?? `Type ${type.id}`}
-                </span>
-                <span className="selected-chip-id">#{type.id}</span>
+                <span className="selected-chip-label">Alle</span>
                 <span className="selected-chip-remove">×</span>
               </button>
-            ))}
+            ) : (
+              selectedTypes.map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  className="selected-chip"
+                  onClick={() => handleTypeRemove(type.id)}
+                  aria-label={`Fjern ${type.navn ?? `type ${type.id}`}`}
+                >
+                  <span className="selected-chip-label">
+                    {type.navn ?? `Type ${type.id}`}
+                  </span>
+                  <span className="selected-chip-id">#{type.id}</span>
+                  <span className="selected-chip-remove">×</span>
+                </button>
+              ))
+            )}
           </div>
         </>
       )}
@@ -217,12 +258,18 @@ export default function ObjectTypeSelector() {
           <li
             key={type.id}
             className={`object-type-item ${isSelected(type) ? 'selected' : ''}`}
-            onClick={() => handleTypeToggle(type)}
+            onClick={() => {
+              if (!allTypesSelected) {
+                handleTypeToggle(type)
+              }
+            }}
+            aria-disabled={allTypesSelected}
           >
             <input
               type="checkbox"
               className="object-type-checkbox"
               checked={isSelected(type)}
+              disabled={allTypesSelected}
               onChange={() => {}}
             />
             <div className="object-type-info">

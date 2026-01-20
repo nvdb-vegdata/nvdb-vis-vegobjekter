@@ -59,6 +59,7 @@ function getOverlappingVeglenkeRanges(
 
 type VegobjekterParams = {
   selectedTypes: Vegobjekttype[];
+  allTypesSelected: boolean;
   veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined;
   polygon: Polygon | null;
   vegsystemreferanse?: string | null;
@@ -66,6 +67,7 @@ type VegobjekterParams = {
 
 export function useVegobjekter({
   selectedTypes,
+  allTypesSelected,
   veglenkesekvenser,
   polygon,
   vegsystemreferanse,
@@ -78,7 +80,7 @@ export function useVegobjekter({
   }, [veglenkesekvenser, polygon, trimmedStrekning]);
 
   const enabled =
-    selectedTypes.length > 0 &&
+    (allTypesSelected || selectedTypes.length > 0) &&
     (trimmedStrekning.length > 0 || stedfestingFilter.length > 0);
   const today = getTodayDate();
   const typeIds = useMemo(
@@ -88,12 +90,13 @@ export function useVegobjekter({
   const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
 
   const query = useQuery({
-    queryKey: ["vegobjekter", typeIdList, stedfestingFilter, trimmedStrekning, today],
+    queryKey: ["vegobjekter", allTypesSelected ? "all" : typeIdList, stedfestingFilter, trimmedStrekning, today],
     queryFn: async () => {
+      const typeIdsParam = allTypesSelected ? undefined : typeIds;
       if (trimmedStrekning.length > 0) {
-        return hentVegobjekter({ typeIds, vegsystemreferanse: trimmedStrekning, dato: today });
+        return hentVegobjekter({ typeIds: typeIdsParam, vegsystemreferanse: trimmedStrekning, dato: today });
       }
-      return hentVegobjekter({ typeIds, stedfesting: stedfestingFilter, dato: today });
+      return hentVegobjekter({ typeIds: typeIdsParam, stedfesting: stedfestingFilter, dato: today });
     },
     enabled,
   });

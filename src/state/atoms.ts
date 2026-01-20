@@ -9,11 +9,16 @@ export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 10
 function getInitialTypeIds(): number[] {
   const params = new URLSearchParams(window.location.search)
   const typesParam = params.get('types')
-  if (!typesParam) return []
+  if (!typesParam || typesParam === 'all') return []
   return typesParam
     .split(',')
     .map(Number)
     .filter((n) => !isNaN(n) && n > 0)
+}
+
+function getInitialAllTypesSelected(): boolean {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('types') === 'all'
 }
 
 function getInitialPolygon(): Polygon | null {
@@ -46,6 +51,7 @@ function getInitialSearchMode(): SearchMode {
 
 export const selectedTypeIdsAtom = atom<number[]>(getInitialTypeIds())
 export const selectedTypesAtom = atom<Vegobjekttype[]>([])
+export const allTypesSelectedAtom = atom(getInitialAllTypesSelected())
 export const polygonAtom = atom<Polygon | null>(getInitialPolygon())
 export const veglenkesekvensLimitAtom = atom(DEFAULT_VEGLENKESEKVENSER_LIMIT)
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())

@@ -169,7 +169,7 @@ The application synchronizes state with the URL for shareable links:
 - **Map view**: Center coordinates and zoom level
 - **Polygon**: Drawn selection polygon coordinates (polygon mode)
 - **Strekning**: Vegsystemreferanse query (strekning mode)
-- **Selected types**: List of selected vegobjekttype IDs
+- **Selected types**: List of selected vegobjekttype IDs, or `types=all` when all are selected
 
 ## Data Model
 
