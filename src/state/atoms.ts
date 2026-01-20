@@ -57,9 +57,11 @@ export const veglenkesekvensLimitAtom = atom(DEFAULT_VEGLENKESEKVENSER_LIMIT)
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
 export const strekningAtom = atom<string>(getInitialStrekning())
 export const strekningInputAtom = atom<string>(getInitialStrekning())
-export const focusedVegobjektAtom = atom<{ typeId: number; id: number } | null>(
-  null,
-)
+export const focusedVegobjektAtom = atom<{
+  typeId: number
+  id: number
+  token: number
+} | null>(null)
 export const locateVegobjektAtom = atom<{ vegobjekt: Vegobjekt; token: number } | null>(
   null,
 )

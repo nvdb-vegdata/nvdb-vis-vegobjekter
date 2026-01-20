@@ -216,10 +216,12 @@ function TypeGroup({
   type, 
   objects,
   focusedVegobjektId,
+  focusedVegobjektToken,
 }: { 
   type: Vegobjekttype; 
   objects: Vegobjekt[];
   focusedVegobjektId?: number;
+  focusedVegobjektToken?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
@@ -230,22 +232,33 @@ function TypeGroup({
   const vegobjekttype = getVegobjekttypeById(type.id);
 
   useEffect(() => {
-    if (focusedVegobjektId !== undefined) {
+    if (focusedVegobjektId !== undefined && focusedVegobjektToken !== undefined) {
       setExpanded(true);
-      setExpandedItems((prev) => new Set(prev).add(focusedVegobjektId));
+
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        next.add(focusedVegobjektId);
+        return next;
+      });
       setHighlightedId(focusedVegobjektId);
-      
+
       setTimeout(() => {
         focusedItemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         setFocusedVegobjekt(null);
       }, 100);
-
-      const timer = setTimeout(() => {
-        setHighlightedId(null);
-      }, 1500);
-      return () => clearTimeout(timer);
     }
-  }, [focusedVegobjektId, setFocusedVegobjekt]);
+  }, [focusedVegobjektId, focusedVegobjektToken, setFocusedVegobjekt]);
+
+  useEffect(() => {
+    if (highlightedId === null) return;
+
+    const currentId = highlightedId;
+    const timer = setTimeout(() => {
+      setHighlightedId((prev) => (prev === currentId ? null : prev));
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [highlightedId]);
 
   const processedObjects = objects.map((obj) => ({
     vegobjekt: obj,
@@ -352,14 +365,18 @@ export default function VegobjektList({
             Ingen vegobjekter funnet i det valgte området.
           </div>
         ) : (
-          typesWithObjects.map((type) => (
-            <TypeGroup
-              key={type.id}
-              type={type}
-              objects={vegobjekterByType.get(type.id) ?? []}
-              focusedVegobjektId={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.id : undefined}
-            />
-          ))
+          typesWithObjects.map((type) => {
+            const objects = vegobjekterByType.get(type.id) ?? [];
+            return (
+              <TypeGroup
+                key={type.id}
+                type={type}
+                objects={objects}
+                focusedVegobjektId={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.id : undefined}
+                focusedVegobjektToken={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.token : undefined}
+              />
+            );
+          })
         )}
       </div>
     </div>

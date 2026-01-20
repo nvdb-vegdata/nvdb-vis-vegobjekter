@@ -555,7 +555,7 @@ export default function MapView({
 
   const handleVegobjektClick = useCallback(
     (typeId: number, vegobjektId: number) => {
-      setFocusedVegobjekt({ typeId, id: vegobjektId })
+      setFocusedVegobjekt({ typeId, id: vegobjektId, token: Date.now() })
     },
     [setFocusedVegobjekt],
   )
