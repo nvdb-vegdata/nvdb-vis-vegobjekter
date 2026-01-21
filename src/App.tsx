@@ -129,11 +129,13 @@ export default function App() {
 
   const vegobjekterErrorMessage = useMemo(() => {
     if (!vegobjekterError) return null;
-    if (
-      isVegobjekterRequestError(vegobjekterError) &&
-      vegobjekterError.status === 400
-    ) {
-      return "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.";
+    if (isVegobjekterRequestError(vegobjekterError)) {
+      if (vegobjekterError.status === 400) {
+        return "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.";
+      }
+      if (vegobjekterError.status === 504) {
+        return "Kunne ikke hente data, forespørselen tok for lang tid. Prøv et mindre område eller færre typer.";
+      }
     }
 
     if (
@@ -144,7 +146,7 @@ export default function App() {
       return "Vegobjektsøket feilet. Prøv et mindre område eller færre typer.";
     }
 
-    return null;
+    return "Kunne ikke hente vegobjekter. Prøv igjen senere.";
   }, [vegobjekterError]);
 
   useEffect(() => {

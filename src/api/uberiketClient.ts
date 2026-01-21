@@ -134,14 +134,10 @@ export async function hentVegobjekter({
   });
 
   if (response.error) {
-    const status =
-      typeof response.error === "object" && response.error
-        ? (response.error as { status?: number }).status
-        : undefined;
-    const detail =
-      typeof response.error === "object" && response.error
-        ? (response.error as { detail?: string }).detail
-        : undefined;
+    const httpStatus = response.response?.status;
+    const errorBody = response.error as { status?: number; detail?: string } | undefined;
+    const status = httpStatus ?? errorBody?.status;
+    const detail = errorBody?.detail;
     throw new VegobjekterRequestError(
       `Failed to fetch vegobjekter: ${response.error}`,
       status,
