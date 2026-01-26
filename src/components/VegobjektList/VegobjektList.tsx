@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import type { Vegobjekttype, Egenskapstype } from "../../api/datakatalogClient";
 import { getVegobjekttypeById, getEgenskapstypeById, getEnumVerdiById } from "../../api/datakatalogClient";
@@ -97,10 +97,41 @@ function VegobjektItem({
 }) {
   const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom);
   const setLocateVegobjekt = useSetAtom(locateVegobjektAtom);
+  const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const uberiketUrl = `${UBERIKET_API_BASE_URL}/api/v1/vegobjekter/${details.typeId}/${details.id}`;
   const lesApiUrl = `${NVDB_API_BASE_URL}/vegobjekt?id=${details.id}`;
   const vegkartUrl = `${VEGKART_BASE_URL}#valgt:${details.id}`;
+
+  const handleCopyId = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+
+    if (!navigator.clipboard?.writeText) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(String(details.id));
+      setCopied(true);
+      if (copyTimeoutRef.current !== null) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = window.setTimeout(() => {
+        setCopied(false);
+      }, 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div 
@@ -118,26 +149,45 @@ function VegobjektItem({
         {details.versjonId && (
           <span className="vegobjekt-version">v{details.versjonId}</span>
         )}
-        <button
-          type="button"
-          className="vegobjekt-locate-btn"
-          aria-label="Finn i kart"
-          title="Finn i kart"
-          onClick={(event) => {
-            event.stopPropagation();
-            setLocateVegobjekt({ vegobjekt, token: Date.now() });
-          }}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
+        <div className="vegobjekt-header-actions">
+          <button
+            type="button"
+            className={`vegobjekt-action-btn vegobjekt-copy-btn${copied ? " copied" : ""}`}
+            aria-label={copied ? "ID kopiert" : "Kopier ID"}
+            title={copied ? "Kopiert!" : "Kopier ID"}
+            onClick={handleCopyId}
           >
-            <path
-              d="M12 2a7 7 0 0 1 7 7c0 4.2-5.1 10.1-6.4 11.5a.8.8 0 0 1-1.2 0C10.1 19.1 5 13.2 5 9a7 7 0 0 1 7-7Zm0 4.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z"
-            />
-          </svg>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="vegobjekt-action-btn vegobjekt-locate-btn"
+            aria-label="Finn i kart"
+            title="Finn i kart"
+            onClick={(event) => {
+              event.stopPropagation();
+              setLocateVegobjekt({ vegobjekt, token: Date.now() });
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M12 2a7 7 0 0 1 7 7c0 4.2-5.1 10.1-6.4 11.5a.8.8 0 0 1-1.2 0C10.1 19.1 5 13.2 5 9a7 7 0 0 1 7-7Zm0 4.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
       
       {isExpanded && (

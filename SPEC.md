@@ -157,7 +157,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
    - Locate button recenters the map on the vegobjekt's stedfesting geometry
    - Each vegobjekt displays:
-     - ID
+     - ID with copy button
      - Gyldighetsperiode (validity period)
      - Stedfestinger (format: "0.2-0.8@1234")
      - Barn (child object references)
