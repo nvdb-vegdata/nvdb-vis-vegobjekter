@@ -437,6 +437,39 @@ body,
   color: #c0392b;
 }
 
+.stedfesting-controls {
+  width: 320px;
+}
+
+.stedfesting-input-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.stedfesting-input-row .search-input-wrapper {
+  flex: 1;
+}
+
+.stedfesting-input-row .search-input {
+  margin-bottom: 0;
+  height: 40px;
+}
+
+.stedfesting-input-row .btn {
+  height: 40px;
+}
+
+.stedfesting-error {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
+  font-size: 12px;
+  color: #c0392b;
+}
+
 .status-bar {
   padding: 12px 16px;
   background: #ecf0f1;
@@ -971,4 +1004,28 @@ body,
 
 .vegobjekt-highlight {
   animation: highlight-pop 1.5s ease-out;
+}
+
+.stedfesting-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: rgba(52, 152, 219, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  max-width: 300px;
+}
+
+.stedfesting-indicator strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stedfesting-indicator small {
+  opacity: 0.8;
+  font-size: 12px;
 }

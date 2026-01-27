@@ -9,7 +9,7 @@ import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
 import { useVegobjekter } from "./hooks/useVegobjekter";
 import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
 import { isSelectableVegobjekttype, type Vegobjekttype } from "./api/datakatalogClient";
-import { isVegobjekterRequestError } from "./api/uberiketClient";
+import { isVegobjekterRequestError, parseStedfestingString } from "./api/uberiketClient";
 import { Polygon } from "ol/geom";
 import {
   allTypesSelectedAtom,
@@ -18,6 +18,7 @@ import {
   polygonAtom,
   veglenkesekvensLimitAtom,
   searchModeAtom,
+  stedfestingAtom,
   strekningAtom,
   vegobjekterErrorAtom,
   DEFAULT_VEGLENKESEKVENSER_LIMIT,
@@ -49,6 +50,7 @@ export default function App() {
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
   const searchMode = useAtomValue(searchModeAtom);
   const strekning = useAtomValue(strekningAtom);
+  const stedfesting = useAtomValue(stedfestingAtom);
   const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
 
   useEffect(() => {
@@ -75,6 +77,11 @@ export default function App() {
     } else {
       url.searchParams.delete("strekning");
     }
+    if (searchMode === "stedfesting" && stedfesting.trim().length > 0) {
+      url.searchParams.set("stedfesting", stedfesting.trim());
+    } else {
+      url.searchParams.delete("stedfesting");
+    }
     if (allTypesSelected) {
       url.searchParams.set("types", "all");
     } else if (selectedTypes.length > 0) {
@@ -94,6 +101,7 @@ export default function App() {
     selectedTypes,
     searchMode,
     strekning,
+    stedfesting,
     veglenkesekvensLimit,
   ]);
 
@@ -109,10 +117,11 @@ export default function App() {
   } = useVeglenkesekvenser({
     polygonUtm33,
     vegsystemreferanse: searchMode === "strekning" ? strekning : null,
+    veglenkesekvenserIds: searchMode === "stedfesting" ? parseStedfestingString(stedfesting) : undefined,
     limit: veglenkesekvensLimit,
   });
 
-  const {
+const {
     vegobjekterByType,
     isLoading: vegobjekterLoading,
     error: vegobjekterError,
@@ -125,6 +134,7 @@ export default function App() {
     veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
     polygon: searchMode === "polygon" ? polygon : null,
     vegsystemreferanse: searchMode === "strekning" ? strekning : null,
+    stedfesting: searchMode === "stedfesting" ? stedfesting : null,
   });
 
   const vegobjekterErrorMessage = useMemo(() => {
@@ -165,15 +175,14 @@ export default function App() {
     0
   );
 
-  const showSidebarHelp =
-    !veglenkeResult || (!allTypesSelected && selectedTypes.length === 0);
+  const showSidebarHelp = (!allTypesSelected && selectedTypes.length === 0);
 
   return (
     <div className="app">
       <aside className="sidebar">
         <header className="sidebar-header">
           <h1>NVDB Vegobjekt Visualisering</h1>
-          <p>Velg objekttyper og tegn et område eller søk på strekning</p>
+          <p>Velg objekttyper og tegn et område, søk på strekning, eller søk på stedfesting</p>
         </header>
 
         <div className="sidebar-content">
@@ -215,7 +224,7 @@ export default function App() {
                 <ol>
                   <li>Velg en eller flere vegobjekttyper fra listen til venstre</li>
                   <li>
-                    Klikk "Tegn område" for polygon, eller velg "Søk på strekning", skriv inn vegsystemreferanse og trykk "Søk"
+                    Klikk "Tegn område" for polygon, "Søk på strekning" for vegsystemreferanse, eller "Søk på stedfesting" for spesifikke posisjoner
                   </li>
                   <li>Vegobjektene i området eller strekningen vises her</li>
                 </ol>

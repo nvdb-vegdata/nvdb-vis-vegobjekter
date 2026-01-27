@@ -62,12 +62,14 @@ export type {
 type VeglenkesekvenserQuery = {
   polygon?: string;
   vegsystemreferanse?: string;
+  ids?: number[];
   antall?: number;
 };
 
 export async function hentVeglenkesekvenser({
   polygon,
   vegsystemreferanse,
+  ids,
   antall = 10,
 }: VeglenkesekvenserQuery): Promise<VeglenkesekvenserSide> {
   const response = await sdkHentVeglenkesekvenser({
@@ -75,6 +77,7 @@ export async function hentVeglenkesekvenser({
       antall,
       polygon,
       vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
+      ider : ids ? [ids.join(",")] as unknown as number[] : undefined,
       inkluder: ["alle"],
     },
   });
@@ -150,6 +153,26 @@ export async function hentVegobjekter({
 
 export function getStedfestingFilter(veglenkesekvensIds: number[]): string {
   return veglenkesekvensIds.join(",");
+}
+
+export function parseStedfestingString(stedfesting?: string | null): number[] {
+  if (!stedfesting || stedfesting.trim().length === 0) return [];
+  
+  const trimmedStedfesting = stedfesting.trim();
+  const parts = trimmedStedfesting.split(',');
+  const ids: number[] = [];
+  
+  for (const part of parts) {
+    const match = /^[\d.]+-[\d.]+@(\d+)$/.exec(part.trim());
+    if (match && match[1]) {
+      const id = parseInt(match[1], 10);
+      if (!isNaN(id)) {
+        ids.push(id);
+      }
+    }
+  }
+  
+  return [...new Set(ids)]; // Remove duplicates
 }
 
 export interface VeglenkeRange {
