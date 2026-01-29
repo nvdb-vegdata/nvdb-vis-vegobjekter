@@ -1,28 +1,10 @@
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import { type MouseEvent, useEffect, useRef, useState } from 'react'
 import type { Egenskapstype, Vegobjekttype } from '../../api/datakatalogClient'
-import {
-  getEgenskapstypeById,
-  getEnumVerdiById,
-  getVegobjekttypeById,
-} from '../../api/datakatalogClient'
-import type {
-  EgenskapVerdi,
-  EnumEgenskap,
-  Stedfesting,
-  Vegobjekt,
-} from '../../api/uberiketClient'
-import {
-  formatStedfesting,
-  getEgenskapDisplayValue,
-} from '../../api/uberiketClient'
-import {
-  focusedVegobjektAtom,
-  hoveredVegobjektAtom,
-  locateVegobjektAtom,
-  selectedTypesAtom,
-  vegobjekterErrorAtom,
-} from '../../state/atoms'
+import { getEgenskapstypeById, getEnumVerdiById, getVegobjekttypeById } from '../../api/datakatalogClient'
+import type { EgenskapVerdi, EnumEgenskap, Stedfesting, Vegobjekt } from '../../api/uberiketClient'
+import { formatStedfesting, getEgenskapDisplayValue } from '../../api/uberiketClient'
+import { focusedVegobjektAtom, hoveredVegobjektAtom, locateVegobjektAtom, selectedTypesAtom, vegobjekterErrorAtom } from '../../state/atoms'
 import { downloadCsvAllTypes, downloadCsvPerType } from '../../utils/csvExport'
 
 interface Props {
@@ -47,35 +29,21 @@ interface VegobjektDetails {
   egenskaper: { id: string; name: string; value: string }[]
 }
 
-function getEgenskapValue(
-  egenskap: EgenskapVerdi,
-  egenskapstype: Egenskapstype | undefined,
-): string {
+function getEgenskapValue(egenskap: EgenskapVerdi, egenskapstype: Egenskapstype | undefined): string {
   if (egenskap.type === 'EnumEgenskap' && egenskapstype) {
-    const enumVerdi = getEnumVerdiById(
-      egenskapstype,
-      (egenskap as EnumEgenskap).verdi,
-    )
+    const enumVerdi = getEnumVerdiById(egenskapstype, (egenskap as EnumEgenskap).verdi)
     if (enumVerdi) {
-      return (
-        enumVerdi.kortnavn ?? String(enumVerdi.verdi) ?? `ID: ${enumVerdi.id}`
-      )
+      return enumVerdi.kortnavn ?? String(enumVerdi.verdi) ?? `ID: ${enumVerdi.id}`
     }
   }
   return getEgenskapDisplayValue(egenskap)
 }
 
-function processVegobjekt(
-  obj: Vegobjekt,
-  typeId: number,
-  vegobjekttype: Vegobjekttype | undefined,
-): VegobjektDetails {
+function processVegobjekt(obj: Vegobjekt, typeId: number, vegobjekttype: Vegobjekttype | undefined): VegobjektDetails {
   const egenskaper: VegobjektDetails['egenskaper'] = []
   if (obj.egenskaper) {
     for (const [id, egenskap] of Object.entries(obj.egenskaper)) {
-      const egenskapstype = vegobjekttype
-        ? getEgenskapstypeById(vegobjekttype, Number(id))
-        : undefined
+      const egenskapstype = vegobjekttype ? getEgenskapstypeById(vegobjekttype, Number(id)) : undefined
       const name = egenskapstype?.navn ?? `Egenskap ${id}`
       const value = getEgenskapValue(egenskap, egenskapstype)
       egenskaper.push({ id, name, value })
@@ -97,9 +65,7 @@ function processVegobjekt(
     typeId,
     versjonId: obj.versjon,
     gyldighetsperiode: obj.gyldighetsperiode,
-    stedfestinger: formatStedfesting(
-      obj.stedfesting as Stedfesting | undefined,
-    ),
+    stedfestinger: formatStedfesting(obj.stedfesting as Stedfesting | undefined),
     barn,
     egenskaper,
   }
@@ -168,9 +134,7 @@ function VegobjektItem({
       <div className="vegobjekt-header" onClick={onToggle}>
         <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
         <span className="vegobjekt-id">ID: {details.id}</span>
-        {details.versjonId && (
-          <span className="vegobjekt-version">v{details.versjonId}</span>
-        )}
+        {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
         <div className="vegobjekt-header-actions">
           <button
             type="button"
@@ -207,9 +171,7 @@ function VegobjektItem({
               <div className="vegobjekt-section-title">Gyldighetsperiode</div>
               <div className="vegobjekt-property">
                 {details.gyldighetsperiode.startdato}
-                {details.gyldighetsperiode.sluttdato
-                  ? ` - ${details.gyldighetsperiode.sluttdato}`
-                  : ' - (aktiv)'}
+                {details.gyldighetsperiode.sluttdato ? ` - ${details.gyldighetsperiode.sluttdato}` : ' - (aktiv)'}
               </div>
             </div>
           )}
@@ -218,10 +180,7 @@ function VegobjektItem({
             <div className="vegobjekt-section">
               <div className="vegobjekt-section-title">Stedfesting</div>
               {details.stedfestinger.map((s, i) => (
-                <div
-                  key={i}
-                  className="vegobjekt-property vegobjekt-stedfesting"
-                >
+                <div key={i} className="vegobjekt-property vegobjekt-stedfesting">
                   {s}
                 </div>
               ))}
@@ -233,8 +192,7 @@ function VegobjektItem({
               <div className="vegobjekt-section-title">Barn</div>
               {details.barn.map((b, i) => (
                 <div key={i} className="vegobjekt-property">
-                  <span className="vegobjekt-barn-type">Type {b.typeId}:</span>{' '}
-                  {b.ids.slice(0, 5).join(', ')}
+                  <span className="vegobjekt-barn-type">Type {b.typeId}:</span> {b.ids.slice(0, 5).join(', ')}
                   {b.ids.length > 5 && ` (+${b.ids.length - 5} til)`}
                 </div>
               ))}
@@ -263,8 +221,7 @@ function VegobjektItem({
               <div className="vegobjekt-section-title">Egenskaper</div>
               {details.egenskaper.map((e) => (
                 <div key={e.id} className="vegobjekt-property">
-                  <span className="vegobjekt-egenskap-name">{e.name}:</span>{' '}
-                  <span className="vegobjekt-egenskap-value">{e.value}</span>
+                  <span className="vegobjekt-egenskap-name">{e.name}:</span> <span className="vegobjekt-egenskap-value">{e.value}</span>
                 </div>
               ))}
             </div>
@@ -295,10 +252,7 @@ function TypeGroup({
   const vegobjekttype = getVegobjekttypeById(type.id)
 
   useEffect(() => {
-    if (
-      focusedVegobjektId !== undefined &&
-      focusedVegobjektToken !== undefined
-    ) {
+    if (focusedVegobjektId !== undefined && focusedVegobjektToken !== undefined) {
       setExpanded(true)
 
       setExpandedItems((prev) => {
@@ -348,10 +302,7 @@ function TypeGroup({
 
   return (
     <div className="vegobjekt-type-group">
-      <div
-        className="vegobjekt-type-header"
-        onClick={() => setExpanded(!expanded)}
-      >
+      <div className="vegobjekt-type-header" onClick={() => setExpanded(!expanded)}>
         <span className="vegobjekt-expand">{expanded ? '-' : '+'}</span>
         <span className="vegobjekt-type-name">{type.navn}</span>
         <span className="vegobjekt-type-count">({objects.length})</span>
@@ -367,9 +318,7 @@ function TypeGroup({
               isExpanded={expandedItems.has(details.id)}
               isHighlighted={highlightedId === details.id}
               onToggle={() => toggleItem(details.id)}
-              itemRef={
-                focusedVegobjektId === details.id ? focusedItemRef : undefined
-              }
+              itemRef={focusedVegobjektId === details.id ? focusedItemRef : undefined}
             />
           ))}
         </div>
@@ -378,13 +327,7 @@ function TypeGroup({
   )
 }
 
-export default function VegobjektList({
-  vegobjekterByType,
-  isLoading,
-  hasNextPage,
-  isFetchingNextPage,
-  onFetchNextPage,
-}: Props) {
+export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPage, isFetchingNextPage, onFetchNextPage }: Props) {
   const selectedTypes = useAtomValue(selectedTypesAtom)
   const focusedVegobjekt = useAtomValue(focusedVegobjektAtom)
   const errorMessage = useAtomValue(vegobjekterErrorAtom)
@@ -394,10 +337,7 @@ export default function VegobjektList({
     return objects && objects.length > 0
   })
 
-  const totalCount = Array.from(vegobjekterByType.values()).reduce(
-    (sum, arr) => sum + arr.length,
-    0,
-  )
+  const totalCount = Array.from(vegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
 
   return (
     <div className="vegobjekt-list">
@@ -413,11 +353,7 @@ export default function VegobjektList({
           )}
           {totalCount > 0 && !isLoading && (
             <>
-              <button
-                type="button"
-                className="btn btn-secondary btn-small csv-popover-anchor"
-                popoverTarget="csv-popover"
-              >
+              <button type="button" className="btn btn-secondary btn-small csv-popover-anchor" popoverTarget="csv-popover">
                 Last ned CSV
               </button>
               <div id="csv-popover" className="csv-popover" popover="auto">
@@ -445,12 +381,7 @@ export default function VegobjektList({
             </>
           )}
           {hasNextPage && !isLoading && (
-            <button
-              type="button"
-              className="btn btn-primary btn-small"
-              onClick={onFetchNextPage}
-              disabled={isFetchingNextPage}
-            >
+            <button type="button" className="btn btn-primary btn-small" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
               {isFetchingNextPage ? 'Henter...' : 'Neste side'}
             </button>
           )}
@@ -463,13 +394,9 @@ export default function VegobjektList({
             <span>Henter vegobjekter...</span>
           </div>
         ) : errorMessage ? (
-          <div className="vegobjekt-list-empty vegobjekt-list-warning">
-            {errorMessage}
-          </div>
+          <div className="vegobjekt-list-empty vegobjekt-list-warning">{errorMessage}</div>
         ) : typesWithObjects.length === 0 ? (
-          <div className="vegobjekt-list-empty">
-            Ingen vegobjekter funnet i det valgte området.
-          </div>
+          <div className="vegobjekt-list-empty">Ingen vegobjekter funnet i det valgte området.</div>
         ) : (
           typesWithObjects.map((type) => {
             const objects = vegobjekterByType.get(type.id) ?? []
@@ -478,16 +405,8 @@ export default function VegobjektList({
                 key={type.id}
                 type={type}
                 objects={objects}
-                focusedVegobjektId={
-                  focusedVegobjekt?.typeId === type.id
-                    ? focusedVegobjekt.id
-                    : undefined
-                }
-                focusedVegobjektToken={
-                  focusedVegobjekt?.typeId === type.id
-                    ? focusedVegobjekt.token
-                    : undefined
-                }
+                focusedVegobjektId={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.id : undefined}
+                focusedVegobjektToken={focusedVegobjekt?.typeId === type.id ? focusedVegobjekt.token : undefined}
               />
             )
           })

@@ -1,106 +1,88 @@
-import { client } from "./generated/datakatalog/client.gen";
-import {
-  getKategorier as sdkGetKategorier,
-  getVegobjekttyper as sdkGetVegobjekttyper,
-} from "./generated/datakatalog/sdk.gen";
+import { client } from './generated/datakatalog/client.gen'
+import { getKategorier as sdkGetKategorier, getVegobjekttyper as sdkGetVegobjekttyper } from './generated/datakatalog/sdk.gen'
 import type {
-  Vegobjekttype,
   Egenskapstype,
+  EgenskapstypeFlyttallenum,
   EgenskapstypeHeltallenum,
   EgenskapstypeTekstenum,
-  EgenskapstypeFlyttallenum,
+  EnumverdiFlyttall,
   EnumverdiHeltall,
   EnumverdiTekst,
-  EnumverdiFlyttall,
   Kategori,
-} from "./generated/datakatalog/types.gen";
+  Vegobjekttype,
+} from './generated/datakatalog/types.gen'
 
-const BASE_URL = "https://nvdbapiles.atlas.vegvesen.no/datakatalog";
+const BASE_URL = 'https://nvdbapiles.atlas.vegvesen.no/datakatalog'
 
 client.setConfig({
   baseUrl: BASE_URL,
   headers: {
-    "X-Client": "nvdb-vis-vegobjekter",
+    'X-Client': 'nvdb-vis-vegobjekter',
   },
-});
+})
 
-export type { Vegobjekttype, Egenskapstype, Kategori };
+export type { Vegobjekttype, Egenskapstype, Kategori }
 
-let cachedTypes: Vegobjekttype[] | null = null;
-let cachedTypesById: Map<number, Vegobjekttype> | null = null;
-let cachedKategorier: Kategori[] | null = null;
+let cachedTypes: Vegobjekttype[] | null = null
+let cachedTypesById: Map<number, Vegobjekttype> | null = null
+let cachedKategorier: Kategori[] | null = null
 
-export type EnumVerdi = EnumverdiHeltall | EnumverdiTekst | EnumverdiFlyttall;
+export type EnumVerdi = EnumverdiHeltall | EnumverdiTekst | EnumverdiFlyttall
 
-export type EgenskapstypeMedEnum =
-  | EgenskapstypeHeltallenum
-  | EgenskapstypeTekstenum
-  | EgenskapstypeFlyttallenum;
+export type EgenskapstypeMedEnum = EgenskapstypeHeltallenum | EgenskapstypeTekstenum | EgenskapstypeFlyttallenum
 
 export function isSelectableVegobjekttype(type: Vegobjekttype): boolean {
-  return !type.sensitiv;
+  return !type.sensitiv
 }
 
 export async function getVegobjekttyper(): Promise<Vegobjekttype[]> {
   if (cachedTypes) {
-    return cachedTypes;
+    return cachedTypes
   }
 
   const response = await sdkGetVegobjekttyper({
-    query: { inkluder: ["alle"] },
-  });
+    query: { inkluder: ['alle'] },
+  })
 
   if (response.error) {
-    throw new Error(`Failed to fetch vegobjekttyper: ${response.error}`);
+    throw new Error(`Failed to fetch vegobjekttyper: ${response.error}`)
   }
 
-  cachedTypes = response.data ?? [];
-  cachedTypesById = new Map(cachedTypes.map((t) => [t.id, t]));
-  return cachedTypes;
+  cachedTypes = response.data ?? []
+  cachedTypesById = new Map(cachedTypes.map((t) => [t.id, t]))
+  return cachedTypes
 }
 
 export async function getKategorier(): Promise<Kategori[]> {
   if (cachedKategorier) {
-    return cachedKategorier;
+    return cachedKategorier
   }
 
-  const response = await sdkGetKategorier();
+  const response = await sdkGetKategorier()
 
   if (response.error) {
-    throw new Error(`Failed to fetch kategorier: ${response.error}`);
+    throw new Error(`Failed to fetch kategorier: ${response.error}`)
   }
 
-  cachedKategorier = response.data ?? [];
-  return cachedKategorier;
+  cachedKategorier = response.data ?? []
+  return cachedKategorier
 }
 
 export function getVegobjekttypeById(id: number): Vegobjekttype | undefined {
-  return cachedTypesById?.get(id);
+  return cachedTypesById?.get(id)
 }
 
-export function getEgenskapstypeById(
-  vegobjekttype: Vegobjekttype,
-  egenskapId: number
-): Egenskapstype | undefined {
-  return vegobjekttype.egenskapstyper?.find((e) => e.id === egenskapId);
+export function getEgenskapstypeById(vegobjekttype: Vegobjekttype, egenskapId: number): Egenskapstype | undefined {
+  return vegobjekttype.egenskapstyper?.find((e) => e.id === egenskapId)
 }
 
-function isEnumEgenskapstype(
-  egenskapstype: Egenskapstype
-): egenskapstype is EgenskapstypeMedEnum {
-  return (
-    egenskapstype.egenskapstype === "Heltallenum" ||
-    egenskapstype.egenskapstype === "Tekstenum" ||
-    egenskapstype.egenskapstype === "Flyttallenum"
-  );
+function isEnumEgenskapstype(egenskapstype: Egenskapstype): egenskapstype is EgenskapstypeMedEnum {
+  return egenskapstype.egenskapstype === 'Heltallenum' || egenskapstype.egenskapstype === 'Tekstenum' || egenskapstype.egenskapstype === 'Flyttallenum'
 }
 
-export function getEnumVerdiById(
-  egenskapstype: Egenskapstype,
-  verdiId: number
-): EnumVerdi | undefined {
+export function getEnumVerdiById(egenskapstype: Egenskapstype, verdiId: number): EnumVerdi | undefined {
   if (!isEnumEgenskapstype(egenskapstype)) {
-    return undefined;
+    return undefined
   }
-  return egenskapstype.tillatte_verdier?.find((v) => v.id === verdiId);
+  return egenskapstype.tillatte_verdier?.find((v) => v.id === verdiId)
 }

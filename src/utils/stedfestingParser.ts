@@ -17,9 +17,7 @@ function isPositiveId(id: number): boolean {
   return Number.isFinite(id) && id > 0
 }
 
-function parseToken(
-  token: string,
-): { id: number; filter: string; start: number; end: number } | null {
+function parseToken(token: string): { id: number; filter: string; start: number; end: number } | null {
   const bareMatch = BARE_ID_REGEX.exec(token)
   if (bareMatch) {
     const id = Number(bareMatch[1])
@@ -79,9 +77,7 @@ export function parseStedfestingInput(input: string): ParsedStedfesting {
   }
 }
 
-export function parseStedfestingRanges(
-  input: string,
-): ParsedStedfestingRange[] {
+export function parseStedfestingRanges(input: string): ParsedStedfestingRange[] {
   const tokens = input
     .split(',')
     .map((token) => token.trim())

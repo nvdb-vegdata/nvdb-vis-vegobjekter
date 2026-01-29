@@ -1,70 +1,61 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import WKT from "ol/format/WKT";
-import type { Polygon } from "ol/geom";
-import {
-  hentVegobjekter,
-  buildStedfestingFilter,
-  type Vegobjekt,
-  type VeglenkeRange,
-  type VeglenkesekvensMedPosisjoner,
-} from "../api/uberiketClient";
-import type { Vegobjekttype } from "../api/datakatalogClient";
+import { useInfiniteQuery } from '@tanstack/react-query'
+import WKT from 'ol/format/WKT'
+import type { Polygon } from 'ol/geom'
+import { useMemo } from 'react'
+import type { Vegobjekttype } from '../api/datakatalogClient'
+import { buildStedfestingFilter, hentVegobjekter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt } from '../api/uberiketClient'
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10)
 }
 
-function getOverlappingVeglenkeRanges(
-  veglenkesekvenser: VeglenkesekvensMedPosisjoner[],
-  polygon: Polygon
-): VeglenkeRange[] {
-  const ranges: VeglenkeRange[] = [];
-  const wktFormat = new WKT();
-  const today = new Date().toISOString().split("T")[0]!;
-  const polygonExtent = polygon.getExtent();
+function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosisjoner[], polygon: Polygon): VeglenkeRange[] {
+  const ranges: VeglenkeRange[] = []
+  const wktFormat = new WKT()
+  const today = new Date().toISOString().split('T')[0]!
+  const polygonExtent = polygon.getExtent()
 
   for (const vs of veglenkesekvenser) {
     for (const vl of vs.veglenker) {
-      const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato;
+      const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
       if (sluttdato && sluttdato < today) {
-        continue;
+        continue
       }
 
-      if (!vl.geometri?.wkt) continue;
+      if (!vl.geometri?.wkt) continue
 
       try {
         const geom = wktFormat.readGeometry(vl.geometri.wkt, {
           dataProjection: `EPSG:${vl.geometri.srid}`,
-          featureProjection: "EPSG:3857",
-        });
+          featureProjection: 'EPSG:3857',
+        })
 
         if (!geom.intersectsExtent(polygonExtent)) {
-          continue;
+          continue
         }
 
         ranges.push({
           veglenkesekvensId: vs.id,
           startposisjon: vl.startposisjon,
           sluttposisjon: vl.sluttposisjon,
-        });
+        })
       } catch (e) {
-        console.warn("Failed to parse veglenke geometry", e);
+        console.warn('Failed to parse veglenke geometry', e)
       }
     }
   }
 
-  return ranges;
+  return ranges
 }
 
 type VegobjekterParams = {
-  selectedTypes: Vegobjekttype[];
-  allTypesSelected: boolean;
-  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined;
-  polygon: Polygon | null;
-  vegsystemreferanse?: string | null;
-  stedfestingFilterDirect?: string | null;
-};
+  selectedTypes: Vegobjekttype[]
+  allTypesSelected: boolean
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined
+  polygon: Polygon | null
+  vegsystemreferanse?: string | null
+  stedfestingFilterDirect?: string | null
+}
 
 export function useVegobjekter({
   selectedTypes,
@@ -74,67 +65,54 @@ export function useVegobjekter({
   vegsystemreferanse,
   stedfestingFilterDirect,
 }: VegobjekterParams) {
-  const trimmedStrekning = vegsystemreferanse?.trim() ?? "";
-  const directFilter = stedfestingFilterDirect?.trim() ?? "";
+  const trimmedStrekning = vegsystemreferanse?.trim() ?? ''
+  const directFilter = stedfestingFilterDirect?.trim() ?? ''
   const stedfestingFilter = useMemo(() => {
-    if (directFilter.length > 0) return directFilter;
-    if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return "";
-    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon);
-    return buildStedfestingFilter(ranges);
-  }, [directFilter, veglenkesekvenser, polygon, trimmedStrekning]);
+    if (directFilter.length > 0) return directFilter
+    if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return ''
+    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon)
+    return buildStedfestingFilter(ranges)
+  }, [directFilter, veglenkesekvenser, polygon, trimmedStrekning])
 
-  const enabled =
-    (allTypesSelected || selectedTypes.length > 0) &&
-    (trimmedStrekning.length > 0 || stedfestingFilter.length > 0);
-  const today = getTodayDate();
-  const typeIds = useMemo(
-    () => selectedTypes.map((type) => type.id).sort((a, b) => a - b),
-    [selectedTypes]
-  );
-  const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
+  const enabled = (allTypesSelected || selectedTypes.length > 0) && (trimmedStrekning.length > 0 || stedfestingFilter.length > 0)
+  const today = getTodayDate()
+  const typeIds = useMemo(() => selectedTypes.map((type) => type.id).sort((a, b) => a - b), [selectedTypes])
+  const typeIdList = useMemo(() => typeIds.join(','), [typeIds])
 
   const query = useInfiniteQuery({
-    queryKey: [
-      "vegobjekter",
-      allTypesSelected ? "all" : typeIdList,
-      stedfestingFilter,
-      trimmedStrekning,
-      today,
-    ],
+    queryKey: ['vegobjekter', allTypesSelected ? 'all' : typeIdList, stedfestingFilter, trimmedStrekning, today],
     queryFn: async ({ pageParam }: { pageParam?: string }) => {
-      const typeIdsParam = allTypesSelected ? undefined : typeIds;
+      const typeIdsParam = allTypesSelected ? undefined : typeIds
       if (trimmedStrekning.length > 0) {
         return hentVegobjekter({
           typeIds: typeIdsParam,
           vegsystemreferanse: trimmedStrekning,
           dato: today,
           start: pageParam,
-        });
+        })
       }
       return hentVegobjekter({
         typeIds: typeIdsParam,
         stedfesting: stedfestingFilter,
         dato: today,
         start: pageParam,
-      });
+      })
     },
     enabled,
     initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.metadata.neste?.start,
-  });
+  })
 
-  const vegobjekterByType = new Map<number, Vegobjekt[]>(
-    selectedTypes.map((type) => [type.id, [] as Vegobjekt[]])
-  );
+  const vegobjekterByType = new Map<number, Vegobjekt[]>(selectedTypes.map((type) => [type.id, [] as Vegobjekt[]]))
 
-  const allVegobjekter = query.data?.pages.flatMap((page) => page.vegobjekter) ?? [];
+  const allVegobjekter = query.data?.pages.flatMap((page) => page.vegobjekter) ?? []
 
   for (const vegobjekt of allVegobjekter) {
-    const list = vegobjekterByType.get(vegobjekt.typeId);
+    const list = vegobjekterByType.get(vegobjekt.typeId)
     if (list) {
-      list.push(vegobjekt);
+      list.push(vegobjekt)
     } else {
-      vegobjekterByType.set(vegobjekt.typeId, [vegobjekt]);
+      vegobjekterByType.set(vegobjekt.typeId, [vegobjekt])
     }
   }
 
@@ -146,5 +124,5 @@ export function useVegobjekter({
     hasNextPage: query.hasNextPage ?? false,
     fetchNextPage: query.fetchNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
-  };
+  }
 }

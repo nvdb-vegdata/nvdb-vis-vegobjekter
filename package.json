@@ -10,9 +10,11 @@
     "fetch:datakatalog": "curl -sS -H 'X-Client: nvdb-vis-vegobjekter' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/datakatalog' -o specs/datakatalog.json",
     "fetch:uberiket": "curl -sS -H 'X-Client: nvdb-vis-vegobjekter' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/uberiket' -o specs/uberiket.json",
     "generate:api": "bunx openapi-ts",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "lint": "biome check --write"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.13",
     "@hey-api/openapi-ts": "^0.91.0",
     "@types/bun": "latest",
     "@types/react": "^19.2.8",

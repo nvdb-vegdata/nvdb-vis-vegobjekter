@@ -1201,6 +1201,57 @@ export type HentVeglenkesekvensResponses = {
 
 export type HentVeglenkesekvensResponse = HentVeglenkesekvensResponses[keyof HentVeglenkesekvensResponses];
 
+export type HentVeglenkesekvensHistoriskData = {
+    body?: never;
+    path: {
+        /**
+         * ID for veglenkesekvensen
+         */
+        veglenkesekvensId: number;
+    };
+    query: {
+        /**
+         * Dato å hente veglenkesekvens fra
+         */
+        dato: string;
+    };
+    url: '/api/v1/vegnett/veglenkesekvenser/{veglenkesekvensId}/historisk';
+};
+
+export type HentVeglenkesekvensHistoriskErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetail;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetail;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetail;
+    /**
+     * Not Found
+     */
+    404: ProblemDetail;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetail;
+};
+
+export type HentVeglenkesekvensHistoriskError = HentVeglenkesekvensHistoriskErrors[keyof HentVeglenkesekvensHistoriskErrors];
+
+export type HentVeglenkesekvensHistoriskResponses = {
+    /**
+     * OK
+     */
+    200: Veglenkesekvens;
+};
+
+export type HentVeglenkesekvensHistoriskResponse = HentVeglenkesekvensHistoriskResponses[keyof HentVeglenkesekvensHistoriskResponses];
+
 export type StreamVeglenkesekvenserData = {
     body?: never;
     path?: never;

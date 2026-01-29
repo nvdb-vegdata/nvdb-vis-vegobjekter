@@ -1,120 +1,109 @@
-import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useMemo } from "react";
-import { transform } from "ol/proj";
-import WKT from "ol/format/WKT";
-import MapView from "./components/Map/MapView";
-import ObjectTypeSelector from "./components/ObjectTypeSelector/ObjectTypeSelector";
-import VegobjektList from "./components/VegobjektList/VegobjektList";
-import { useVeglenkesekvenser } from "./hooks/useVeglenkesekvenser";
-import { useVegobjekter } from "./hooks/useVegobjekter";
-import { useVegobjekttyper } from "./hooks/useVegobjekttyper";
-import { isSelectableVegobjekttype, type Vegobjekttype } from "./api/datakatalogClient";
-import { isVegobjekterRequestError } from "./api/uberiketClient";
-import { Polygon } from "ol/geom";
-import { parseStedfestingInput } from "./utils/stedfestingParser";
+import { useAtom, useAtomValue } from 'jotai'
+import WKT from 'ol/format/WKT'
+import type { Polygon } from 'ol/geom'
+import { transform } from 'ol/proj'
+import { useEffect, useMemo } from 'react'
+import { isSelectableVegobjekttype, type Vegobjekttype } from './api/datakatalogClient'
+import { isVegobjekterRequestError } from './api/uberiketClient'
+import MapView from './components/Map/MapView'
+import ObjectTypeSelector from './components/ObjectTypeSelector/ObjectTypeSelector'
+import VegobjektList from './components/VegobjektList/VegobjektList'
+import { useVeglenkesekvenser } from './hooks/useVeglenkesekvenser'
+import { useVegobjekter } from './hooks/useVegobjekter'
+import { useVegobjekttyper } from './hooks/useVegobjekttyper'
 import {
   allTypesSelectedAtom,
+  DEFAULT_VEGLENKESEKVENSER_LIMIT,
+  polygonAtom,
+  searchModeAtom,
   selectedTypeIdsAtom,
   selectedTypesAtom,
-  polygonAtom,
-  veglenkesekvensLimitAtom,
-  searchModeAtom,
-  strekningAtom,
   stedfestingAtom,
+  strekningAtom,
+  veglenkesekvensLimitAtom,
   vegobjekterErrorAtom,
-  DEFAULT_VEGLENKESEKVENSER_LIMIT,
-} from "./state/atoms";
+} from './state/atoms'
+import { parseStedfestingInput } from './utils/stedfestingParser'
 
 function polygonToUtm33(polygon: Polygon): string {
-  const coords = polygon.getCoordinates()[0];
-  if (!coords) return "";
+  const coords = polygon.getCoordinates()[0]
+  if (!coords) return ''
 
   const utm33Coords = coords.map((coord) => {
-    const [x, y] = transform(coord, "EPSG:3857", "EPSG:25833");
-    return `${Math.round(x!)} ${Math.round(y!)}`;
-  });
+    const [x, y] = transform(coord, 'EPSG:3857', 'EPSG:25833')
+    return `${Math.round(x!)} ${Math.round(y!)}`
+  })
 
-  return utm33Coords.join(", ");
+  return utm33Coords.join(', ')
 }
 
 function polygonToWkt(polygon: Polygon): string {
-  const format = new WKT();
-  return format.writeGeometry(polygon);
+  const format = new WKT()
+  return format.writeGeometry(polygon)
 }
 
 export default function App() {
-  const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom);
-  const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom);
-  const allTypesSelected = useAtomValue(allTypesSelectedAtom);
-  const [, setVegobjekterError] = useAtom(vegobjekterErrorAtom);
-  const polygon = useAtomValue(polygonAtom);
-  const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom);
-  const searchMode = useAtomValue(searchModeAtom);
-  const strekning = useAtomValue(strekningAtom);
-  const stedfesting = useAtomValue(stedfestingAtom);
-  const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper();
+  const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom)
+  const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
+  const allTypesSelected = useAtomValue(allTypesSelectedAtom)
+  const [, setVegobjekterError] = useAtom(vegobjekterErrorAtom)
+  const polygon = useAtomValue(polygonAtom)
+  const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
+  const searchMode = useAtomValue(searchModeAtom)
+  const strekning = useAtomValue(strekningAtom)
+  const stedfesting = useAtomValue(stedfestingAtom)
+  const { data: allTypes, isLoading: datakatalogLoading } = useVegobjekttyper()
 
   useEffect(() => {
-    if (!allTypes || selectedTypeIds.length === 0) return;
+    if (!allTypes || selectedTypeIds.length === 0) return
     const types = selectedTypeIds
       .map((id) => allTypes.find((t) => t.id === id))
       .filter((t): t is Vegobjekttype => t !== undefined)
-      .filter(isSelectableVegobjekttype);
+      .filter(isSelectableVegobjekttype)
     if (types.length > 0) {
-      setSelectedTypes(types);
+      setSelectedTypes(types)
     }
-    setSelectedTypeIds([]);
-  }, [allTypes, selectedTypeIds, setSelectedTypes, setSelectedTypeIds]);
+    setSelectedTypeIds([])
+  }, [allTypes, selectedTypeIds, setSelectedTypes, setSelectedTypeIds])
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    if (searchMode === "polygon" && polygon) {
-      url.searchParams.set("polygon", polygonToWkt(polygon));
+    const url = new URL(window.location.href)
+    if (searchMode === 'polygon' && polygon) {
+      url.searchParams.set('polygon', polygonToWkt(polygon))
     } else {
-      url.searchParams.delete("polygon");
+      url.searchParams.delete('polygon')
     }
-    if (searchMode === "strekning" && strekning.trim().length > 0) {
-      url.searchParams.set("strekning", strekning.trim());
+    if (searchMode === 'strekning' && strekning.trim().length > 0) {
+      url.searchParams.set('strekning', strekning.trim())
     } else {
-      url.searchParams.delete("strekning");
+      url.searchParams.delete('strekning')
     }
-    if (searchMode === "stedfesting" && stedfesting.trim().length > 0) {
-      url.searchParams.set("stedfesting", stedfesting.trim());
+    if (searchMode === 'stedfesting' && stedfesting.trim().length > 0) {
+      url.searchParams.set('stedfesting', stedfesting.trim())
     } else {
-      url.searchParams.delete("stedfesting");
+      url.searchParams.delete('stedfesting')
     }
     if (allTypesSelected) {
-      url.searchParams.set("types", "all");
+      url.searchParams.set('types', 'all')
     } else if (selectedTypes.length > 0) {
-      url.searchParams.set("types", selectedTypes.map((t) => t.id).join(","));
+      url.searchParams.set('types', selectedTypes.map((t) => t.id).join(','))
     } else {
-      url.searchParams.delete("types");
+      url.searchParams.delete('types')
     }
     if (veglenkesekvensLimit !== DEFAULT_VEGLENKESEKVENSER_LIMIT) {
-      url.searchParams.set("veglenkesekvenslimit", veglenkesekvensLimit.toString());
+      url.searchParams.set('veglenkesekvenslimit', veglenkesekvensLimit.toString())
     } else {
-      url.searchParams.delete("veglenkesekvenslimit");
+      url.searchParams.delete('veglenkesekvenslimit')
     }
-    window.history.replaceState({}, "", url);
-  }, [
-    allTypesSelected,
-    polygon,
-    selectedTypes,
-    searchMode,
-    strekning,
-    stedfesting,
-    veglenkesekvensLimit,
-  ]);
+    window.history.replaceState({}, '', url)
+  }, [allTypesSelected, polygon, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
 
-  const polygonUtm33 = useMemo(
-    () => (searchMode === "polygon" && polygon ? polygonToUtm33(polygon) : null),
-    [polygon, searchMode]
-  );
+  const polygonUtm33 = useMemo(() => (searchMode === 'polygon' && polygon ? polygonToUtm33(polygon) : null), [polygon, searchMode])
 
   const stedfestingParsed = useMemo(() => {
-    if (searchMode !== "stedfesting") return null;
-    return parseStedfestingInput(stedfesting);
-  }, [searchMode, stedfesting]);
+    if (searchMode !== 'stedfesting') return null
+    return parseStedfestingInput(stedfesting)
+  }, [searchMode, stedfesting])
 
   const {
     data: veglenkeResult,
@@ -122,13 +111,10 @@ export default function App() {
     error: veglenkerError,
   } = useVeglenkesekvenser({
     polygonUtm33,
-    vegsystemreferanse: searchMode === "strekning" ? strekning : null,
-    veglenkesekvensIds:
-      searchMode === "stedfesting"
-        ? stedfestingParsed?.veglenkesekvensIds ?? null
-        : null,
+    vegsystemreferanse: searchMode === 'strekning' ? strekning : null,
+    veglenkesekvensIds: searchMode === 'stedfesting' ? (stedfestingParsed?.veglenkesekvensIds ?? null) : null,
     limit: veglenkesekvensLimit,
-  });
+  })
 
   const {
     vegobjekterByType,
@@ -141,60 +127,48 @@ export default function App() {
     selectedTypes,
     allTypesSelected,
     veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
-    polygon: searchMode === "polygon" ? polygon : null,
-    vegsystemreferanse: searchMode === "strekning" ? strekning : null,
-    stedfestingFilterDirect:
-      searchMode === "stedfesting"
-        ? stedfestingParsed?.stedfestingFilter ?? null
-        : null,
-  });
+    polygon: searchMode === 'polygon' ? polygon : null,
+    vegsystemreferanse: searchMode === 'strekning' ? strekning : null,
+    stedfestingFilterDirect: searchMode === 'stedfesting' ? (stedfestingParsed?.stedfestingFilter ?? null) : null,
+  })
 
   const vegobjekterErrorMessage = useMemo(() => {
-    if (!vegobjekterError) return null;
+    if (!vegobjekterError) return null
     if (isVegobjekterRequestError(vegobjekterError)) {
       if (vegobjekterError.status === 400) {
-        return "Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.";
+        return 'Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.'
       }
       if (vegobjekterError.status === 504) {
-        return "Kunne ikke hente data, forespørselen tok for lang tid. Prøv et mindre område eller færre typer.";
+        return 'Kunne ikke hente data, forespørselen tok for lang tid. Prøv et mindre område eller færre typer.'
       }
     }
 
-    if (
-      vegobjekterError instanceof TypeError ||
-      (vegobjekterError instanceof Error &&
-        vegobjekterError.message.toLowerCase().includes("failed to fetch"))
-    ) {
-      return "Vegobjektsøket feilet. Prøv et mindre område eller færre typer.";
+    if (vegobjekterError instanceof TypeError || (vegobjekterError instanceof Error && vegobjekterError.message.toLowerCase().includes('failed to fetch'))) {
+      return 'Vegobjektsøket feilet. Prøv et mindre område eller færre typer.'
     }
 
-    return "Kunne ikke hente vegobjekter. Prøv igjen senere.";
-  }, [vegobjekterError]);
+    return 'Kunne ikke hente vegobjekter. Prøv igjen senere.'
+  }, [vegobjekterError])
 
   useEffect(() => {
-    setVegobjekterError(vegobjekterErrorMessage);
-  }, [setVegobjekterError, vegobjekterErrorMessage]);
+    setVegobjekterError(vegobjekterErrorMessage)
+  }, [setVegobjekterError, vegobjekterErrorMessage])
 
-  const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading;
+  const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading
 
-  const totalVeglenker = veglenkeResult?.veglenkesekvenser.reduce(
-    (sum, vs) => sum + (vs.veglenker?.length ?? 0),
-    0
-  ) ?? 0;
+  const totalVeglenker = veglenkeResult?.veglenkesekvenser.reduce((sum, vs) => sum + (vs.veglenker?.length ?? 0), 0) ?? 0
 
-  const totalVegobjekter = Array.from(vegobjekterByType.values()).reduce(
-    (sum, arr) => sum + arr.length,
-    0
-  );
+  const totalVegobjekter = Array.from(vegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
 
-  const showSidebarHelp =
-    !veglenkeResult || (!allTypesSelected && selectedTypes.length === 0);
+  const showSidebarHelp = !veglenkeResult || (!allTypesSelected && selectedTypes.length === 0)
 
   return (
     <div className="app">
       <aside className="sidebar">
         <header className="sidebar-header">
-          <h1>NVDB Vegobjekt Visualisering <span className="beta-badge">BETA</span></h1>
+          <h1>
+            NVDB Vegobjekt Visualisering <span className="beta-badge">BETA</span>
+          </h1>
           <p>Velg objekttyper og tegn et område eller søk på strekning</p>
         </header>
 
@@ -204,12 +178,12 @@ export default function App() {
 
         <div className="status-bar">
           {datakatalogLoading ? (
-            "Laster datakatalog..."
+            'Laster datakatalog...'
           ) : isLoading ? (
-            "Laster data..."
+            'Laster data...'
           ) : (
             <>
-              {allTypesSelected ? "Alle typer valgt" : `${selectedTypes.length} type(r) valgt`}
+              {allTypesSelected ? 'Alle typer valgt' : `${selectedTypes.length} type(r) valgt`}
               {totalVeglenker > 0 && ` | ${totalVeglenker} veglenke(r)`}
               {totalVegobjekter > 0 && ` | ${totalVegobjekter} objekt(er)`}
             </>
@@ -218,11 +192,7 @@ export default function App() {
       </aside>
 
       <main className="map-container">
-        <MapView
-          veglenkesekvenser={veglenkeResult?.veglenkesekvenser}
-          vegobjekterByType={vegobjekterByType}
-          isLoadingVeglenker={veglenkerLoading}
-        />
+        <MapView veglenkesekvenser={veglenkeResult?.veglenkesekvenser} vegobjekterByType={vegobjekterByType} isLoadingVeglenker={veglenkerLoading} />
       </main>
 
       <aside className="sidebar-right">
@@ -236,9 +206,7 @@ export default function App() {
                 <h3>Kom i gang</h3>
                 <ol>
                   <li>Velg en eller flere vegobjekttyper fra listen til venstre</li>
-                  <li>
-                    Klikk "Tegn område" for polygon, eller velg "Søk på strekning"/"Stedfesting" og skriv inn søket ditt
-                  </li>
+                  <li>Klikk "Tegn område" for polygon, eller velg "Søk på strekning"/"Stedfesting" og skriv inn søket ditt</li>
                   <li>Vegobjektene i området eller strekningen vises her</li>
                 </ol>
               </div>
@@ -259,20 +227,17 @@ export default function App() {
             hasNextPage={vegobjekterHasNextPage}
             isFetchingNextPage={vegobjekterFetchingNextPage}
             onFetchNextPage={() => {
-              void fetchNextVegobjekterPage();
+              void fetchNextVegobjekterPage()
             }}
           />
         )}
       </aside>
 
       {veglenkerError && (
-        <div
-          className="error"
-          style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}
-        >
+        <div className="error" style={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}>
           Kunne ikke hente data fra NVDB
         </div>
       )}
     </div>
-  );
+  )
 }

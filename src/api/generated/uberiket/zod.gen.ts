@@ -664,6 +664,21 @@ export const zHentVeglenkesekvensData = z.object({
  */
 export const zHentVeglenkesekvensResponse = zVeglenkesekvens;
 
+export const zHentVeglenkesekvensHistoriskData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        veglenkesekvensId: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })
+    }),
+    query: z.object({
+        dato: z.iso.date()
+    })
+});
+
+/**
+ * OK
+ */
+export const zHentVeglenkesekvensHistoriskResponse = zVeglenkesekvens;
+
 export const zStreamVeglenkesekvenserData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),

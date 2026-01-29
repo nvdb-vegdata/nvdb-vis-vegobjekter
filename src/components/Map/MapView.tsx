@@ -1,15 +1,15 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import Feature from 'ol/Feature'
-import OLMap from 'ol/Map'
-import Overlay from 'ol/Overlay'
-import View from 'ol/View'
 import { click } from 'ol/events/condition'
+import { createEmpty, type Extent, extend, isEmpty as isExtentEmpty } from 'ol/extent'
+import Feature from 'ol/Feature'
 import WKT from 'ol/format/WKT'
-import { LineString, Point, Polygon } from 'ol/geom'
-import { createEmpty, extend, isEmpty as isExtentEmpty, type Extent } from 'ol/extent'
+import { LineString, Point, type Polygon } from 'ol/geom'
 import { Draw, Select } from 'ol/interaction'
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
+import OLMap from 'ol/Map'
+import Overlay from 'ol/Overlay'
+import View from 'ol/View'
 import 'ol/ol.css'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { register } from 'ol/proj/proj4'
@@ -34,29 +34,16 @@ import {
   polygonAtom,
   searchModeAtom,
   selectedTypesAtom,
-  strekningAtom,
-  strekningInputAtom,
   stedfestingAtom,
   stedfestingInputAtom,
+  strekningAtom,
+  strekningInputAtom,
 } from '../../state/atoms'
-import {
-  getClippedGeometries,
-  getPointAtFraction,
-  sliceLineStringByFraction,
-} from '../../utils/geometryUtils'
-import {
-  isValidStedfestingInput,
-  parseStedfestingRanges,
-} from '../../utils/stedfestingParser'
+import { getClippedGeometries, getPointAtFraction, sliceLineStringByFraction } from '../../utils/geometryUtils'
+import { isValidStedfestingInput, parseStedfestingRanges } from '../../utils/stedfestingParser'
 
-proj4.defs(
-  'EPSG:25833',
-  '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-)
-proj4.defs(
-  'EPSG:5973',
-  '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs',
-)
+proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
+proj4.defs('EPSG:5973', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs')
 register(proj4)
 
 interface Props {
@@ -122,8 +109,7 @@ const EGENGEOMETRI_POLYGON_STYLE = new Style({
   stroke: new Stroke({ color: '#8e44ad', width: 2 }),
 })
 
-const VEGSYSTEMREFERANSE_REGEX =
-  /^(?:(\d{4})\s*)?([ERFKPS])(?:([VAPF])\s*)?(\d+)(?:\s*S(\d+(?:-\d+)?))?(?:\s*D(\d+(?:-\d+)?))?\s*$/i
+const VEGSYSTEMREFERANSE_REGEX = /^(?:(\d{4})\s*)?([ERFKPS])(?:([VAPF])\s*)?(\d+)(?:\s*S(\d+(?:-\d+)?))?(?:\s*D(\d+(?:-\d+)?))?\s*$/i
 
 function isValidVegsystemreferanse(value: string): boolean {
   const match = VEGSYSTEMREFERANSE_REGEX.exec(value.trim())
@@ -141,11 +127,7 @@ function isValidVegsystemreferanse(value: string): boolean {
   return true
 }
 
-export default function MapView({
-  veglenkesekvenser,
-  vegobjekterByType,
-  isLoadingVeglenker,
-}: Props) {
+export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadingVeglenker }: Props) {
   const selectedTypes = useAtomValue(selectedTypesAtom)
   const [polygon, setPolygon] = useAtom(polygonAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
@@ -198,10 +180,7 @@ export default function MapView({
 
     const stedfestingLayer = new VectorLayer({
       source: stedfestingSource.current,
-      style: (feature) =>
-        feature.getGeometry()?.getType() === 'Point'
-          ? STEDFESTING_POINT_STYLE
-          : STEDFESTING_STYLE,
+      style: (feature) => (feature.getGeometry()?.getType() === 'Point' ? STEDFESTING_POINT_STYLE : STEDFESTING_STYLE),
     })
 
     const highlightLayer = new VectorLayer({
@@ -236,14 +215,7 @@ export default function MapView({
 
     const map = new OLMap({
       target: mapRef.current,
-      layers: [
-        new TileLayer({ source: new OSM() }),
-        drawLayer,
-        veglenkeLayer,
-        stedfestingLayer,
-        highlightLayer,
-        egengeometriLayer,
-      ],
+      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer, stedfestingLayer, highlightLayer, egengeometriLayer],
       overlays: [overlay],
       view: new View({
         center: fromLonLat([lon, lat]),
@@ -264,10 +236,7 @@ export default function MapView({
         const geom = feature.getGeometry()
         if (geom) {
           const extent = geom.getExtent()
-          const center = [
-            (extent[0]! + extent[2]!) / 2,
-            (extent[1]! + extent[3]!) / 2,
-          ]
+          const center = [(extent[0]! + extent[2]!) / 2, (extent[1]! + extent[3]!) / 2]
           overlay.setPosition(center)
         }
       } else {
@@ -327,9 +296,7 @@ export default function MapView({
 
   useEffect(() => {
     if (!veglenkeLayerRef.current) return
-    veglenkeLayerRef.current.setStyle(
-      searchMode === 'stedfesting' ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE,
-    )
+    veglenkeLayerRef.current.setStyle(searchMode === 'stedfesting' ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE)
   }, [searchMode])
 
   useEffect(() => {
@@ -353,8 +320,7 @@ export default function MapView({
     const today = new Date().toISOString().split('T')[0]!
 
     const drawnFeatures = drawSource.current.getFeatures()
-    const drawnPolygon =
-      drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
+    const drawnPolygon = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
 
     const stedfestingRangesById =
       searchMode === 'stedfesting' && stedfesting.trim().length > 0
@@ -371,8 +337,7 @@ export default function MapView({
 
     for (const vs of veglenkesekvenser) {
       for (const vl of vs.veglenker ?? []) {
-        const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } })
-          .gyldighetsperiode?.sluttdato
+        const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
         if (sluttdato && sluttdato < today) {
           continue
         }
@@ -391,9 +356,7 @@ export default function MapView({
             if (stedfestingRangesById) {
               const ranges = stedfestingRangesById.get(vs.id)
               if (!ranges) continue
-              const overlaps = ranges.some(
-                (range) => range.end >= vl.startposisjon && range.start <= vl.sluttposisjon,
-              )
+              const overlaps = ranges.some((range) => range.end >= vl.startposisjon && range.start <= vl.sluttposisjon)
               if (!overlaps) continue
             }
 
@@ -421,23 +384,15 @@ export default function MapView({
                 if (startFraction === endFraction) {
                   const pointCoord = getPointAtFraction(coords, startFraction)
                   const pointGeom = new Point(pointCoord)
-                  stedfestingSource.current.addFeature(
-                    new Feature({ geometry: pointGeom }),
-                  )
+                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
                   continue
                 }
 
-                const slicedCoords = sliceLineStringByFraction(
-                  coords,
-                  startFraction,
-                  endFraction,
-                )
+                const slicedCoords = sliceLineStringByFraction(coords, startFraction, endFraction)
 
                 if (slicedCoords.length >= 2) {
                   const slicedGeom = new LineString(slicedCoords)
-                  stedfestingSource.current.addFeature(
-                    new Feature({ geometry: slicedGeom }),
-                  )
+                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom }))
                 }
               }
             }
@@ -468,22 +423,14 @@ export default function MapView({
 
     const stedfesting = hoveredVegobjekt.stedfesting as Stedfesting | undefined
     if (stedfesting) {
-      const clippedGeometries = getClippedGeometries(
-        stedfesting,
-        veglenkesekvenser,
-      )
+      const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser)
 
       for (const clipped of clippedGeometries) {
-        const veglenkeFeature = veglenkeSource.current
-          .getFeatures()
-          .find((f) => {
-            const vsId = f.get('veglenkesekvensId')
-            const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
-            return (
-              vsId === clipped.veglenkesekvensId &&
-              vl?.nummer === clipped.veglenkeNummer
-            )
-          })
+        const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
+          const vsId = f.get('veglenkesekvensId')
+          const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
+          return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer
+        })
 
         if (!veglenkeFeature) continue
 
@@ -500,11 +447,7 @@ export default function MapView({
             const highlightFeature = new Feature({ geometry: pointGeom })
             highlightSource.current.addFeature(highlightFeature)
           } else {
-            const slicedCoords = sliceLineStringByFraction(
-              coords,
-              clipped.startFraction,
-              clipped.endFraction,
-            )
+            const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction)
 
             if (slicedCoords.length >= 2) {
               const slicedGeom = new LineString(slicedCoords)
@@ -538,27 +481,17 @@ export default function MapView({
     if (!locateVegobjekt || !veglenkesekvenser || !mapInstance.current) return
 
     const extents = [] as number[][]
-    const stedfesting = locateVegobjekt.vegobjekt.stedfesting as
-      | Stedfesting
-      | undefined
+    const stedfesting = locateVegobjekt.vegobjekt.stedfesting as Stedfesting | undefined
 
     if (stedfesting) {
-      const clippedGeometries = getClippedGeometries(
-        stedfesting,
-        veglenkesekvenser,
-      )
+      const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser)
 
       for (const clipped of clippedGeometries) {
-        const veglenkeFeature = veglenkeSource.current
-          .getFeatures()
-          .find((f) => {
-            const vsId = f.get('veglenkesekvensId')
-            const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
-            return (
-              vsId === clipped.veglenkesekvensId &&
-              vl?.nummer === clipped.veglenkeNummer
-            )
-          })
+        const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
+          const vsId = f.get('veglenkesekvensId')
+          const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
+          return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer
+        })
 
         if (!veglenkeFeature) continue
 
@@ -574,11 +507,7 @@ export default function MapView({
             const pointGeom = new Point(pointCoord)
             extents.push(pointGeom.getExtent())
           } else {
-            const slicedCoords = sliceLineStringByFraction(
-              coords,
-              clipped.startFraction,
-              clipped.endFraction,
-            )
+            const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction)
 
             if (slicedCoords.length >= 2) {
               const slicedGeom = new LineString(slicedCoords)
@@ -703,9 +632,7 @@ export default function MapView({
     const trimmed = strekningInput.trim()
     if (trimmed.length === 0) return
     if (!isValidVegsystemreferanse(trimmed)) {
-      setStrekningError(
-        'Ugyldig vegsystemreferanse. Bruk f.eks. FV6 S1D1 (KSP kan ha kommunenummer). Kryssdel/sideanleggsdel og meterverdier er ikke støttet.',
-      )
+      setStrekningError('Ugyldig vegsystemreferanse. Bruk f.eks. FV6 S1D1 (KSP kan ha kommunenummer). Kryssdel/sideanleggsdel og meterverdier er ikke støttet.')
       return
     }
     setStrekningError(null)
@@ -742,9 +669,7 @@ export default function MapView({
     const trimmed = stedfestingInput.trim()
     if (trimmed.length === 0) return
     if (!isValidStedfestingInput(trimmed)) {
-      setStedfestingError(
-        'Ugyldig stedfesting. Bruk f.eks. 1234, 0.2-0.5@5678 eller 0.8@9999.',
-      )
+      setStedfestingError('Ugyldig stedfesting. Bruk f.eks. 1234, 0.2-0.5@5678 eller 0.8@9999.')
       return
     }
     setStedfestingError(null)
@@ -780,14 +705,7 @@ export default function MapView({
 
       for (const type of selectedTypes) {
         const objects = vegobjekterByType.get(type.id) ?? []
-        const matching = objects.filter((obj) =>
-          isOnVeglenke(
-            obj.stedfesting as Stedfesting | undefined,
-            veglenkesekvensId,
-            startposisjon,
-            sluttposisjon,
-          ),
-        )
+        const matching = objects.filter((obj) => isOnVeglenke(obj.stedfesting as Stedfesting | undefined, veglenkesekvensId, startposisjon, sluttposisjon))
         if (matching.length > 0) {
           result.push({ type, objects: matching })
         }
@@ -798,24 +716,14 @@ export default function MapView({
     [vegobjekterByType, selectedTypes],
   )
 
-  const selectedVeglenkesekvensId = selectedFeature?.get(
-    'veglenkesekvensId',
-  ) as number | undefined
-  const selectedVeglenke = selectedFeature?.get('veglenke') as
-    | VeglenkeMedPosisjon
-    | undefined
-  const vegobjekterOnSelected = selectedVeglenkesekvensId
-    ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId, selectedVeglenke)
-    : []
+  const selectedVeglenkesekvensId = selectedFeature?.get('veglenkesekvensId') as number | undefined
+  const selectedVeglenke = selectedFeature?.get('veglenke') as VeglenkeMedPosisjon | undefined
+  const vegobjekterOnSelected = selectedVeglenkesekvensId ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId, selectedVeglenke) : []
 
   const trimmedStrekningInput = strekningInput.trim()
-  const isStrekningValid =
-    trimmedStrekningInput.length === 0 ||
-    isValidVegsystemreferanse(trimmedStrekningInput)
+  const isStrekningValid = trimmedStrekningInput.length === 0 || isValidVegsystemreferanse(trimmedStrekningInput)
   const trimmedStedfestingInput = stedfestingInput.trim()
-  const isStedfestingValid =
-    trimmedStedfestingInput.length === 0 ||
-    isValidStedfestingInput(trimmedStedfestingInput)
+  const isStedfestingValid = trimmedStedfestingInput.length === 0 || isValidStedfestingInput(trimmedStedfestingInput)
 
   return (
     <>
@@ -828,25 +736,17 @@ export default function MapView({
           >
             Tegn område
           </button>
-          <button
-            className={`btn ${searchMode === 'strekning' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={handleStrekningMode}
-          >
+          <button className={`btn ${searchMode === 'strekning' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStrekningMode}>
             Søk på strekning
           </button>
-          <button
-            className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={handleStedfestingMode}
-          >
+          <button className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStedfestingMode}>
             Stedfesting
           </button>
-          {searchMode === 'polygon' &&
-            !isDrawing &&
-            (polygon || veglenkesekvenser) && (
-              <button className="btn btn-danger" onClick={clearAll}>
-                Nullstill
-              </button>
-            )}
+          {searchMode === 'polygon' && !isDrawing && (polygon || veglenkesekvenser) && (
+            <button className="btn btn-danger" onClick={clearAll}>
+              Nullstill
+            </button>
+          )}
         </div>
 
         {searchMode === 'polygon' && isDrawing && (
@@ -871,12 +771,7 @@ export default function MapView({
                   onKeyDown={handleStrekningKeyDown}
                 />
                 {strekningInput && (
-                  <button
-                    className="search-clear-btn"
-                    type="button"
-                    onClick={clearStrekning}
-                    aria-label="Tøm strekning"
-                  >
+                  <button className="search-clear-btn" type="button" onClick={clearStrekning} aria-label="Tøm strekning">
                     ×
                   </button>
                 )}
@@ -890,9 +785,7 @@ export default function MapView({
                 Søk
               </button>
             </div>
-            {strekningError && (
-              <div className="strekning-error">{strekningError}</div>
-            )}
+            {strekningError && <div className="strekning-error">{strekningError}</div>}
           </div>
         )}
 
@@ -912,12 +805,7 @@ export default function MapView({
                   onKeyDown={handleStedfestingKeyDown}
                 />
                 {stedfestingInput && (
-                  <button
-                    className="search-clear-btn"
-                    type="button"
-                    onClick={clearStedfesting}
-                    aria-label="Tøm stedfesting"
-                  >
+                  <button className="search-clear-btn" type="button" onClick={clearStedfesting} aria-label="Tøm stedfesting">
                     ×
                   </button>
                 )}
@@ -926,26 +814,19 @@ export default function MapView({
                 className="btn btn-primary"
                 type="button"
                 onClick={handleStedfestingSearch}
-                disabled={
-                  trimmedStedfestingInput.length === 0 || !isStedfestingValid
-                }
+                disabled={trimmedStedfestingInput.length === 0 || !isStedfestingValid}
               >
                 Søk
               </button>
             </div>
-            {stedfestingError && (
-              <div className="strekning-error">{stedfestingError}</div>
-            )}
+            {stedfestingError && <div className="strekning-error">{stedfestingError}</div>}
           </div>
         )}
       </div>
 
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
 
-      <div
-        className="map-loading-overlay"
-        style={{ display: isLoadingVeglenker ? undefined : 'none' }}
-      >
+      <div className="map-loading-overlay" style={{ display: isLoadingVeglenker ? undefined : 'none' }}>
         <div className="spinner spinner-large" />
         <div className="map-loading-text">Henter veglenker...</div>
       </div>
@@ -957,9 +838,7 @@ export default function MapView({
               Veglenke {selectedVeglenkesekvensId}:{selectedVeglenke?.nummer}
             </div>
             {vegobjekterOnSelected.length === 0 ? (
-              <p style={{ fontSize: 12, color: '#666' }}>
-                Ingen vegobjekter funnet på denne veglenken
-              </p>
+              <p style={{ fontSize: 12, color: '#666' }}>Ingen vegobjekter funnet på denne veglenken</p>
             ) : (
               vegobjekterOnSelected.map(({ type, objects }) => (
                 <div key={type.id} style={{ marginBottom: 8 }}>
@@ -969,17 +848,12 @@ export default function MapView({
                   <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
                     {objects.slice(0, 5).map((obj) => (
                       <li key={obj.id}>
-                        <button
-                          className="popup-vegobjekt-link"
-                          onClick={() => handleVegobjektClick(type.id, obj.id)}
-                        >
+                        <button className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
                           ID: {obj.id}
                         </button>
                       </li>
                     ))}
-                    {objects.length > 5 && (
-                      <li>...og {objects.length - 5} til</li>
-                    )}
+                    {objects.length > 5 && <li>...og {objects.length - 5} til</li>}
                   </ul>
                 </div>
               ))

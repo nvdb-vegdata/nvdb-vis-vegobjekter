@@ -63,9 +63,7 @@ function getInitialVeglenkesekvensLimit(): number {
   const parsedLimit = Number(limitParam)
   if (!Number.isFinite(parsedLimit)) return DEFAULT_VEGLENKESEKVENSER_LIMIT
   const allowedLimits = new Set([10, 20, 50, 100])
-  return allowedLimits.has(parsedLimit)
-    ? parsedLimit
-    : DEFAULT_VEGLENKESEKVENSER_LIMIT
+  return allowedLimits.has(parsedLimit) ? parsedLimit : DEFAULT_VEGLENKESEKVENSER_LIMIT
 }
 
 export const selectedTypeIdsAtom = atom<number[]>(getInitialTypeIds())
@@ -83,8 +81,9 @@ export const focusedVegobjektAtom = atom<{
   id: number
   token: number
 } | null>(null)
-export const locateVegobjektAtom = atom<{ vegobjekt: Vegobjekt; token: number } | null>(
-  null,
-)
+export const locateVegobjektAtom = atom<{
+  vegobjekt: Vegobjekt
+  token: number
+} | null>(null)
 export const hoveredVegobjektAtom = atom<Vegobjekt | null>(null)
 export const vegobjekterErrorAtom = atom<string | null>(null)

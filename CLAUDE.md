@@ -1,6 +1,6 @@
 ---
 description: Use Bun instead of Node.js, npm, pnpm, or vite.
-globs: "*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json"
+globs: '*.ts, *.tsx, *.html, *.css, *.js, *.jsx, package.json'
 alwaysApply: false
 ---
 
@@ -125,3 +125,7 @@ curl -H "X-Client: nvdb-vis-vegobjekter" "https://nvdbapiles.atlas.vegvesen.no/.
 The uberiket API base URL is: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1`
 
 Always use the uberiket API when fetching vegobjekter data.
+
+## Formatting
+
+After making changes to `.ts`, `.tsx`, `.js`, `.jsx`, or `.json` files, run `bun lint` silently to format and lint.

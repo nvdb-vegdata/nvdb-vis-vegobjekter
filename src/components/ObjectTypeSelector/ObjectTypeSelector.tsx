@@ -1,22 +1,10 @@
 import { useAtom } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  getKategorier,
-  getVegobjekttyper,
-  isSelectableVegobjekttype,
-  type Kategori,
-  type Vegobjekttype,
-} from '../../api/datakatalogClient'
-import {
-  allTypesSelectedAtom,
-  selectedTypesAtom,
-  veglenkesekvensLimitAtom,
-} from '../../state/atoms'
+import { getKategorier, getVegobjekttyper, isSelectableVegobjekttype, type Kategori, type Vegobjekttype } from '../../api/datakatalogClient'
+import { allTypesSelectedAtom, selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
 
 export default function ObjectTypeSelector() {
-  const [veglenkesekvensLimit, setVeglenkesekvensLimit] = useAtom(
-    veglenkesekvensLimitAtom,
-  )
+  const [veglenkesekvensLimit, setVeglenkesekvensLimit] = useAtom(veglenkesekvensLimitAtom)
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
   const [allTypesSelected, setAllTypesSelected] = useAtom(allTypesSelectedAtom)
   const [allTypes, setAllTypes] = useState<Vegobjekttype[]>([])
@@ -30,13 +18,8 @@ export default function ObjectTypeSelector() {
     async function loadTypes() {
       try {
         setIsLoading(true)
-        const [types, kategoriList] = await Promise.all([
-          getVegobjekttyper(),
-          getKategorier(),
-        ])
-        const visibleTypes = types
-          .filter(isSelectableVegobjekttype)
-          .sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? ''))
+        const [types, kategoriList] = await Promise.all([getVegobjekttyper(), getKategorier()])
+        const visibleTypes = types.filter(isSelectableVegobjekttype).sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? ''))
         const sortedCategories = [...kategoriList].sort((a, b) => {
           if (a.sorteringsnummer !== b.sorteringsnummer) {
             return a.sorteringsnummer - b.sorteringsnummer
@@ -64,17 +47,13 @@ export default function ObjectTypeSelector() {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return allTypes
     return allTypes.filter(
-      (type) =>
-        type.navn?.toLowerCase().includes(query) ||
-        type.id.toString().includes(query) ||
-        type.beskrivelse?.toLowerCase().includes(query),
+      (type) => type.navn?.toLowerCase().includes(query) || type.id.toString().includes(query) || type.beskrivelse?.toLowerCase().includes(query),
     )
   }, [allTypes, searchQuery])
 
   const ALL_CATEGORY_ID = 38
 
-  const isSelected = (type: Vegobjekttype) =>
-    selectedTypes.some((t) => t.id === type.id)
+  const isSelected = (type: Vegobjekttype) => selectedTypes.some((t) => t.id === type.id)
 
   const handleTypeToggle = (type: Vegobjekttype) => {
     if (allTypesSelected) return
@@ -113,9 +92,7 @@ export default function ObjectTypeSelector() {
 
     setAllTypesSelected(false)
 
-    const categoryTypes = allTypes.filter((type) =>
-      type.kategorier.some((kategori) => kategori.id === categoryId),
-    )
+    const categoryTypes = allTypes.filter((type) => type.kategorier.some((kategori) => kategori.id === categoryId))
 
     setSelectedTypes(categoryTypes)
   }
@@ -147,12 +124,7 @@ export default function ObjectTypeSelector() {
         <div className="section-header">Vegobjekttyper</div>
         <div className="limit-inline">
           <label htmlFor="veglenke-limit">Maks veglenkesekvenser</label>
-          <select
-            id="veglenke-limit"
-            className="limit-select"
-            value={veglenkesekvensLimit}
-            onChange={(e) => setVeglenkesekvensLimit(Number(e.target.value))}
-          >
+          <select id="veglenke-limit" className="limit-select" value={veglenkesekvensLimit} onChange={(e) => setVeglenkesekvensLimit(Number(e.target.value))}>
             <option value={10}>10</option>
             <option value={20}>20</option>
             <option value={50}>50</option>
@@ -175,11 +147,7 @@ export default function ObjectTypeSelector() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button
-              className="search-clear-btn"
-              onClick={() => setSearchQuery('')}
-              aria-label="Tøm søk"
-            >
+            <button className="search-clear-btn" onClick={() => setSearchQuery('')} aria-label="Tøm søk">
               ×
             </button>
           )}
@@ -190,44 +158,27 @@ export default function ObjectTypeSelector() {
         <label className="search-label" htmlFor="category-select">
           Velg kategori
         </label>
-        <select
-          id="category-select"
-          className="category-select"
-          value={selectedCategoryId}
-          onChange={(e) => handleCategorySelect(e.target.value)}
-        >
+        <select id="category-select" className="category-select" value={selectedCategoryId} onChange={(e) => handleCategorySelect(e.target.value)}>
           <option value="">Velg kategori</option>
           {categories.map((kategori) => (
             <option key={kategori.id} value={kategori.id}>
-              {(kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`) +
-                ` (#${kategori.id})`}
+              {(kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`) + ` (#${kategori.id})`}
             </option>
           ))}
         </select>
       </div>
 
-        {selectedTypes.length > 0 && (
+      {selectedTypes.length > 0 && (
         <>
           <div className="selected-summary">
-            <div className="selected-count">
-              {allTypesSelected ? "Alle valgt" : `${selectedTypes.length} valgt`}
-            </div>
-            <button
-              type="button"
-              className="clear-types-btn"
-              onClick={handleClearTypes}
-            >
+            <div className="selected-count">{allTypesSelected ? 'Alle valgt' : `${selectedTypes.length} valgt`}</div>
+            <button type="button" className="clear-types-btn" onClick={handleClearTypes}>
               Fjern alle
             </button>
           </div>
           <div className="selected-chips">
             {allTypesSelected ? (
-              <button
-                type="button"
-                className="selected-chip"
-                onClick={handleClearTypes}
-                aria-label="Fjern alle"
-              >
+              <button type="button" className="selected-chip" onClick={handleClearTypes} aria-label="Fjern alle">
                 <span className="selected-chip-label">Alle</span>
                 <span className="selected-chip-remove">×</span>
               </button>
@@ -240,9 +191,7 @@ export default function ObjectTypeSelector() {
                   onClick={() => handleTypeRemove(type.id)}
                   aria-label={`Fjern ${type.navn ?? `type ${type.id}`}`}
                 >
-                  <span className="selected-chip-label">
-                    {type.navn ?? `Type ${type.id}`}
-                  </span>
+                  <span className="selected-chip-label">{type.navn ?? `Type ${type.id}`}</span>
                   <span className="selected-chip-id">#{type.id}</span>
                   <span className="selected-chip-remove">×</span>
                 </button>
@@ -251,7 +200,6 @@ export default function ObjectTypeSelector() {
           </div>
         </>
       )}
-
 
       <ul className="object-type-list">
         {filteredTypes.map((type) => (
@@ -265,23 +213,14 @@ export default function ObjectTypeSelector() {
             }}
             aria-disabled={allTypesSelected}
           >
-            <input
-              type="checkbox"
-              className="object-type-checkbox"
-              checked={isSelected(type)}
-              disabled={allTypesSelected}
-              onChange={() => {}}
-            />
+            <input type="checkbox" className="object-type-checkbox" checked={isSelected(type)} disabled={allTypesSelected} onChange={() => {}} />
             <div className="object-type-info">
               <div className="object-type-header">
                 <div className="object-type-name">{type.navn}</div>
                 <div className="object-type-id">ID: {type.id}</div>
               </div>
               {type.beskrivelse && (
-                <div
-                  className="object-type-description"
-                  title={type.beskrivelse}
-                >
+                <div className="object-type-description" title={type.beskrivelse}>
                   {type.beskrivelse}
                 </div>
               )}

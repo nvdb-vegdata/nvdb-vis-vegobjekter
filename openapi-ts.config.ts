@@ -1,40 +1,40 @@
-import { defineConfig } from "@hey-api/openapi-ts";
+import { defineConfig } from '@hey-api/openapi-ts'
 
 export default defineConfig([
   {
     input: {
-      path: "./specs/datakatalog.json",
+      path: './specs/datakatalog.json',
     },
     output: {
-      path: "src/api/generated/datakatalog",
+      path: 'src/api/generated/datakatalog',
       clean: true,
     },
     plugins: [
-      "@hey-api/typescript",
-      "@hey-api/client-fetch",
-      "@hey-api/sdk",
+      '@hey-api/typescript',
+      '@hey-api/client-fetch',
+      '@hey-api/sdk',
       {
-        name: "zod",
+        name: 'zod',
         exportFromIndex: true,
       },
     ],
   },
   {
     input: {
-      path: "./specs/uberiket.json",
+      path: './specs/uberiket.json',
     },
     output: {
-      path: "src/api/generated/uberiket",
+      path: 'src/api/generated/uberiket',
       clean: true,
     },
     plugins: [
-      "@hey-api/typescript",
-      "@hey-api/client-fetch",
-      "@hey-api/sdk",
+      '@hey-api/typescript',
+      '@hey-api/client-fetch',
+      '@hey-api/sdk',
       {
-        name: "zod",
+        name: 'zod',
         exportFromIndex: true,
       },
     ],
   },
-]);
+])

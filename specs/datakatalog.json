@@ -1,1 +1,1193 @@
-{"openapi":"3.1.0","info":{"title":"NVDB Datakatalog API","description":"API-et gir tilgang til å hente vegobjekttyper med tilhørende metadata fra datakatalogen.<br><br>[Dokumentasjon for Datakatalog API](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/Datakatalog)","contact":{"name":"Nasjonal vegdatabank (NVDB)","url":"https://nvdb.no/","email":"nvdb@vegvesen.no"},"version":"v1"},"servers":[{"url":"/datakatalog","description":"Default Server URL"}],"tags":[{"name":"Datakatalogen","description":"API for uthenting av vegobjekttyper og tilhørende metadata fra [datakatalogen](https://datakatalogen.atlas.vegvesen.no)."}],"paths":{"/api/v1/versjon":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer aktiv versjon på datakatalog","operationId":"getVersjon","responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/Versjon"}}}}}}},"/api/v1/vegobjekttyper":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer alle vegobjekttypene","operationId":"getVegobjekttyper","parameters":[{"name":"inkluder","in":"query","description":"Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.","required":false,"schema":{"type":"array","items":{"type":"string","enum":["egenskapstyper","relasjonstyper","stedfesting","alle","minimum"]},"uniqueItems":true}},{"name":"kategori","in":"query","description":"Begrens vegobjekttyper etter kategori. (/vegobjekttyper/kategorier)","required":false,"schema":{"type":"integer","format":"int32"}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Vegobjekttype"}}}}}}}},"/api/v1/vegobjekttyper/{vegobjekttypeid}":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer angitt vegobjekttype","operationId":"getVegobjekttype","parameters":[{"name":"vegobjekttypeid","in":"path","required":true,"schema":{"type":"integer","format":"int32"}},{"name":"inkluder","in":"query","description":"Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.","required":false,"schema":{"type":"array","items":{"type":"string","enum":["egenskapstyper","relasjonstyper","stedfesting","alle","minimum"]},"uniqueItems":true}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/Vegobjekttype"}}}}}}},"/api/v1/vegobjekttyper/{vegobjekttypeid}/{egenskapstypeid}":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer angitt egenskapstype for angitt vegobjekttype","operationId":"getEgenskapstypeForVegobjekttype","parameters":[{"name":"vegobjekttypeid","in":"path","required":true,"schema":{"type":"integer","format":"int32"}},{"name":"egenskapstypeid","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/Egenskapstype"}}}}}}},"/api/v1/vegobjekttyper/{vegobjekttypeid}/produktspesifikasjon":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer produktspesifikasjonen til den angitte vegobjekttypen","operationId":"getProduktspesifikasjon","parameters":[{"name":"vegobjekttypeid","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProductSpecification"}}}}}}},"/api/v1/vegobjekttyper/historisk/{versjon}":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer alle vegobjekttypene for en gitt versjon av datakatalogen, f.eks. 2.31","operationId":"getVegobjekttyperHistorisk","parameters":[{"name":"versjon","in":"path","required":true,"schema":{"type":"string"}},{"name":"inkluder","in":"query","description":"Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.","required":false,"schema":{"type":"array","items":{"type":"string","enum":["egenskapstyper","relasjonstyper","stedfesting","alle","minimum"]},"uniqueItems":true}},{"name":"kategori","in":"query","description":"Begrens vegobjekttyper etter kategori. (/vegobjekttyper/kategorier)","required":false,"schema":{"type":"integer","format":"int32"}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Vegobjekttype"}}}}}}}},"/api/v1/kategorier":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer alle kategorier for vegobjekter","operationId":"getKategorier","responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Kategori"}}}}}}}},"/api/v1/enheter":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer alle enheter","operationId":"getEnheter","responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Enhet"}}}}}}}},"/api/v1/egenskapstyper/{egenskapstypeid}":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer angitt egenskapstype","operationId":"getEgenskapstype","parameters":[{"name":"egenskapstypeid","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}],"responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"$ref":"#/components/schemas/Egenskapstype"}}}}}}},"/api/v1/egenskapstypekategorier":{"get":{"tags":["Datakatalogen"],"summary":"Returnerer alle kategorier for egenskapstypene","operationId":"getEgenskapstypeKategorier","responses":{"500":{"description":"Internal Server Error","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"503":{"description":"Service Unavailable","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"404":{"description":"Not Found","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ProblemDetail"}}}},"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/EgenskapstypeKategori"}}}}}}}}},"components":{"schemas":{"ProblemDetail":{"type":"object","properties":{"type":{"type":"string","format":"uri"},"title":{"type":"string"},"status":{"type":"integer","format":"int32"},"detail":{"type":"string"},"instance":{"type":"string","format":"uri"},"properties":{"type":"object","additionalProperties":{"type":"object"}}}},"Versjon":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"dato":{"type":"string","format":"date"},"versjon":{"type":"string"}},"required":["dato","id","versjon"]},"Assosiasjonstype":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"egenskapstype":{"type":"string"},"maksimalt_antall_verdier":{"type":"integer","format":"int32"},"minimalt_antall_verdier":{"type":"integer","format":"int32"},"innhold":{"$ref":"#/components/schemas/AssosiasjonstypeListeInnhold"},"type":{"$ref":"#/components/schemas/AssosiasjonstypeVegobjekttype"},"innenfor_mor":{"type":"string","enum":["NEI","JA","MED_AVVIK"]},"relasjonstype":{"type":"string","enum":["ASSOSIASJON","AGGREGERING","KOMPOSISJON","TOPOLOGI"]}},"required":["egenskapstype","id"]},"AssosiasjonstypeListeInnhold":{"type":"object","properties":{"innenfor_mor":{"type":"string","enum":["NEI","JA","MED_AVVIK"]},"relasjonstype":{"type":"string","enum":["ASSOSIASJON","AGGREGERING","KOMPOSISJON","TOPOLOGI"]},"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"egenskapstype":{"type":"string"},"type":{"$ref":"#/components/schemas/AssosiasjonstypeVegobjekttype"}},"required":["egenskapstype","id","type"]},"AssosiasjonstypeVegobjekttype":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"objektliste_dato":{"type":"string","format":"date"}},"required":["id"]},"Egenskapstype":{"type":"object","discriminator":{"propertyName":"egenskapstype","mapping":{"Assosiasjon":"#/components/schemas/EgenskapstypeAssosiasjon","Boolsk":"#/components/schemas/EgenskapstypeBoolsk","Binær":"#/components/schemas/EgenskapstypeBinaer","Tekst":"#/components/schemas/EgenskapstypeTekst","Dato":"#/components/schemas/EgenskapstypeDato","Flyttall":"#/components/schemas/EgenskapstypeFlyttall","Heltall":"#/components/schemas/EgenskapstypeHeltall","Struktur":"#/components/schemas/EgenskapstypeStruktur","Geometri":"#/components/schemas/EgenskapstypeGeometri","Stedfesting":"#/components/schemas/EgenskapstypeStedfesting","Kortdato":"#/components/schemas/EgenskapstypeKortdato","Tid":"#/components/schemas/EgenskapstypeTid","Liste":"#/components/schemas/EgenskapstypeListe","Tekstenum":"#/components/schemas/EgenskapstypeTekstenum","Heltallenum":"#/components/schemas/EgenskapstypeHeltallenum","Flyttallenum":"#/components/schemas/EgenskapstypeFlyttallenum"}},"properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"egenskapstype":{"$ref":"#/components/schemas/EgenskapstypeEnum"},"komplementær_egenskapstype":{"type":"integer","format":"int32"},"kortnavn":{"type":"string"},"beskrivelse":{"type":"string"},"veiledning":{"type":"string"},"sosinavn":{"type":"string"},"sosinvdbnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"avledet":{"type":"boolean"},"skrivebeskyttet":{"type":"boolean"},"obligatorisk_verdi":{"type":"boolean"},"sensitivitet":{"type":"integer","format":"int32"},"gruppesorteringsnummer":{"type":"integer","format":"int32"},"grunnrissreferanse":{"type":"string"},"høydereferanse":{"type":"string"},"høydereferanse_tall":{"type":"integer","format":"int32"},"nøyaktighetskrav_grunnriss":{"type":"number","format":"double"},"nøyaktighetskrav_høyde":{"type":"number","format":"double"},"sosi_referanse":{"type":"string"},"referansegeometri_tilstrekkelig":{"type":"boolean"},"viktighet":{"$ref":"#/components/schemas/Viktighet"},"kategori":{"type":"integer","format":"int32"},"tilleggskrav":{"type":"array","items":{"type":"string"}}},"required":["avledet","egenskapstype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeAssosiasjon":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"tilknytning":{"type":"integer","format":"int32"},"vegobjekttypeid":{"type":"integer","format":"int32"},"innenfor_mor":{"type":"integer","format":"int32"},"startdato":{"type":"string","format":"date"},"sluttdato":{"type":"string","format":"date"},"assosiasjonskrav":{"type":"integer","format":"int32"},"assosiasjonskravkommentar":{"type":"string"}}}],"required":["avledet","egenskapstype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeBinaer":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"mediatype":{"type":"string","enum":["Audio","Bilde","Tekst","TSF","Video","Udefinert"]}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","mediatype","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeBoolsk":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"boolean"}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeDato":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"string","format":"date"},"min_anbefalt":{"type":"string","format":"date"},"maks_anbefalt":{"type":"string","format":"date"},"feltmønster":{"type":"string"}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeEnum":{"type":"string","enum":["Assosiasjon","Boolsk","Binær","Tekst","Dato","Flyttall","Heltall","Struktur","Geometri","Stedfesting","Kortdato","Tid","Liste","Tekstenum","Heltallenum","Flyttallenum"]},"EgenskapstypeFlyttall":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"number","format":"double"},"min_anbefalt":{"type":"number","format":"double"},"maks_anbefalt":{"type":"number","format":"double"},"min":{"type":"number","format":"double"},"maks":{"type":"number","format":"double"},"desimaler":{"type":"integer","format":"int32"},"feltlengde":{"type":"integer","format":"int32"},"fortegnsendring_snu":{"type":"boolean"},"enhet":{"$ref":"#/components/schemas/Enhet"}}}],"required":["ajourhold_snu","avledet","egenskapstype","fortegnsendring_snu","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeFlyttallenum":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"number","format":"double"},"min_anbefalt":{"type":"number","format":"double"},"maks_anbefalt":{"type":"number","format":"double"},"min":{"type":"number","format":"double"},"maks":{"type":"number","format":"double"},"desimaler":{"type":"integer","format":"int32"},"feltlengde":{"type":"integer","format":"int32"},"fortegnsendring_snu":{"type":"boolean"},"enhet":{"$ref":"#/components/schemas/Enhet"},"tillatte_verdier":{"type":"array","items":{"$ref":"#/components/schemas/EnumverdiFlyttall"}}}}],"required":["ajourhold_snu","avledet","egenskapstype","fortegnsendring_snu","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","tillatte_verdier","viktighet"]},"EgenskapstypeGeometri":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"dimensjoner":{"type":"integer","format":"int32"},"geometritype":{"type":"string","enum":["PUNKT","POLYGON","LINJE","FLERELINJE","FLEREPUNKT","FLEREPOLYGON","KOMPLEKS","UKJENT"]},"innenfor_mor":{"type":"boolean"}}}],"required":["avledet","dimensjoner","egenskapstype","geometritype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeHeltall":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"integer","format":"int32"},"min_anbefalt":{"type":"integer","format":"int32"},"maks_anbefalt":{"type":"integer","format":"int32"},"min":{"type":"integer","format":"int32"},"maks":{"type":"integer","format":"int32"},"feltlengde":{"type":"integer","format":"int32"},"fortegnsendring_snu":{"type":"boolean"},"enhet":{"$ref":"#/components/schemas/Enhet"}}}],"required":["ajourhold_snu","avledet","egenskapstype","fortegnsendring_snu","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeHeltallenum":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"integer","format":"int32"},"min_anbefalt":{"type":"integer","format":"int32"},"maks_anbefalt":{"type":"integer","format":"int32"},"min":{"type":"integer","format":"int32"},"maks":{"type":"integer","format":"int32"},"feltlengde":{"type":"integer","format":"int32"},"fortegnsendring_snu":{"type":"boolean"},"enhet":{"$ref":"#/components/schemas/Enhet"},"tillatte_verdier":{"type":"array","items":{"$ref":"#/components/schemas/EnumverdiHeltall"}}}}],"required":["ajourhold_snu","avledet","egenskapstype","fortegnsendring_snu","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","tillatte_verdier","viktighet"]},"EgenskapstypeKortdato":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"integer","format":"int32"},"min_anbefalt":{"type":"integer","format":"int32"},"maks_anbefalt":{"type":"integer","format":"int32"},"feltmønster":{"type":"string"}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeListe":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"maksimalt_antall_verdier":{"type":"integer","format":"int32"},"minimalt_antall_verdier":{"type":"integer","format":"int32"},"innhold":{"$ref":"#/components/schemas/Egenskapstype"}}}],"required":["avledet","egenskapstype","høydereferanse_tall","id","innhold","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeStedfesting":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"stedfestingstype":{"type":"string","enum":["Punkt","Linje","Sving"]},"geometritype":{"type":"string","enum":["PUNKT","LINJE","SVING"]},"overlapp_ok":{"type":"boolean"},"kjørefelt_relevant":{"type":"string","enum":["KAN","NEI","MÅ"]},"sideposisjon_relevant":{"type":"string","enum":["KAN","NEI","MÅ"]},"innenfor_mor":{"type":"boolean"},"vegnettsajourhold_splitt":{"type":"string","enum":["IKKE_TATT_STILLING","KAN_IKKE_SPLITTES","KAN_SPLITTES"]},"overlappsautomatikk":{"type":"string"},"retning_relevant":{"type":"boolean"}}}],"required":["avledet","egenskapstype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeStruktur":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"egenskapstyper":{"description":"Egenskapstyper som kan inngå i strukturen"}}},{"type":"object","properties":{"egenskapstyper":{"type":"array","description":"Egenskapstyper som kan inngå i strukturen","items":{"$ref":"#/components/schemas/Egenskapstype"}}}}],"required":["avledet","egenskapstype","egenskapstyper","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeTekst":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"string"},"feltlengde":{"type":"integer","format":"int32"},"feltmønster":{"type":"string"}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"EgenskapstypeTekstenum":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"string"},"feltlengde":{"type":"integer","format":"int32"},"feltmønster":{"type":"string"},"tillatte_verdier":{"type":"array","items":{"$ref":"#/components/schemas/EnumverdiTekst"}}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","tillatte_verdier","viktighet"]},"EgenskapstypeTid":{"allOf":[{"$ref":"#/components/schemas/Egenskapstype"},{"type":"object","properties":{"objektliste_dato":{"type":"string","format":"date"},"slutt_dato":{"type":"string","format":"date"},"lengdeavhengig_verdi":{"type":"boolean"},"ajourhold_snu":{"type":"boolean"},"standardverdi":{"type":"string","format":"partial-time"},"min_anbefalt":{"type":"string","format":"partial-time"},"maks_anbefalt":{"type":"string","format":"partial-time"},"feltmønster":{"type":"string"}}}],"required":["ajourhold_snu","avledet","egenskapstype","høydereferanse_tall","id","kategori","lengdeavhengig_verdi","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"Enhet":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"kortnavn":{"type":"string"}},"required":["id"]},"EnumverdiFlyttall":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"kortnavn":{"type":"string"},"kortnavnlengde":{"type":"integer","format":"int32"},"kortnavn_brukbar":{"type":"boolean"},"beskrivelse":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"objektliste_dato":{"type":"string","format":"date"},"sluttdato":{"type":"string","format":"date"},"standardverdi":{"type":"boolean"},"komplementær_enumverdi":{"type":"integer","format":"int32"},"verdi":{"type":"number","format":"double"},"type":{"type":"string"}},"required":["id","kortnavn_brukbar","sorteringsnummer","standardverdi","type"]},"EnumverdiHeltall":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"kortnavn":{"type":"string"},"kortnavnlengde":{"type":"integer","format":"int32"},"kortnavn_brukbar":{"type":"boolean"},"beskrivelse":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"objektliste_dato":{"type":"string","format":"date"},"sluttdato":{"type":"string","format":"date"},"standardverdi":{"type":"boolean"},"komplementær_enumverdi":{"type":"integer","format":"int32"},"verdi":{"type":"integer","format":"int32"},"type":{"type":"string"}},"required":["id","kortnavn_brukbar","sorteringsnummer","standardverdi","type"]},"EnumverdiTekst":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"kortnavn":{"type":"string"},"kortnavnlengde":{"type":"integer","format":"int32"},"kortnavn_brukbar":{"type":"boolean"},"beskrivelse":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"objektliste_dato":{"type":"string","format":"date"},"sluttdato":{"type":"string","format":"date"},"standardverdi":{"type":"boolean"},"komplementær_enumverdi":{"type":"integer","format":"int32"},"verdi":{"type":"string"},"type":{"type":"string"}},"required":["id","kortnavn_brukbar","sorteringsnummer","standardverdi","type"]},"Relasjonstyper":{"type":"object","properties":{"foreldre":{"type":"array","items":{"$ref":"#/components/schemas/Assosiasjonstype"}},"barn":{"type":"array","items":{"$ref":"#/components/schemas/Assosiasjonstype"}}},"required":["barn","foreldre"]},"Stedfesting":{"type":"object","discriminator":{"propertyName":"egenskapstype","mapping":{"Stedfesting":"#/components/schemas/StedfestingEnkel","Liste":"#/components/schemas/StedfestingListe"}},"properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"egenskapstype":{"$ref":"#/components/schemas/EgenskapstypeEnum"},"komplementær_egenskapstype":{"type":"integer","format":"int32"},"kortnavn":{"type":"string"},"beskrivelse":{"type":"string"},"veiledning":{"type":"string"},"sosinavn":{"type":"string"},"sosinvdbnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"avledet":{"type":"boolean"},"skrivebeskyttet":{"type":"boolean"},"obligatorisk_verdi":{"type":"boolean"},"sensitivitet":{"type":"integer","format":"int32"},"gruppesorteringsnummer":{"type":"integer","format":"int32"},"grunnrissreferanse":{"type":"string"},"høydereferanse":{"type":"string"},"høydereferanse_tall":{"type":"integer","format":"int32"},"nøyaktighetskrav_grunnriss":{"type":"number","format":"double"},"nøyaktighetskrav_høyde":{"type":"number","format":"double"},"sosi_referanse":{"type":"string"},"referansegeometri_tilstrekkelig":{"type":"boolean"},"viktighet":{"$ref":"#/components/schemas/Viktighet"},"kategori":{"type":"integer","format":"int32"}},"required":["avledet","egenskapstype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"StedfestingEnkel":{"allOf":[{"$ref":"#/components/schemas/Stedfesting"},{"type":"object","properties":{"stedfestingstype":{"type":"string","enum":["Punkt","Linje","Sving"]},"geometritype":{"type":"string","enum":["PUNKT","LINJE","SVING"]},"overlapp_ok":{"type":"boolean"},"kjørefelt_relevant":{"type":"string","enum":["KAN","NEI","MÅ"]},"sideposisjon_relevant":{"type":"string","enum":["KAN","NEI","MÅ"]},"innenfor_mor":{"type":"boolean"},"vegnettsajourhold_splitt":{"type":"string","enum":["IKKE_TATT_STILLING","KAN_IKKE_SPLITTES","KAN_SPLITTES"]},"overlappsautomatikk":{"type":"string"},"retning_relevant":{"type":"boolean"}}}],"required":["avledet","egenskapstype","høydereferanse_tall","id","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"StedfestingListe":{"allOf":[{"$ref":"#/components/schemas/Stedfesting"},{"type":"object","properties":{"maksimalt_antall_verdier":{"type":"integer","format":"int32"},"minimalt_antall_verdier":{"type":"integer","format":"int32"},"innhold":{"$ref":"#/components/schemas/EgenskapstypeStedfesting"}}}],"required":["avledet","egenskapstype","høydereferanse_tall","id","innhold","kategori","nøyaktighetskrav_grunnriss","nøyaktighetskrav_høyde","obligatorisk_verdi","referansegeometri_tilstrekkelig","sensitivitet","skrivebeskyttet","sorteringsnummer","viktighet"]},"VegobjektKategori":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"primærkategori":{"type":"boolean"},"nummer":{"type":"integer","format":"int32"},"navn":{"type":"string"},"kortnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"beskrivelse":{"type":"string"},"startDato":{"type":"string","format":"date"}},"required":["id","nummer","primærkategori","sorteringsnummer"]},"Vegobjekttype":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"kortnavn":{"type":"string"},"beskrivelse":{"type":"string"},"objektliste_dato":{"type":"string","format":"date"},"veiledning":{"type":"string"},"stedfesting":{"$ref":"#/components/schemas/Stedfesting"},"sosinavn":{"type":"string"},"sosinvdbnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"status":{"type":"string"},"hovedkategori":{"type":"string"},"tidsrom_relevant":{"type":"boolean"},"konnekteringslenke_ok":{"type":"boolean"},"abstrakt_type":{"type":"boolean"},"avledet":{"type":"boolean"},"må_ha_mor":{"type":"boolean"},"er_dataserie":{"type":"boolean"},"en_versjon":{"type":"boolean"},"tilleggsinformasjon":{"type":"string"},"kategorier":{"type":"array","items":{"$ref":"#/components/schemas/VegobjektKategori"}},"egenskapstyper":{"type":"array","items":{"$ref":"#/components/schemas/Egenskapstype"}},"relasjonstyper":{"$ref":"#/components/schemas/Relasjonstyper"},"sensitiv":{"type":"boolean"}},"required":["abstrakt_type","avledet","en_versjon","er_dataserie","id","kategorier","må_ha_mor","sensitiv","sorteringsnummer","tidsrom_relevant"]},"Viktighet":{"type":"string","enum":["IKKE_SATT","PÅKREVD_ABSOLUTT","PÅKREVD_IKKE_ABSOLUTT","BETINGET","OPSJONELL","MINDRE_VIKTIG","HISTORISK"]},"Example":{"type":"object","properties":{"title":{"type":"string"},"url":{"type":"string"}},"required":["title","url"]},"ProductSpecification":{"type":"object","properties":{"url":{"type":"string"},"registrationConstraints":{"type":"array","items":{"$ref":"#/components/schemas/RegistrationConstraint"}},"examples":{"type":"array","items":{"$ref":"#/components/schemas/Example"}}},"required":["examples","registrationConstraints"]},"RegistrationConstraint":{"type":"object","properties":{"title":{"type":"string"},"content":{"type":"string"}},"required":["content","title"]},"Kategori":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"kortnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"beskrivelse":{"type":"string"},"startDato":{"type":"string","format":"date"}},"required":["id","sorteringsnummer"]},"EgenskapstypeKategori":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"navn":{"type":"string"},"kortnavn":{"type":"string"},"sorteringsnummer":{"type":"integer","format":"int32"},"beskrivelse":{"type":"string"}},"required":["id","sorteringsnummer"]}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NVDB Datakatalog API",
+    "description": "API-et gir tilgang til å hente vegobjekttyper med tilhørende metadata fra datakatalogen.<br><br>[Dokumentasjon for Datakatalog API](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/Datakatalog)",
+    "contact": { "name": "Nasjonal vegdatabank (NVDB)", "url": "https://nvdb.no/", "email": "nvdb@vegvesen.no" },
+    "version": "v1"
+  },
+  "servers": [{ "url": "/datakatalog", "description": "Default Server URL" }],
+  "tags": [
+    {
+      "name": "Datakatalogen",
+      "description": "API for uthenting av vegobjekttyper og tilhørende metadata fra [datakatalogen](https://datakatalogen.atlas.vegvesen.no)."
+    }
+  ],
+  "paths": {
+    "/api/v1/versjon": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer aktiv versjon på datakatalog",
+        "operationId": "getVersjon",
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/Versjon" } } } }
+        }
+      }
+    },
+    "/api/v1/vegobjekttyper": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer alle vegobjekttypene",
+        "operationId": "getVegobjekttyper",
+        "parameters": [
+          {
+            "name": "inkluder",
+            "in": "query",
+            "description": "Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["egenskapstyper", "relasjonstyper", "stedfesting", "alle", "minimum"] },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "kategori",
+            "in": "query",
+            "description": "Begrens vegobjekttyper etter kategori. (/vegobjekttyper/kategorier)",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vegobjekttype" } } } } }
+        }
+      }
+    },
+    "/api/v1/vegobjekttyper/{vegobjekttypeid}": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer angitt vegobjekttype",
+        "operationId": "getVegobjekttype",
+        "parameters": [
+          { "name": "vegobjekttypeid", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+          {
+            "name": "inkluder",
+            "in": "query",
+            "description": "Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["egenskapstyper", "relasjonstyper", "stedfesting", "alle", "minimum"] },
+              "uniqueItems": true
+            }
+          }
+        ],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/Vegobjekttype" } } } }
+        }
+      }
+    },
+    "/api/v1/vegobjekttyper/{vegobjekttypeid}/{egenskapstypeid}": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer angitt egenskapstype for angitt vegobjekttype",
+        "operationId": "getEgenskapstypeForVegobjekttype",
+        "parameters": [
+          { "name": "vegobjekttypeid", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+          { "name": "egenskapstypeid", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } }
+        ],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/Egenskapstype" } } } }
+        }
+      }
+    },
+    "/api/v1/vegobjekttyper/{vegobjekttypeid}/produktspesifikasjon": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer produktspesifikasjonen til den angitte vegobjekttypen",
+        "operationId": "getProduktspesifikasjon",
+        "parameters": [{ "name": "vegobjekttypeid", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } }],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProductSpecification" } } } }
+        }
+      }
+    },
+    "/api/v1/vegobjekttyper/historisk/{versjon}": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer alle vegobjekttypene for en gitt versjon av datakatalogen, f.eks. 2.31",
+        "operationId": "getVegobjekttyperHistorisk",
+        "parameters": [
+          { "name": "versjon", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "inkluder",
+            "in": "query",
+            "description": "Kommaseparert liste med hvilke informasjonsfelter som skal inkluderes i tillegg til vegobjekttypenes metadata.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["egenskapstyper", "relasjonstyper", "stedfesting", "alle", "minimum"] },
+              "uniqueItems": true
+            }
+          },
+          {
+            "name": "kategori",
+            "in": "query",
+            "description": "Begrens vegobjekttyper etter kategori. (/vegobjekttyper/kategorier)",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vegobjekttype" } } } } }
+        }
+      }
+    },
+    "/api/v1/kategorier": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer alle kategorier for vegobjekter",
+        "operationId": "getKategorier",
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Kategori" } } } } }
+        }
+      }
+    },
+    "/api/v1/enheter": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer alle enheter",
+        "operationId": "getEnheter",
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Enhet" } } } } }
+        }
+      }
+    },
+    "/api/v1/egenskapstyper/{egenskapstypeid}": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer angitt egenskapstype",
+        "operationId": "getEgenskapstype",
+        "parameters": [{ "name": "egenskapstypeid", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } }],
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": { "description": "OK", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/Egenskapstype" } } } }
+        }
+      }
+    },
+    "/api/v1/egenskapstypekategorier": {
+      "get": {
+        "tags": ["Datakatalogen"],
+        "summary": "Returnerer alle kategorier for egenskapstypene",
+        "operationId": "getEgenskapstypeKategorier",
+        "responses": {
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "503": { "description": "Service Unavailable", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/EgenskapstypeKategori" } } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "format": "uri" },
+          "title": { "type": "string" },
+          "status": { "type": "integer", "format": "int32" },
+          "detail": { "type": "string" },
+          "instance": { "type": "string", "format": "uri" },
+          "properties": { "type": "object", "additionalProperties": { "type": "object" } }
+        }
+      },
+      "Versjon": {
+        "type": "object",
+        "properties": { "id": { "type": "integer", "format": "int32" }, "dato": { "type": "string", "format": "date" }, "versjon": { "type": "string" } },
+        "required": ["dato", "id", "versjon"]
+      },
+      "Assosiasjonstype": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "egenskapstype": { "type": "string" },
+          "maksimalt_antall_verdier": { "type": "integer", "format": "int32" },
+          "minimalt_antall_verdier": { "type": "integer", "format": "int32" },
+          "innhold": { "$ref": "#/components/schemas/AssosiasjonstypeListeInnhold" },
+          "type": { "$ref": "#/components/schemas/AssosiasjonstypeVegobjekttype" },
+          "innenfor_mor": { "type": "string", "enum": ["NEI", "JA", "MED_AVVIK"] },
+          "relasjonstype": { "type": "string", "enum": ["ASSOSIASJON", "AGGREGERING", "KOMPOSISJON", "TOPOLOGI"] }
+        },
+        "required": ["egenskapstype", "id"]
+      },
+      "AssosiasjonstypeListeInnhold": {
+        "type": "object",
+        "properties": {
+          "innenfor_mor": { "type": "string", "enum": ["NEI", "JA", "MED_AVVIK"] },
+          "relasjonstype": { "type": "string", "enum": ["ASSOSIASJON", "AGGREGERING", "KOMPOSISJON", "TOPOLOGI"] },
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "egenskapstype": { "type": "string" },
+          "type": { "$ref": "#/components/schemas/AssosiasjonstypeVegobjekttype" }
+        },
+        "required": ["egenskapstype", "id", "type"]
+      },
+      "AssosiasjonstypeVegobjekttype": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "objektliste_dato": { "type": "string", "format": "date" }
+        },
+        "required": ["id"]
+      },
+      "Egenskapstype": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "egenskapstype",
+          "mapping": {
+            "Assosiasjon": "#/components/schemas/EgenskapstypeAssosiasjon",
+            "Boolsk": "#/components/schemas/EgenskapstypeBoolsk",
+            "Binær": "#/components/schemas/EgenskapstypeBinaer",
+            "Tekst": "#/components/schemas/EgenskapstypeTekst",
+            "Dato": "#/components/schemas/EgenskapstypeDato",
+            "Flyttall": "#/components/schemas/EgenskapstypeFlyttall",
+            "Heltall": "#/components/schemas/EgenskapstypeHeltall",
+            "Struktur": "#/components/schemas/EgenskapstypeStruktur",
+            "Geometri": "#/components/schemas/EgenskapstypeGeometri",
+            "Stedfesting": "#/components/schemas/EgenskapstypeStedfesting",
+            "Kortdato": "#/components/schemas/EgenskapstypeKortdato",
+            "Tid": "#/components/schemas/EgenskapstypeTid",
+            "Liste": "#/components/schemas/EgenskapstypeListe",
+            "Tekstenum": "#/components/schemas/EgenskapstypeTekstenum",
+            "Heltallenum": "#/components/schemas/EgenskapstypeHeltallenum",
+            "Flyttallenum": "#/components/schemas/EgenskapstypeFlyttallenum"
+          }
+        },
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "egenskapstype": { "$ref": "#/components/schemas/EgenskapstypeEnum" },
+          "komplementær_egenskapstype": { "type": "integer", "format": "int32" },
+          "kortnavn": { "type": "string" },
+          "beskrivelse": { "type": "string" },
+          "veiledning": { "type": "string" },
+          "sosinavn": { "type": "string" },
+          "sosinvdbnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "avledet": { "type": "boolean" },
+          "skrivebeskyttet": { "type": "boolean" },
+          "obligatorisk_verdi": { "type": "boolean" },
+          "sensitivitet": { "type": "integer", "format": "int32" },
+          "gruppesorteringsnummer": { "type": "integer", "format": "int32" },
+          "grunnrissreferanse": { "type": "string" },
+          "høydereferanse": { "type": "string" },
+          "høydereferanse_tall": { "type": "integer", "format": "int32" },
+          "nøyaktighetskrav_grunnriss": { "type": "number", "format": "double" },
+          "nøyaktighetskrav_høyde": { "type": "number", "format": "double" },
+          "sosi_referanse": { "type": "string" },
+          "referansegeometri_tilstrekkelig": { "type": "boolean" },
+          "viktighet": { "$ref": "#/components/schemas/Viktighet" },
+          "kategori": { "type": "integer", "format": "int32" },
+          "tilleggskrav": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeAssosiasjon": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "tilknytning": { "type": "integer", "format": "int32" },
+              "vegobjekttypeid": { "type": "integer", "format": "int32" },
+              "innenfor_mor": { "type": "integer", "format": "int32" },
+              "startdato": { "type": "string", "format": "date" },
+              "sluttdato": { "type": "string", "format": "date" },
+              "assosiasjonskrav": { "type": "integer", "format": "int32" },
+              "assosiasjonskravkommentar": { "type": "string" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeBinaer": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "mediatype": { "type": "string", "enum": ["Audio", "Bilde", "Tekst", "TSF", "Video", "Udefinert"] }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "mediatype",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeBoolsk": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "boolean" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeDato": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "string", "format": "date" },
+              "min_anbefalt": { "type": "string", "format": "date" },
+              "maks_anbefalt": { "type": "string", "format": "date" },
+              "feltmønster": { "type": "string" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeEnum": {
+        "type": "string",
+        "enum": [
+          "Assosiasjon",
+          "Boolsk",
+          "Binær",
+          "Tekst",
+          "Dato",
+          "Flyttall",
+          "Heltall",
+          "Struktur",
+          "Geometri",
+          "Stedfesting",
+          "Kortdato",
+          "Tid",
+          "Liste",
+          "Tekstenum",
+          "Heltallenum",
+          "Flyttallenum"
+        ]
+      },
+      "EgenskapstypeFlyttall": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "number", "format": "double" },
+              "min_anbefalt": { "type": "number", "format": "double" },
+              "maks_anbefalt": { "type": "number", "format": "double" },
+              "min": { "type": "number", "format": "double" },
+              "maks": { "type": "number", "format": "double" },
+              "desimaler": { "type": "integer", "format": "int32" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "fortegnsendring_snu": { "type": "boolean" },
+              "enhet": { "$ref": "#/components/schemas/Enhet" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "fortegnsendring_snu",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeFlyttallenum": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "number", "format": "double" },
+              "min_anbefalt": { "type": "number", "format": "double" },
+              "maks_anbefalt": { "type": "number", "format": "double" },
+              "min": { "type": "number", "format": "double" },
+              "maks": { "type": "number", "format": "double" },
+              "desimaler": { "type": "integer", "format": "int32" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "fortegnsendring_snu": { "type": "boolean" },
+              "enhet": { "$ref": "#/components/schemas/Enhet" },
+              "tillatte_verdier": { "type": "array", "items": { "$ref": "#/components/schemas/EnumverdiFlyttall" } }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "fortegnsendring_snu",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "tillatte_verdier",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeGeometri": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "dimensjoner": { "type": "integer", "format": "int32" },
+              "geometritype": { "type": "string", "enum": ["PUNKT", "POLYGON", "LINJE", "FLERELINJE", "FLEREPUNKT", "FLEREPOLYGON", "KOMPLEKS", "UKJENT"] },
+              "innenfor_mor": { "type": "boolean" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "dimensjoner",
+          "egenskapstype",
+          "geometritype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeHeltall": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "integer", "format": "int32" },
+              "min_anbefalt": { "type": "integer", "format": "int32" },
+              "maks_anbefalt": { "type": "integer", "format": "int32" },
+              "min": { "type": "integer", "format": "int32" },
+              "maks": { "type": "integer", "format": "int32" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "fortegnsendring_snu": { "type": "boolean" },
+              "enhet": { "$ref": "#/components/schemas/Enhet" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "fortegnsendring_snu",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeHeltallenum": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "integer", "format": "int32" },
+              "min_anbefalt": { "type": "integer", "format": "int32" },
+              "maks_anbefalt": { "type": "integer", "format": "int32" },
+              "min": { "type": "integer", "format": "int32" },
+              "maks": { "type": "integer", "format": "int32" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "fortegnsendring_snu": { "type": "boolean" },
+              "enhet": { "$ref": "#/components/schemas/Enhet" },
+              "tillatte_verdier": { "type": "array", "items": { "$ref": "#/components/schemas/EnumverdiHeltall" } }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "fortegnsendring_snu",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "tillatte_verdier",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeKortdato": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "integer", "format": "int32" },
+              "min_anbefalt": { "type": "integer", "format": "int32" },
+              "maks_anbefalt": { "type": "integer", "format": "int32" },
+              "feltmønster": { "type": "string" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeListe": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "maksimalt_antall_verdier": { "type": "integer", "format": "int32" },
+              "minimalt_antall_verdier": { "type": "integer", "format": "int32" },
+              "innhold": { "$ref": "#/components/schemas/Egenskapstype" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "innhold",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeStedfesting": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "stedfestingstype": { "type": "string", "enum": ["Punkt", "Linje", "Sving"] },
+              "geometritype": { "type": "string", "enum": ["PUNKT", "LINJE", "SVING"] },
+              "overlapp_ok": { "type": "boolean" },
+              "kjørefelt_relevant": { "type": "string", "enum": ["KAN", "NEI", "MÅ"] },
+              "sideposisjon_relevant": { "type": "string", "enum": ["KAN", "NEI", "MÅ"] },
+              "innenfor_mor": { "type": "boolean" },
+              "vegnettsajourhold_splitt": { "type": "string", "enum": ["IKKE_TATT_STILLING", "KAN_IKKE_SPLITTES", "KAN_SPLITTES"] },
+              "overlappsautomatikk": { "type": "string" },
+              "retning_relevant": { "type": "boolean" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeStruktur": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          { "type": "object", "properties": { "egenskapstyper": { "description": "Egenskapstyper som kan inngå i strukturen" } } },
+          {
+            "type": "object",
+            "properties": {
+              "egenskapstyper": {
+                "type": "array",
+                "description": "Egenskapstyper som kan inngå i strukturen",
+                "items": { "$ref": "#/components/schemas/Egenskapstype" }
+              }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "egenskapstyper",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeTekst": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "string" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "feltmønster": { "type": "string" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeTekstenum": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "string" },
+              "feltlengde": { "type": "integer", "format": "int32" },
+              "feltmønster": { "type": "string" },
+              "tillatte_verdier": { "type": "array", "items": { "$ref": "#/components/schemas/EnumverdiTekst" } }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "tillatte_verdier",
+          "viktighet"
+        ]
+      },
+      "EgenskapstypeTid": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Egenskapstype" },
+          {
+            "type": "object",
+            "properties": {
+              "objektliste_dato": { "type": "string", "format": "date" },
+              "slutt_dato": { "type": "string", "format": "date" },
+              "lengdeavhengig_verdi": { "type": "boolean" },
+              "ajourhold_snu": { "type": "boolean" },
+              "standardverdi": { "type": "string", "format": "partial-time" },
+              "min_anbefalt": { "type": "string", "format": "partial-time" },
+              "maks_anbefalt": { "type": "string", "format": "partial-time" },
+              "feltmønster": { "type": "string" }
+            }
+          }
+        ],
+        "required": [
+          "ajourhold_snu",
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "lengdeavhengig_verdi",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "Enhet": {
+        "type": "object",
+        "properties": { "id": { "type": "integer", "format": "int32" }, "navn": { "type": "string" }, "kortnavn": { "type": "string" } },
+        "required": ["id"]
+      },
+      "EnumverdiFlyttall": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "kortnavn": { "type": "string" },
+          "kortnavnlengde": { "type": "integer", "format": "int32" },
+          "kortnavn_brukbar": { "type": "boolean" },
+          "beskrivelse": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "objektliste_dato": { "type": "string", "format": "date" },
+          "sluttdato": { "type": "string", "format": "date" },
+          "standardverdi": { "type": "boolean" },
+          "komplementær_enumverdi": { "type": "integer", "format": "int32" },
+          "verdi": { "type": "number", "format": "double" },
+          "type": { "type": "string" }
+        },
+        "required": ["id", "kortnavn_brukbar", "sorteringsnummer", "standardverdi", "type"]
+      },
+      "EnumverdiHeltall": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "kortnavn": { "type": "string" },
+          "kortnavnlengde": { "type": "integer", "format": "int32" },
+          "kortnavn_brukbar": { "type": "boolean" },
+          "beskrivelse": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "objektliste_dato": { "type": "string", "format": "date" },
+          "sluttdato": { "type": "string", "format": "date" },
+          "standardverdi": { "type": "boolean" },
+          "komplementær_enumverdi": { "type": "integer", "format": "int32" },
+          "verdi": { "type": "integer", "format": "int32" },
+          "type": { "type": "string" }
+        },
+        "required": ["id", "kortnavn_brukbar", "sorteringsnummer", "standardverdi", "type"]
+      },
+      "EnumverdiTekst": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "kortnavn": { "type": "string" },
+          "kortnavnlengde": { "type": "integer", "format": "int32" },
+          "kortnavn_brukbar": { "type": "boolean" },
+          "beskrivelse": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "objektliste_dato": { "type": "string", "format": "date" },
+          "sluttdato": { "type": "string", "format": "date" },
+          "standardverdi": { "type": "boolean" },
+          "komplementær_enumverdi": { "type": "integer", "format": "int32" },
+          "verdi": { "type": "string" },
+          "type": { "type": "string" }
+        },
+        "required": ["id", "kortnavn_brukbar", "sorteringsnummer", "standardverdi", "type"]
+      },
+      "Relasjonstyper": {
+        "type": "object",
+        "properties": {
+          "foreldre": { "type": "array", "items": { "$ref": "#/components/schemas/Assosiasjonstype" } },
+          "barn": { "type": "array", "items": { "$ref": "#/components/schemas/Assosiasjonstype" } }
+        },
+        "required": ["barn", "foreldre"]
+      },
+      "Stedfesting": {
+        "type": "object",
+        "discriminator": {
+          "propertyName": "egenskapstype",
+          "mapping": { "Stedfesting": "#/components/schemas/StedfestingEnkel", "Liste": "#/components/schemas/StedfestingListe" }
+        },
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "egenskapstype": { "$ref": "#/components/schemas/EgenskapstypeEnum" },
+          "komplementær_egenskapstype": { "type": "integer", "format": "int32" },
+          "kortnavn": { "type": "string" },
+          "beskrivelse": { "type": "string" },
+          "veiledning": { "type": "string" },
+          "sosinavn": { "type": "string" },
+          "sosinvdbnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "avledet": { "type": "boolean" },
+          "skrivebeskyttet": { "type": "boolean" },
+          "obligatorisk_verdi": { "type": "boolean" },
+          "sensitivitet": { "type": "integer", "format": "int32" },
+          "gruppesorteringsnummer": { "type": "integer", "format": "int32" },
+          "grunnrissreferanse": { "type": "string" },
+          "høydereferanse": { "type": "string" },
+          "høydereferanse_tall": { "type": "integer", "format": "int32" },
+          "nøyaktighetskrav_grunnriss": { "type": "number", "format": "double" },
+          "nøyaktighetskrav_høyde": { "type": "number", "format": "double" },
+          "sosi_referanse": { "type": "string" },
+          "referansegeometri_tilstrekkelig": { "type": "boolean" },
+          "viktighet": { "$ref": "#/components/schemas/Viktighet" },
+          "kategori": { "type": "integer", "format": "int32" }
+        },
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "StedfestingEnkel": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Stedfesting" },
+          {
+            "type": "object",
+            "properties": {
+              "stedfestingstype": { "type": "string", "enum": ["Punkt", "Linje", "Sving"] },
+              "geometritype": { "type": "string", "enum": ["PUNKT", "LINJE", "SVING"] },
+              "overlapp_ok": { "type": "boolean" },
+              "kjørefelt_relevant": { "type": "string", "enum": ["KAN", "NEI", "MÅ"] },
+              "sideposisjon_relevant": { "type": "string", "enum": ["KAN", "NEI", "MÅ"] },
+              "innenfor_mor": { "type": "boolean" },
+              "vegnettsajourhold_splitt": { "type": "string", "enum": ["IKKE_TATT_STILLING", "KAN_IKKE_SPLITTES", "KAN_SPLITTES"] },
+              "overlappsautomatikk": { "type": "string" },
+              "retning_relevant": { "type": "boolean" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "StedfestingListe": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Stedfesting" },
+          {
+            "type": "object",
+            "properties": {
+              "maksimalt_antall_verdier": { "type": "integer", "format": "int32" },
+              "minimalt_antall_verdier": { "type": "integer", "format": "int32" },
+              "innhold": { "$ref": "#/components/schemas/EgenskapstypeStedfesting" }
+            }
+          }
+        ],
+        "required": [
+          "avledet",
+          "egenskapstype",
+          "høydereferanse_tall",
+          "id",
+          "innhold",
+          "kategori",
+          "nøyaktighetskrav_grunnriss",
+          "nøyaktighetskrav_høyde",
+          "obligatorisk_verdi",
+          "referansegeometri_tilstrekkelig",
+          "sensitivitet",
+          "skrivebeskyttet",
+          "sorteringsnummer",
+          "viktighet"
+        ]
+      },
+      "VegobjektKategori": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "primærkategori": { "type": "boolean" },
+          "nummer": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "kortnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "beskrivelse": { "type": "string" },
+          "startDato": { "type": "string", "format": "date" }
+        },
+        "required": ["id", "nummer", "primærkategori", "sorteringsnummer"]
+      },
+      "Vegobjekttype": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "kortnavn": { "type": "string" },
+          "beskrivelse": { "type": "string" },
+          "objektliste_dato": { "type": "string", "format": "date" },
+          "veiledning": { "type": "string" },
+          "stedfesting": { "$ref": "#/components/schemas/Stedfesting" },
+          "sosinavn": { "type": "string" },
+          "sosinvdbnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "status": { "type": "string" },
+          "hovedkategori": { "type": "string" },
+          "tidsrom_relevant": { "type": "boolean" },
+          "konnekteringslenke_ok": { "type": "boolean" },
+          "abstrakt_type": { "type": "boolean" },
+          "avledet": { "type": "boolean" },
+          "må_ha_mor": { "type": "boolean" },
+          "er_dataserie": { "type": "boolean" },
+          "en_versjon": { "type": "boolean" },
+          "tilleggsinformasjon": { "type": "string" },
+          "kategorier": { "type": "array", "items": { "$ref": "#/components/schemas/VegobjektKategori" } },
+          "egenskapstyper": { "type": "array", "items": { "$ref": "#/components/schemas/Egenskapstype" } },
+          "relasjonstyper": { "$ref": "#/components/schemas/Relasjonstyper" },
+          "sensitiv": { "type": "boolean" }
+        },
+        "required": [
+          "abstrakt_type",
+          "avledet",
+          "en_versjon",
+          "er_dataserie",
+          "id",
+          "kategorier",
+          "må_ha_mor",
+          "sensitiv",
+          "sorteringsnummer",
+          "tidsrom_relevant"
+        ]
+      },
+      "Viktighet": {
+        "type": "string",
+        "enum": ["IKKE_SATT", "PÅKREVD_ABSOLUTT", "PÅKREVD_IKKE_ABSOLUTT", "BETINGET", "OPSJONELL", "MINDRE_VIKTIG", "HISTORISK"]
+      },
+      "Example": { "type": "object", "properties": { "title": { "type": "string" }, "url": { "type": "string" } }, "required": ["title", "url"] },
+      "ProductSpecification": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "registrationConstraints": { "type": "array", "items": { "$ref": "#/components/schemas/RegistrationConstraint" } },
+          "examples": { "type": "array", "items": { "$ref": "#/components/schemas/Example" } }
+        },
+        "required": ["examples", "registrationConstraints"]
+      },
+      "RegistrationConstraint": {
+        "type": "object",
+        "properties": { "title": { "type": "string" }, "content": { "type": "string" } },
+        "required": ["content", "title"]
+      },
+      "Kategori": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "kortnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "beskrivelse": { "type": "string" },
+          "startDato": { "type": "string", "format": "date" }
+        },
+        "required": ["id", "sorteringsnummer"]
+      },
+      "EgenskapstypeKategori": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int32" },
+          "navn": { "type": "string" },
+          "kortnavn": { "type": "string" },
+          "sorteringsnummer": { "type": "integer", "format": "int32" },
+          "beskrivelse": { "type": "string" }
+        },
+        "required": ["id", "sorteringsnummer"]
+      }
+    }
+  }
+}
