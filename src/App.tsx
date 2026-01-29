@@ -22,7 +22,10 @@ import {
   strekningAtom,
   veglenkesekvensLimitAtom,
 } from './state/atoms'
+import { ensureProjections } from './utils/projections'
 import { parseStedfestingInput } from './utils/stedfestingParser'
+
+ensureProjections()
 
 export default function App() {
   const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom)

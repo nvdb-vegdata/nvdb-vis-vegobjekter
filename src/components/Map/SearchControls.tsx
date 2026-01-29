@@ -3,8 +3,9 @@ import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { polygonAtom, polygonWktInputAtom, stedfestingAtom, stedfestingInputAtom, strekningAtom, strekningInputAtom } from '../../state/atoms'
+import { polygonAtom, polygonClipAtom, polygonWktInputAtom, stedfestingAtom, stedfestingInputAtom, strekningAtom, strekningInputAtom } from '../../state/atoms'
 import { roundPolygonToTwoDecimals } from '../../utils/polygonRounding'
+import { ensureProjections } from '../../utils/projections'
 import { isValidStedfestingInput } from '../../utils/stedfestingParser'
 import { isValidVegsystemreferanse } from '../../utils/vegsystemreferanseValidator'
 
@@ -18,17 +19,30 @@ function isValidPolygonWkt(value: string): boolean {
   return POLYGON_WKT_REGEX.test(value)
 }
 
+ensureProjections()
+
 export default function SearchControls({ searchMode }: Props) {
   const [polygon, setPolygon] = useAtom(polygonAtom)
+  const [polygonClip, setPolygonClip] = useAtom(polygonClipAtom)
   const [polygonWktInput, setPolygonWktInput] = useAtom(polygonWktInputAtom)
   const [polygonError, setPolygonError] = useState<string | null>(null)
+  const [polygonCopied, setPolygonCopied] = useState(false)
   const lastPolygonWktRef = useRef('')
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [, setStrekning] = useAtom(strekningAtom)
   const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
   const [strekningError, setStrekningError] = useState<string | null>(null)
   const [, setStedfesting] = useAtom(stedfestingAtom)
   const [stedfestingInput, setStedfestingInput] = useAtom(stedfestingInputAtom)
   const [stedfestingError, setStedfestingError] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!polygon) {
@@ -42,12 +56,8 @@ export default function SearchControls({ searchMode }: Props) {
       return
     }
     const format = new WKT()
-    const roundedPolygon = roundPolygonToTwoDecimals(polygon)
-    const currentWkt = format.writeGeometry(polygon)
-    const roundedWkt = format.writeGeometry(roundedPolygon)
-    if (currentWkt !== roundedWkt) {
-      setPolygon(roundedPolygon)
-    }
+    const roundedUtm = roundPolygonToTwoDecimals(polygon.clone().transform('EPSG:3857', 'EPSG:5973'))
+    const roundedWkt = format.writeGeometry(roundedUtm)
     if (roundedWkt !== lastPolygonWktRef.current) {
       lastPolygonWktRef.current = roundedWkt
       setPolygonWktInput(roundedWkt)
@@ -55,7 +65,7 @@ export default function SearchControls({ searchMode }: Props) {
     if (polygonError !== null) {
       setPolygonError(null)
     }
-  }, [polygon, polygonError, setPolygon, setPolygonWktInput])
+  }, [polygon, polygonError, setPolygonWktInput])
 
   const handlePolygonChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -74,13 +84,14 @@ export default function SearchControls({ searchMode }: Props) {
     }
     try {
       const format = new WKT()
-      const geometry = format.readGeometry(trimmed)
+      const geometry = format.readGeometry(trimmed, { dataProjection: 'EPSG:5973', featureProjection: 'EPSG:5973' })
       if (!(geometry instanceof Polygon)) {
         setPolygonError('Kun POLYGON er støttet i WKT-feltet.')
         return
       }
       setPolygonError(null)
-      setPolygon(roundPolygonToTwoDecimals(geometry))
+      const roundedUtm = roundPolygonToTwoDecimals(geometry)
+      setPolygon(roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857'))
     } catch {
       setPolygonError('Ugyldig WKT. Bruk f.eks. POLYGON((x y, ...)).')
     }
@@ -103,7 +114,25 @@ export default function SearchControls({ searchMode }: Props) {
     lastPolygonWktRef.current = ''
     setPolygon(null)
     setPolygonError(null)
+    setPolygonCopied(false)
   }, [setPolygon, setPolygonWktInput])
+
+  const handleCopyPolygonWkt = useCallback(async () => {
+    const trimmed = polygonWktInput.trim()
+    if (trimmed.length === 0) return
+    try {
+      await navigator.clipboard.writeText(trimmed)
+      setPolygonCopied(true)
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current)
+      }
+      copyTimeoutRef.current = setTimeout(() => {
+        setPolygonCopied(false)
+      }, 1500)
+    } catch {
+      setPolygonError('Kunne ikke kopiere WKT.')
+    }
+  }, [polygonWktInput])
 
   const handleStrekningChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -194,7 +223,7 @@ export default function SearchControls({ searchMode }: Props) {
           <label className="search-label" htmlFor="strekning-input">
             Søk på strekning
           </label>
-          <div className="strekning-input-row">
+          <div className="search-input-row">
             <div className="search-input-wrapper">
               <input
                 id="strekning-input"
@@ -228,7 +257,7 @@ export default function SearchControls({ searchMode }: Props) {
           <label className="search-label" htmlFor="stedfesting-input">
             Stedfesting
           </label>
-          <div className="strekning-input-row">
+          <div className="search-input-row">
             <div className="search-input-wrapper">
               <input
                 id="stedfesting-input"
@@ -258,11 +287,11 @@ export default function SearchControls({ searchMode }: Props) {
       )}
 
       {searchMode === 'polygon' && (
-        <div className="strekning-controls">
+        <div className="strekning-controls polygon-controls">
           <label className="search-label" htmlFor="polygon-wkt-input">
             Polygon WKT
           </label>
-          <div className="strekning-input-row">
+          <div className="search-input-row">
             <div className="search-input-wrapper">
               <input
                 id="polygon-wkt-input"
@@ -281,8 +310,24 @@ export default function SearchControls({ searchMode }: Props) {
             <button className="btn btn-primary" type="button" onClick={handlePolygonSearch} disabled={trimmedPolygonInput.length === 0 || !isPolygonValid}>
               Søk
             </button>
+            <button
+              className={`vegobjekt-action-btn vegobjekt-copy-btn search-copy-btn${polygonCopied ? ' copied' : ''}`}
+              type="button"
+              onClick={handleCopyPolygonWkt}
+              disabled={trimmedPolygonInput.length === 0 || !isPolygonRegexValid}
+              aria-label={polygonCopied ? 'WKT kopiert' : 'Kopier WKT'}
+              title={polygonCopied ? 'Kopiert!' : 'Kopier WKT'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
+              </svg>
+            </button>
           </div>
           {polygonError && <div className="strekning-error">{polygonError}</div>}
+          <label className="polygon-clip-toggle">
+            <input type="checkbox" checked={polygonClip} onChange={() => setPolygonClip((prev) => !prev)} />
+            Klipp veglenker til polygon
+          </label>
         </div>
       )}
     </>

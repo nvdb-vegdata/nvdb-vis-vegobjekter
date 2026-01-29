@@ -4,8 +4,11 @@ import { Polygon } from 'ol/geom'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import type { Vegobjekt } from '../api/uberiketClient'
 import { roundPolygonToTwoDecimals } from '../utils/polygonRounding'
+import { ensureProjections } from '../utils/projections'
 
-export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 10
+ensureProjections()
+
+export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 100
 
 function getInitialTypeIds(): number[] {
   const params = new URLSearchParams(window.location.search)
@@ -28,9 +31,10 @@ function getInitialPolygon(): Polygon | null {
   if (!wkt) return null
   try {
     const format = new WKT()
-    const geom = format.readGeometry(wkt)
+    const geom = format.readGeometry(wkt, { dataProjection: 'EPSG:5973', featureProjection: 'EPSG:5973' })
     if (geom instanceof Polygon) {
-      return roundPolygonToTwoDecimals(geom)
+      const roundedUtm = roundPolygonToTwoDecimals(geom)
+      return roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857')
     }
   } catch {
     console.warn('Failed to parse WKT from URL')

@@ -416,8 +416,12 @@ body,
   gap: 8px;
 }
 
+.draw-toggle-btn {
+  min-width: 120px;
+}
+
 .polygon-clip-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
@@ -426,6 +430,8 @@ body,
   border-radius: 4px;
   font-size: 12px;
   color: #2c3e50;
+  align-self: flex-start;
+  margin-top: 6px;
 }
 
 .polygon-clip-toggle input {
@@ -436,23 +442,30 @@ body,
   width: 320px;
 }
 
-.strekning-input-row {
+.polygon-controls {
+  width: 520px;
+}
+
+.search-input-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
 }
 
-.strekning-input-row .search-input-wrapper {
+.search-input-row .search-input-wrapper {
   flex: 1;
-}
-
-.strekning-input-row .search-input {
   margin-bottom: 0;
-  height: 40px;
 }
 
-.strekning-input-row .btn {
-  height: 40px;
+.search-input-row .search-input {
+  margin-bottom: 0;
+  height: 33px;
+}
+
+.search-input-row .search-copy-btn {
+  width: 33px;
+  height: 33px;
+  padding: 0;
 }
 
 .strekning-error {
@@ -889,6 +902,11 @@ body,
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.vegobjekt-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .vegobjekt-action-btn svg {

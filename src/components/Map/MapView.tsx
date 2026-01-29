@@ -10,18 +10,18 @@ import Overlay from 'ol/Overlay'
 import View from 'ol/View'
 import 'ol/ol.css'
 import { fromLonLat, toLonLat } from 'ol/proj'
-import { register } from 'ol/proj/proj4'
 import OSM from 'ol/source/OSM'
 import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style } from 'ol/style'
-import proj4 from 'proj4'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { VeglenkesekvensMedPosisjoner, Vegobjekt } from '../../api/uberiketClient'
 import { useHighlightRendering } from '../../hooks/useHighlightRendering'
 import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
 import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
 import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
+import { safeReplaceState } from '../../utils/historyUtils'
 import { roundPolygonToTwoDecimals } from '../../utils/polygonRounding'
+import { ensureProjections } from '../../utils/projections'
 import {
   EGENGEOMETRI_LINE_STYLE,
   EGENGEOMETRI_POINT_STYLE,
@@ -37,9 +37,7 @@ import {
 import SearchControls from './SearchControls'
 import VeglenkePopup from './VeglenkePopup'
 
-proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
-proj4.defs('EPSG:5973', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs')
-register(proj4)
+ensureProjections()
 
 interface Props {
   veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined
@@ -49,7 +47,7 @@ interface Props {
 
 export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadingVeglenker }: Props) {
   const [polygon, setPolygon] = useAtom(polygonAtom)
-  const [polygonClip, setPolygonClip] = useAtom(polygonClipAtom)
+  const [polygonClip, _setPolygonClip] = useAtom(polygonClipAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
   const stedfesting = useAtomValue(stedfestingAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
@@ -190,7 +188,8 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         url.searchParams.set('lon', centerLon.toFixed(5))
         url.searchParams.set('lat', centerLat.toFixed(5))
         url.searchParams.set('z', z.toFixed(1))
-        window.history.replaceState({}, '', url)
+        const nextUrl = `${url.pathname}${url.search}${url.hash}`
+        safeReplaceState(nextUrl, 'map-view')
       }, 200)
     })
 
@@ -286,7 +285,8 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     draw.on('drawend', (event) => {
       const feature = event.feature
       const geom = feature.getGeometry() as Polygon
-      setPolygon(roundPolygonToTwoDecimals(geom))
+      const roundedUtm = roundPolygonToTwoDecimals(geom.clone().transform('EPSG:3857', 'EPSG:5973'))
+      setPolygon(roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857'))
       mapInstance.current?.removeInteraction(draw)
       setIsDrawing(false)
     })
@@ -330,11 +330,10 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         <div className="draw-controls-row">
           <button
             type="button"
-            className={`btn ${searchMode === 'polygon' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={handlePolygonMode}
-            disabled={isDrawing && searchMode === 'polygon'}
+            className={`btn draw-toggle-btn ${searchMode === 'polygon' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={isDrawing && searchMode === 'polygon' ? cancelDrawing : handlePolygonMode}
           >
-            Tegn område
+            {isDrawing && searchMode === 'polygon' ? 'Avbryt' : 'Tegn område'}
           </button>
           <button type="button" className={`btn ${searchMode === 'strekning' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStrekningMode}>
             Søk på strekning
@@ -348,19 +347,6 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
             </button>
           )}
         </div>
-
-        {searchMode === 'polygon' && (
-          <label className="polygon-clip-toggle">
-            <input type="checkbox" checked={polygonClip} onChange={() => setPolygonClip((prev) => !prev)} />
-            Klipp veglenker til polygon
-          </label>
-        )}
-
-        {searchMode === 'polygon' && isDrawing && (
-          <button type="button" className="btn btn-secondary" onClick={cancelDrawing}>
-            Avbryt tegning
-          </button>
-        )}
 
         <SearchControls searchMode={searchMode} />
       </div>

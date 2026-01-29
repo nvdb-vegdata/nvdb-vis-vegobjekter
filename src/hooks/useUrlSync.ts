@@ -13,11 +13,17 @@ import {
   strekningAtom,
   veglenkesekvensLimitAtom,
 } from '../state/atoms'
+import { safeReplaceState } from '../utils/historyUtils'
+import { roundPolygonToTwoDecimals } from '../utils/polygonRounding'
+import { ensureProjections } from '../utils/projections'
 
 function polygonToWkt(polygon: Polygon): string {
   const format = new WKT()
-  return format.writeGeometry(polygon)
+  const roundedUtm = roundPolygonToTwoDecimals(polygon.clone().transform('EPSG:3857', 'EPSG:5973'))
+  return format.writeGeometry(roundedUtm)
 }
+
+ensureProjections()
 
 export function useUrlSync(selectedTypes: Vegobjekttype[]) {
   const allTypesSelected = useAtomValue(allTypesSelectedAtom)
@@ -62,6 +68,7 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
     } else {
       url.searchParams.delete('veglenkesekvenslimit')
     }
-    window.history.replaceState({}, '', url)
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`
+    safeReplaceState(nextUrl, 'filter-sync')
   }, [allTypesSelected, polygon, polygonClip, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
 }
