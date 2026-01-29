@@ -1074,3 +1074,82 @@ body,
   background: #e3f2fd;
   color: #2980b9;
 }
+
+/* Filter popover */
+.filter-popover-anchor {
+  anchor-name: --filter-btn;
+}
+
+.filter-popover {
+  position-anchor: --filter-btn;
+  position-area: block-end span-inline-end;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: none;
+  gap: 10px;
+}
+
+.filter-popover:popover-open {
+  display: grid;
+}
+
+.filter-popover-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.filter-popover-label {
+  font-size: 12px;
+  color: #2c3e50;
+}
+
+.filter-popover-input {
+  border: 1px solid #d6dce1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: #2c3e50;
+}
+
+.filter-popover-input:focus {
+  border-color: #7fb3d5;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(127, 179, 213, 0.2);
+}
+
+.filter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d7e6f5;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #f1f7fd;
+  color: #2c3e50;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  border-color: #7fb3d5;
+  background: #e6f1fb;
+}
+
+.filter-chip-remove {
+  font-size: 14px;
+  line-height: 1;
+  color: #5c6f82;
+}

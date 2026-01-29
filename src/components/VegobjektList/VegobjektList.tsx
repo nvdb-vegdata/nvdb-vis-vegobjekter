@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai'
+import { useMemo, useState } from 'react'
 import type { Vegobjekt } from '../../api/uberiketClient'
 import { focusedVegobjektAtom, selectedTypesAtom, vegobjekterErrorAtom } from '../../state/atoms'
 import { downloadCsvAllTypes, downloadCsvPerType } from '../../utils/csvExport'
@@ -16,13 +17,53 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
   const selectedTypes = useAtomValue(selectedTypesAtom)
   const focusedVegobjekt = useAtomValue(focusedVegobjektAtom)
   const errorMessage = useAtomValue(vegobjekterErrorAtom)
+  const [startDateAfter, setStartDateAfter] = useState('')
+  const [startDateBefore, setStartDateBefore] = useState('')
+  const filterSummaries = useMemo(
+    () =>
+      [
+        startDateAfter ? { label: `Startdato etter ${startDateAfter}`, onClear: () => setStartDateAfter('') } : null,
+        startDateBefore ? { label: `Startdato før ${startDateBefore}`, onClear: () => setStartDateBefore('') } : null,
+      ].filter((item): item is { label: string; onClear: () => void } => item !== null),
+    [startDateAfter, startDateBefore],
+  )
+
+  const filteredVegobjekterByType = useMemo(() => {
+    const startAfterTime = startDateAfter ? Date.parse(startDateAfter) : null
+    const startBeforeTime = startDateBefore ? Date.parse(startDateBefore) : null
+    const hasStartAfter = typeof startAfterTime === 'number' && !Number.isNaN(startAfterTime)
+    const hasStartBefore = typeof startBeforeTime === 'number' && !Number.isNaN(startBeforeTime)
+
+    if (!hasStartAfter && !hasStartBefore) {
+      return vegobjekterByType
+    }
+
+    return new Map(
+      Array.from(vegobjekterByType.entries()).map(([typeId, objects]) => [
+        typeId,
+        objects.filter((obj) => {
+          const startDate = obj.gyldighetsperiode?.startdato
+          if (!startDate) return false
+
+          const startTime = Date.parse(startDate)
+          if (Number.isNaN(startTime)) return false
+
+          if (hasStartAfter && startAfterTime !== null && startTime < startAfterTime) return false
+          if (hasStartBefore && startBeforeTime !== null && startTime >= startBeforeTime) return false
+
+          return true
+        }),
+      ]),
+    )
+  }, [vegobjekterByType, startDateAfter, startDateBefore])
 
   const typesWithObjects = selectedTypes.filter((type) => {
-    const objects = vegobjekterByType.get(type.id)
+    const objects = filteredVegobjekterByType.get(type.id)
     return objects && objects.length > 0
   })
 
-  const totalCount = Array.from(vegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
+  const totalCount = Array.from(filteredVegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
+  const overallCount = Array.from(vegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
 
   return (
     <div className="vegobjekt-list">
@@ -37,8 +78,21 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
               {isFetchingNextPage ? 'Henter...' : 'Hent flere'}
             </button>
           )}
-          {totalCount > 0 && !isLoading && (
+          {overallCount > 0 && !isLoading && (
             <>
+              <button type="button" className="btn btn-secondary btn-small filter-popover-anchor" popoverTarget="filter-popover">
+                Filter
+              </button>
+              <div id="filter-popover" className="filter-popover" popover="auto">
+                <label className="filter-popover-field">
+                  <span className="filter-popover-label">Vis versjoner med startdato etter...</span>
+                  <input type="date" className="filter-popover-input" value={startDateAfter} onChange={(event) => setStartDateAfter(event.target.value)} />
+                </label>
+                <label className="filter-popover-field">
+                  <span className="filter-popover-label">Vis versjoner med startdato før...</span>
+                  <input type="date" className="filter-popover-input" value={startDateBefore} onChange={(event) => setStartDateBefore(event.target.value)} />
+                </label>
+              </div>
               <button type="button" className="btn btn-secondary btn-small csv-popover-anchor" popoverTarget="csv-popover">
                 Last ned CSV
               </button>
@@ -47,7 +101,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                   type="button"
                   className="csv-popover-option"
                   onClick={() => {
-                    downloadCsvAllTypes(vegobjekterByType, selectedTypes)
+                    downloadCsvAllTypes(filteredVegobjekterByType, selectedTypes)
                     document.getElementById('csv-popover')?.hidePopover()
                   }}
                 >
@@ -57,7 +111,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                   type="button"
                   className="csv-popover-option"
                   onClick={() => {
-                    downloadCsvPerType(vegobjekterByType, selectedTypes)
+                    downloadCsvPerType(filteredVegobjekterByType, selectedTypes)
                     document.getElementById('csv-popover')?.hidePopover()
                   }}
                 >
@@ -69,6 +123,18 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
         </div>
       </div>
       <div className="vegobjekt-list-content">
+        {filterSummaries.length > 0 && (
+          <div className="filter-summary">
+            {filterSummaries.map((filter) => (
+              <button key={filter.label} type="button" className="filter-chip" onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`}>
+                <span>{filter.label}</span>
+                <span className="filter-chip-remove" aria-hidden="true">
+                  ×
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
         {isLoading ? (
           <div className="sidebar-loading">
             <span className="spinner spinner-small" />
@@ -80,7 +146,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
           <div className="vegobjekt-list-empty">Ingen vegobjekter funnet i det valgte området.</div>
         ) : (
           typesWithObjects.map((type) => {
-            const objects = vegobjekterByType.get(type.id) ?? []
+            const objects = filteredVegobjekterByType.get(type.id) ?? []
             return (
               <TypeGroup
                 key={type.id}

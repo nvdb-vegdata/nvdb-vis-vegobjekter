@@ -162,10 +162,13 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Stedfesting mode renders full veglenker in a lighter style and overlays clipped stedfesting geometry
    - Queries vegobjekter with stedfesting filter for polygon mode, direct stedfesting filter for stedfesting mode, or vegsystemreferanse for strekning mode
 
-5. **Inspect Vegobjekter**
-   - Click on a veglenke to see related vegobjekter
-   - Sidebar shows collapsible list of vegobjekter grouped by type
-   - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
+  5. **Inspect Vegobjekter**
+    - Click on a veglenke to see related vegobjekter
+    - Sidebar shows collapsible list of vegobjekter grouped by type
+    - A filter button opens a popover to filter by gyldighetsperiode startdato
+      - "Vis versjoner med startdato etter..." (client-side, after date - inclusive)
+      - "Vis versjoner med startdato før..." (client-side, before date - exclusive)
+    - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
    - Locate button recenters the map on the vegobjekt's stedfesting geometry
    - Each vegobjekt displays:
      - ID with copy button
