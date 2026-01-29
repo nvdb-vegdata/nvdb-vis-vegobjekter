@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import WKT from 'ol/format/WKT'
 import type { LineString, Polygon } from 'ol/geom'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import { buildStedfestingFilter, hentVegobjekter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt } from '../api/uberiketClient'
 import { getTodayDate } from '../utils/dateUtils'
@@ -123,6 +123,32 @@ export function useVegobjekter({
     getNextPageParam: (lastPage) => lastPage.metadata.neste?.start,
   })
 
+  const [isFetchingBatch, setIsFetchingBatch] = useState(false)
+
+  const fetchNextBatch = useCallback(async () => {
+    if (isFetchingBatch || !query.hasNextPage) return
+    setIsFetchingBatch(true)
+
+    try {
+      let loaded = 0
+      let pages = query.data?.pages ?? []
+      let hasNext: boolean = query.hasNextPage === true
+
+      while (hasNext && loaded < 10000) {
+        const previousPageCount = pages.length
+        const result = await query.fetchNextPage()
+        pages = result.data?.pages ?? pages
+        const newPages = pages.slice(previousPageCount)
+        loaded += newPages.reduce((sum, page) => sum + (page.vegobjekter?.length ?? 0), 0)
+        hasNext = result.hasNextPage === true
+
+        if (newPages.length === 0) break
+      }
+    } finally {
+      setIsFetchingBatch(false)
+    }
+  }, [isFetchingBatch, query.data, query.fetchNextPage, query.hasNextPage])
+
   const vegobjekterByType = new Map<number, Vegobjekt[]>(selectedTypes.map((type) => [type.id, [] as Vegobjekt[]]))
 
   const allVegobjekter = query.data?.pages.flatMap((page) => page.vegobjekter) ?? []
@@ -142,7 +168,7 @@ export function useVegobjekter({
     isError: query.isError,
     error: query.error,
     hasNextPage: query.hasNextPage ?? false,
-    fetchNextPage: query.fetchNextPage,
-    isFetchingNextPage: query.isFetchingNextPage,
+    fetchNextPage: fetchNextBatch,
+    isFetchingNextPage: isFetchingBatch,
   }
 }

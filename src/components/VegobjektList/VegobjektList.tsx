@@ -29,14 +29,12 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
       <div className="vegobjekt-list-header">
         <div className="vegobjekt-list-heading">
           <span className="vegobjekt-list-title">Vegobjekter</span>
-          {isLoading ? null : (
-            <span className="vegobjekt-list-count">{totalCount} totalt</span>
-          )}
+          {isLoading ? null : <span className="vegobjekt-list-count">{totalCount} totalt</span>}
         </div>
         <div className="vegobjekt-list-actions">
           {hasNextPage && !isLoading && (
             <button type="button" className="btn btn-primary btn-small" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
-              {isFetchingNextPage ? 'Henter...' : 'Neste side'}
+              {isFetchingNextPage ? 'Henter...' : 'Hent flere'}
             </button>
           )}
           {totalCount > 0 && !isLoading && (
