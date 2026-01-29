@@ -221,9 +221,18 @@ To determine if a vegobjekt is on a specific veglenke:
 1. Check if vegobjekt's stedfesting.id matches veglenkesekvens.id
 2. Check if position ranges overlap
 
+## CSV Export
+
+A "Last ned CSV" button in the vegobjekt list header allows downloading all currently loaded vegobjekter as a CSV file.
+
+### CSV Format
+- **Common columns**: `Type ID`, `Type`, `ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`
+- **Dynamic columns**: one column per unique egenskap name across all loaded vegobjekter
+- Empty cells where a property doesn't apply to a given object/type
+- Geometry properties (GeometriEgenskap) are excluded from the CSV
+
 ## Future Enhancements (Out of Scope)
 
-- Export selected objects
 - Time-based queries
 - More than 10 veglenker per query
 

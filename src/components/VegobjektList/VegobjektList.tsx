@@ -11,6 +11,7 @@ import {
   locateVegobjektAtom,
   vegobjekterErrorAtom,
 } from "../../state/atoms";
+import { downloadCsvPerType } from "../../utils/csvExport";
 
 interface Props {
   vegobjekterByType: Map<number, Vegobjekt[]>;
@@ -387,6 +388,15 @@ export default function VegobjektList({
             </span>
           ) : (
             <span className="vegobjekt-list-count">{totalCount} totalt</span>
+          )}
+          {totalCount > 0 && !isLoading && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-small"
+              onClick={() => downloadCsvPerType(vegobjekterByType, selectedTypes)}
+            >
+              Last ned CSV
+            </button>
           )}
           {hasNextPage && !isLoading && (
             <button
