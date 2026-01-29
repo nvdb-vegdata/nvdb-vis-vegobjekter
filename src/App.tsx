@@ -172,7 +172,7 @@ export default function App() {
     <div className="app">
       <aside className="sidebar">
         <header className="sidebar-header">
-          <h1>NVDB Vegobjekt Visualisering</h1>
+          <h1>NVDB Vegobjekt Visualisering <span className="beta-badge">BETA</span></h1>
           <p>Velg objekttyper og tegn et område eller søk på strekning</p>
         </header>
 

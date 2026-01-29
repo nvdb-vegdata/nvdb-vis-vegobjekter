@@ -102,6 +102,37 @@ export function downloadCsvPerType(
   }
 }
 
+export function downloadCsvAllTypes(
+  vegobjekterByType: Map<number, Vegobjekt[]>,
+  selectedTypes: Vegobjekttype[]
+): void {
+  const headers = ["TypeID", "TypeNavn", "ID", "Versjon", "Startdato", "Sluttdato", "Stedfesting"];
+  const csvRows = [headers.map(escapeCsvValue).join(",")];
+
+  for (const type of selectedTypes) {
+    const objects = vegobjekterByType.get(type.id);
+    if (!objects?.length) continue;
+
+    const typeName = type.navn ?? `type_${type.id}`;
+
+    for (const obj of objects) {
+      const stedfestinger = formatStedfesting(obj.stedfesting as Stedfesting | undefined);
+      const values = [
+        String(type.id),
+        typeName,
+        String(obj.id),
+        obj.versjon != null ? String(obj.versjon) : "",
+        obj.gyldighetsperiode?.startdato ?? "",
+        obj.gyldighetsperiode?.sluttdato ?? "",
+        stedfestinger.join("; "),
+      ];
+      csvRows.push(values.map(escapeCsvValue).join(","));
+    }
+  }
+
+  downloadCsv(csvRows.join("\n"), "vegobjekter.csv");
+}
+
 function downloadCsv(csvContent: string, filename: string): void {
   const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);

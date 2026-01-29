@@ -11,7 +11,7 @@ import {
   locateVegobjektAtom,
   vegobjekterErrorAtom,
 } from "../../state/atoms";
-import { downloadCsvPerType } from "../../utils/csvExport";
+import { downloadCsvPerType, downloadCsvAllTypes } from "../../utils/csvExport";
 
 interface Props {
   vegobjekterByType: Map<number, Vegobjekt[]>;
@@ -390,13 +390,39 @@ export default function VegobjektList({
             <span className="vegobjekt-list-count">{totalCount} totalt</span>
           )}
           {totalCount > 0 && !isLoading && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-small"
-              onClick={() => downloadCsvPerType(vegobjekterByType, selectedTypes)}
-            >
-              Last ned CSV
-            </button>
+            <>
+              <button
+                type="button"
+                className="btn btn-secondary btn-small csv-popover-anchor"
+                // @ts-expect-error popoverTarget not in React 18 types
+                popoverTarget="csv-popover"
+              >
+                Last ned CSV
+              </button>
+              {/* @ts-expect-error popover not in React 18 types */}
+              <div id="csv-popover" className="csv-popover" popover="auto">
+                <button
+                  type="button"
+                  className="csv-popover-option"
+                  onClick={() => {
+                    downloadCsvAllTypes(vegobjekterByType, selectedTypes);
+                    document.getElementById("csv-popover")?.hidePopover();
+                  }}
+                >
+                  Alle typer i én fil
+                </button>
+                <button
+                  type="button"
+                  className="csv-popover-option"
+                  onClick={() => {
+                    downloadCsvPerType(vegobjekterByType, selectedTypes);
+                    document.getElementById("csv-popover")?.hidePopover();
+                  }}
+                >
+                  Én fil per type
+                </button>
+              </div>
+            </>
           )}
           {hasNextPage && !isLoading && (
             <button

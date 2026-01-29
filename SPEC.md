@@ -4,6 +4,8 @@
 
 A static web application for visualizing road objects (vegobjekter) from the Norwegian Public Roads Administration's database (NVDB) on an interactive map of Norway. The app visualizes road segments (veglenker) and shows which road objects are located on each segment.
 
+The application is in **beta** and displays a visible beta badge in the header.
+
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
@@ -223,13 +225,11 @@ To determine if a vegobjekt is on a specific veglenke:
 
 ## CSV Export
 
-A "Last ned CSV" button in the vegobjekt list header allows downloading all currently loaded vegobjekter as a CSV file.
+A "Last ned CSV" button in the vegobjekt list header opens a popover (CSS anchor positioning) with two download options:
 
-### CSV Format
-- **Common columns**: `Type ID`, `Type`, `ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`
-- **Dynamic columns**: one column per unique egenskap name across all loaded vegobjekter
-- Empty cells where a property doesn't apply to a given object/type
-- Geometry properties (GeometriEgenskap) are excluded from the CSV
+### Download Options
+1. **Alle typer i én fil** — Downloads a single `vegobjekter.csv` containing all vegobjekter across all types. Headers: `TypeID`, `TypeNavn`, `ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`. No egenskaper columns.
+2. **Én fil per type** — Downloads one CSV file per vegobjekttype, named after the type (e.g., `Skiltplate.csv`). Includes common columns (`ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`) plus one dynamic column per unique egenskap name for that type. Geometry properties (GeometriEgenskap) are excluded.
 
 ## Future Enhancements (Out of Scope)
 
