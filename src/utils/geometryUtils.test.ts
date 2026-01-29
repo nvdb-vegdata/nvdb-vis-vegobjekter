@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test'
+import { Polygon } from 'ol/geom'
 import type { StedfestingLinjer, StedfestingPunkter } from '../api/generated/uberiket/types.gen'
 import type { VeglenkeMedPosisjon, VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
-import { getClippedGeometries, getPointAtFraction, sliceLineStringByFraction } from './geometryUtils'
+import { getClippedGeometries, getLineStringOverlapFractions, getPointAtFraction, sliceLineStringByFraction } from './geometryUtils'
 
 function veglenke(partial: Pick<VeglenkeMedPosisjon, 'nummer' | 'startposisjon' | 'sluttposisjon'>): VeglenkeMedPosisjon {
   return partial as VeglenkeMedPosisjon
@@ -270,6 +271,56 @@ describe('getClippedGeometries', () => {
 
     // Act
     const result = getClippedGeometries(stedfesting, veglenkesekvenser)
+
+    // Assert
+    expect(result.length).toBe(0)
+  })
+})
+
+describe('getLineStringOverlapFractions', () => {
+  test('returns overlap for line crossing polygon', () => {
+    // Arrange
+    const polygon = new Polygon([
+      [
+        [-0.5, -0.5],
+        [0.5, -0.5],
+        [0.5, 0.5],
+        [-0.5, 0.5],
+        [-0.5, -0.5],
+      ],
+    ])
+    const coords = [
+      [-1, 0],
+      [1, 0],
+    ]
+
+    // Act
+    const result = getLineStringOverlapFractions(coords, polygon)
+
+    // Assert
+    expect(result.length).toBe(1)
+    expect(result[0]?.startFraction).toBeCloseTo(0.25, 5)
+    expect(result[0]?.endFraction).toBeCloseTo(0.75, 5)
+  })
+
+  test('returns empty when line is outside polygon', () => {
+    // Arrange
+    const polygon = new Polygon([
+      [
+        [-0.5, -0.5],
+        [0.5, -0.5],
+        [0.5, 0.5],
+        [-0.5, 0.5],
+        [-0.5, -0.5],
+      ],
+    ])
+    const coords = [
+      [2, 0],
+      [3, 0],
+    ]
+
+    // Act
+    const result = getLineStringOverlapFractions(coords, polygon)
 
     // Assert
     expect(result.length).toBe(0)

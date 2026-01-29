@@ -7,6 +7,7 @@ import {
   allTypesSelectedAtom,
   DEFAULT_VEGLENKESEKVENSER_LIMIT,
   polygonAtom,
+  polygonClipAtom,
   searchModeAtom,
   stedfestingAtom,
   strekningAtom,
@@ -21,6 +22,7 @@ function polygonToWkt(polygon: Polygon): string {
 export function useUrlSync(selectedTypes: Vegobjekttype[]) {
   const allTypesSelected = useAtomValue(allTypesSelectedAtom)
   const polygon = useAtomValue(polygonAtom)
+  const polygonClip = useAtomValue(polygonClipAtom)
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
   const searchMode = useAtomValue(searchModeAtom)
   const strekning = useAtomValue(strekningAtom)
@@ -32,6 +34,11 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
       url.searchParams.set('polygon', polygonToWkt(polygon))
     } else {
       url.searchParams.delete('polygon')
+    }
+    if (searchMode === 'polygon' && polygonClip) {
+      url.searchParams.set('polygonclip', '1')
+    } else {
+      url.searchParams.delete('polygonclip')
     }
     if (searchMode === 'strekning' && strekning.trim().length > 0) {
       url.searchParams.set('strekning', strekning.trim())
@@ -56,5 +63,5 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
       url.searchParams.delete('veglenkesekvenslimit')
     }
     window.history.replaceState({}, '', url)
-  }, [allTypesSelected, polygon, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
+  }, [allTypesSelected, polygon, polygonClip, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
 }

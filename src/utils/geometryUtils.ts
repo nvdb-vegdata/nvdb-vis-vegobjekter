@@ -1,3 +1,4 @@
+import type { Polygon } from 'ol/geom'
 import type { Stedfesting, VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
 import { getVegobjektPositions } from '../api/uberiketClient'
 
@@ -171,4 +172,122 @@ export function getPointAtFraction(coords: number[][], fraction: number): number
 
   const targetDistance = fraction * totalLength
   return getPointAtDistance(coords, targetDistance)
+}
+
+type FractionRange = {
+  startFraction: number
+  endFraction: number
+}
+
+const INTERSECTION_EPSILON = 1e-8
+
+function lineSegmentIntersectionParam(p1: number[], p2: number[], p3: number[], p4: number[]): number | null {
+  const x1 = p1[0] ?? 0
+  const y1 = p1[1] ?? 0
+  const x2 = p2[0] ?? 0
+  const y2 = p2[1] ?? 0
+  const x3 = p3[0] ?? 0
+  const y3 = p3[1] ?? 0
+  const x4 = p4[0] ?? 0
+  const y4 = p4[1] ?? 0
+
+  const denom = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3)
+  if (Math.abs(denom) < INTERSECTION_EPSILON) return null
+
+  const t = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / denom
+  const u = ((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)) / denom
+
+  if (t < -INTERSECTION_EPSILON || t > 1 + INTERSECTION_EPSILON) return null
+  if (u < -INTERSECTION_EPSILON || u > 1 + INTERSECTION_EPSILON) return null
+
+  return Math.min(1, Math.max(0, t))
+}
+
+function dedupeSorted(values: number[]): number[] {
+  const result: number[] = []
+  for (const value of values) {
+    const last = result[result.length - 1]
+    if (last === undefined || Math.abs(value - last) > INTERSECTION_EPSILON) {
+      result.push(value)
+    }
+  }
+  return result
+}
+
+function mergeFractionRanges(ranges: FractionRange[]): FractionRange[] {
+  if (ranges.length === 0) return []
+  const sorted = ranges.slice().sort((a, b) => a.startFraction - b.startFraction)
+  const merged: FractionRange[] = []
+  const first = sorted[0]
+  if (!first) return []
+  let current = { ...first }
+
+  for (let i = 1; i < sorted.length; i += 1) {
+    const next = sorted[i]
+    if (!next) continue
+    if (next.startFraction <= current.endFraction + INTERSECTION_EPSILON) {
+      current.endFraction = Math.max(current.endFraction, next.endFraction)
+    } else {
+      merged.push(current)
+      current = { ...next }
+    }
+  }
+
+  merged.push(current)
+  return merged
+}
+
+export function getLineStringOverlapFractions(coords: number[][], polygon: Polygon): FractionRange[] {
+  if (coords.length < 2) return []
+  const totalLength = getLineLength(coords)
+  if (totalLength === 0) return []
+
+  const ring = polygon.getCoordinates()[0] ?? []
+  if (ring.length < 2) return []
+
+  const ranges: FractionRange[] = []
+  let cumulativeLength = 0
+
+  for (let i = 1; i < coords.length; i++) {
+    const start = coords[i - 1] as number[]
+    const end = coords[i] as number[]
+    const segmentLength = euclideanDistance(start, end)
+    if (segmentLength === 0) {
+      continue
+    }
+
+    const intersections: number[] = [0, 1]
+    for (let j = 1; j < ring.length; j++) {
+      const edgeStart = ring[j - 1] as number[]
+      const edgeEnd = ring[j] as number[]
+      const t = lineSegmentIntersectionParam(start, end, edgeStart, edgeEnd)
+      if (t !== null) {
+        intersections.push(t)
+      }
+    }
+
+    intersections.sort((a, b) => a - b)
+    const uniqueIntersections = dedupeSorted(intersections)
+
+    for (let j = 1; j < uniqueIntersections.length; j++) {
+      const startT = uniqueIntersections[j - 1] ?? 0
+      const endT = uniqueIntersections[j] ?? 0
+      if (endT - startT <= INTERSECTION_EPSILON) continue
+
+      const midPoint = interpolatePoint(start, end, (startT + endT) / 2)
+      if (polygon.containsXY(midPoint[0] ?? 0, midPoint[1] ?? 0)) {
+        const startDistance = cumulativeLength + segmentLength * startT
+        const endDistance = cumulativeLength + segmentLength * endT
+        const startFraction = Math.max(0, Math.min(1, startDistance / totalLength))
+        const endFraction = Math.max(0, Math.min(1, endDistance / totalLength))
+        if (endFraction - startFraction > INTERSECTION_EPSILON) {
+          ranges.push({ startFraction, endFraction })
+        }
+      }
+    }
+
+    cumulativeLength += segmentLength
+  }
+
+  return mergeFractionRanges(ranges)
 }

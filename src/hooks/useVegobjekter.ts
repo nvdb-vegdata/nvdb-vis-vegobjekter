@@ -1,12 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import WKT from 'ol/format/WKT'
-import type { Polygon } from 'ol/geom'
+import type { LineString, Polygon } from 'ol/geom'
 import { useMemo } from 'react'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import { buildStedfestingFilter, hentVegobjekter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt } from '../api/uberiketClient'
 import { getTodayDate } from '../utils/dateUtils'
+import { getLineStringOverlapFractions } from '../utils/geometryUtils'
 
-function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosisjoner[], polygon: Polygon): VeglenkeRange[] {
+function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosisjoner[], polygon: Polygon, polygonClip: boolean): VeglenkeRange[] {
   const ranges: VeglenkeRange[] = []
   const wktFormat = new WKT()
   const today = getTodayDate()
@@ -31,6 +32,26 @@ function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosis
           continue
         }
 
+        if (polygonClip && geom.getType() === 'LineString') {
+          const span = vl.sluttposisjon - vl.startposisjon
+          if (span <= 0) continue
+          const coords = (geom as LineString).getCoordinates()
+          const overlapFractions = getLineStringOverlapFractions(coords, polygon)
+          if (overlapFractions.length === 0) continue
+
+          for (const overlap of overlapFractions) {
+            const startposisjon = vl.startposisjon + span * overlap.startFraction
+            const sluttposisjon = vl.startposisjon + span * overlap.endFraction
+            if (sluttposisjon - startposisjon <= 0) continue
+            ranges.push({
+              veglenkesekvensId: vs.id,
+              startposisjon,
+              sluttposisjon,
+            })
+          }
+          continue
+        }
+
         ranges.push({
           veglenkesekvensId: vs.id,
           startposisjon: vl.startposisjon,
@@ -50,6 +71,7 @@ type VegobjekterParams = {
   allTypesSelected: boolean
   veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined
   polygon: Polygon | null
+  polygonClip: boolean
   vegsystemreferanse?: string | null
   stedfestingFilterDirect?: string | null
 }
@@ -59,6 +81,7 @@ export function useVegobjekter({
   allTypesSelected,
   veglenkesekvenser,
   polygon,
+  polygonClip,
   vegsystemreferanse,
   stedfestingFilterDirect,
 }: VegobjekterParams) {
@@ -67,9 +90,9 @@ export function useVegobjekter({
   const stedfestingFilter = useMemo(() => {
     if (directFilter.length > 0) return directFilter
     if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return ''
-    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon)
+    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon, polygonClip)
     return buildStedfestingFilter(ranges)
-  }, [directFilter, veglenkesekvenser, polygon, trimmedStrekning])
+  }, [directFilter, polygonClip, veglenkesekvenser, polygon, trimmedStrekning])
 
   const enabled = (allTypesSelected || selectedTypes.length > 0) && (trimmedStrekning.length > 0 || stedfestingFilter.length > 0)
   const today = getTodayDate()

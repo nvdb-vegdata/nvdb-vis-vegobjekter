@@ -1,7 +1,7 @@
 import { isEmpty as isExtentEmpty } from 'ol/extent'
 import Feature from 'ol/Feature'
 import WKT from 'ol/format/WKT'
-import { LineString, Point } from 'ol/geom'
+import { LineString, Point, type Polygon } from 'ol/geom'
 import type OLMap from 'ol/Map'
 import type VectorSource from 'ol/source/Vector'
 import type { MutableRefObject } from 'react'
@@ -9,13 +9,14 @@ import { useEffect } from 'react'
 import type { VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
 import type { SearchMode } from '../state/atoms'
 import { getTodayDate } from '../utils/dateUtils'
-import { getPointAtFraction, sliceLineStringByFraction } from '../utils/geometryUtils'
+import { getLineStringOverlapFractions, getPointAtFraction, sliceLineStringByFraction } from '../utils/geometryUtils'
 import { parseStedfestingRanges } from '../utils/stedfestingParser'
 
 export function useVeglenkeRendering({
   veglenkesekvenser,
   searchMode,
   stedfesting,
+  polygonClip,
   veglenkeSource,
   stedfestingSource,
   drawSource,
@@ -24,6 +25,7 @@ export function useVeglenkeRendering({
   veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined
   searchMode: SearchMode
   stedfesting: string
+  polygonClip: boolean
   veglenkeSource: MutableRefObject<VectorSource>
   stedfestingSource: MutableRefObject<VectorSource>
   drawSource: MutableRefObject<VectorSource>
@@ -42,7 +44,9 @@ export function useVeglenkeRendering({
     const today = getTodayDate()
 
     const drawnFeatures = drawSource.current.getFeatures()
-    const drawnPolygon = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
+    const drawnGeometry = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
+    const polygonGeometry =
+      searchMode === 'polygon' && polygonClip && drawnGeometry && drawnGeometry.getType() === 'Polygon' ? (drawnGeometry as Polygon) : null
 
     const stedfestingRangesById =
       searchMode === 'stedfesting' && stedfesting.trim().length > 0
@@ -71,7 +75,7 @@ export function useVeglenkeRendering({
               featureProjection: 'EPSG:3857',
             })
 
-            if (drawnPolygon && !geom.intersectsExtent(drawnPolygon.getExtent())) {
+            if (drawnGeometry && !geom.intersectsExtent(drawnGeometry.getExtent())) {
               continue
             }
 
@@ -118,6 +122,27 @@ export function useVeglenkeRendering({
                 }
               }
             }
+
+            if (polygonGeometry && geom.getType() === 'LineString') {
+              const coords = (geom as LineString).getCoordinates()
+              const overlapFractions = getLineStringOverlapFractions(coords, polygonGeometry)
+
+              for (const overlap of overlapFractions) {
+                if (overlap.startFraction === overlap.endFraction) {
+                  const pointCoord = getPointAtFraction(coords, overlap.startFraction)
+                  const pointGeom = new Point(pointCoord)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
+                  continue
+                }
+
+                const slicedCoords = sliceLineStringByFraction(coords, overlap.startFraction, overlap.endFraction)
+
+                if (slicedCoords.length >= 2) {
+                  const slicedGeom = new LineString(slicedCoords)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom }))
+                }
+              }
+            }
           } catch (e) {
             console.warn('Failed to parse geometry', e)
           }
@@ -127,7 +152,7 @@ export function useVeglenkeRendering({
 
     const clippedExtent = stedfestingSource.current.getExtent()
     const baseExtent = veglenkeSource.current.getExtent()
-    const polygonExtent = searchMode === 'polygon' ? drawnPolygon?.getExtent() : null
+    const polygonExtent = searchMode === 'polygon' ? drawnGeometry?.getExtent() : null
     const extent = polygonExtent && !isExtentEmpty(polygonExtent) ? polygonExtent : !isExtentEmpty(clippedExtent) ? clippedExtent : baseExtent
     if (mapInstance.current && !isExtentEmpty(extent)) {
       mapInstance.current.getView().fit(extent, {
@@ -136,5 +161,5 @@ export function useVeglenkeRendering({
         maxZoom: 18,
       })
     }
-  }, [veglenkesekvenser, searchMode, stedfesting, veglenkeSource, stedfestingSource, drawSource, mapInstance])
+  }, [veglenkesekvenser, searchMode, stedfesting, polygonClip, veglenkeSource, stedfestingSource, drawSource, mapInstance])
 }

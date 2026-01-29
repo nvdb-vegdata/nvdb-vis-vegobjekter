@@ -20,7 +20,7 @@ import type { VeglenkesekvensMedPosisjoner, Vegobjekt } from '../../api/uberiket
 import { useHighlightRendering } from '../../hooks/useHighlightRendering'
 import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
 import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
-import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
+import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
 import {
   EGENGEOMETRI_LINE_STYLE,
   EGENGEOMETRI_POINT_STYLE,
@@ -48,6 +48,7 @@ interface Props {
 
 export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadingVeglenker }: Props) {
   const [polygon, setPolygon] = useAtom(polygonAtom)
+  const [polygonClip, setPolygonClip] = useAtom(polygonClipAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
   const stedfesting = useAtomValue(stedfestingAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
@@ -215,8 +216,9 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
   useEffect(() => {
     if (!veglenkeLayerRef.current) return
-    veglenkeLayerRef.current.setStyle(searchMode === 'stedfesting' ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE)
-  }, [searchMode])
+    const shouldFade = searchMode === 'stedfesting' || (searchMode === 'polygon' && polygonClip)
+    veglenkeLayerRef.current.setStyle(shouldFade ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE)
+  }, [polygonClip, searchMode])
 
   useEffect(() => {
     if (searchMode !== 'polygon') return
@@ -230,6 +232,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     veglenkesekvenser,
     searchMode,
     stedfesting,
+    polygonClip,
     veglenkeSource,
     stedfestingSource,
     drawSource,
@@ -341,6 +344,13 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
             </button>
           )}
         </div>
+
+        {searchMode === 'polygon' && (
+          <label className="polygon-clip-toggle">
+            <input type="checkbox" checked={polygonClip} onChange={() => setPolygonClip((prev) => !prev)} />
+            Klipp veglenker til polygon
+          </label>
+        )}
 
         {searchMode === 'polygon' && isDrawing && (
           <button type="button" className="btn btn-secondary" onClick={cancelDrawing}>

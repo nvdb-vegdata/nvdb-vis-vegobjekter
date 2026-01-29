@@ -66,10 +66,18 @@ function getInitialVeglenkesekvensLimit(): number {
   return allowedLimits.has(parsedLimit) ? parsedLimit : DEFAULT_VEGLENKESEKVENSER_LIMIT
 }
 
+function getInitialPolygonClip(): boolean {
+  const params = new URLSearchParams(window.location.search)
+  const clipParam = params.get('polygonclip')?.toLowerCase()
+  if (!clipParam) return false
+  return clipParam === '1' || clipParam === 'true'
+}
+
 export const selectedTypeIdsAtom = atom<number[]>(getInitialTypeIds())
 export const selectedTypesAtom = atom<Vegobjekttype[]>([])
 export const allTypesSelectedAtom = atom(getInitialAllTypesSelected())
 export const polygonAtom = atom<Polygon | null>(getInitialPolygon())
+export const polygonClipAtom = atom<boolean>(getInitialPolygonClip())
 export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
 export const strekningAtom = atom<string>(getInitialStrekning())

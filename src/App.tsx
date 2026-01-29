@@ -14,6 +14,7 @@ import { useVegobjekttyper } from './hooks/useVegobjekttyper'
 import {
   allTypesSelectedAtom,
   polygonAtom,
+  polygonClipAtom,
   searchModeAtom,
   selectedTypeIdsAtom,
   selectedTypesAtom,
@@ -28,6 +29,7 @@ export default function App() {
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
   const allTypesSelected = useAtomValue(allTypesSelectedAtom)
   const polygon = useAtomValue(polygonAtom)
+  const polygonClip = useAtomValue(polygonClipAtom)
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
   const searchMode = useAtomValue(searchModeAtom)
   const strekning = useAtomValue(strekningAtom)
@@ -78,6 +80,7 @@ export default function App() {
     allTypesSelected,
     veglenkesekvenser: veglenkeResult?.veglenkesekvenser,
     polygon: searchMode === 'polygon' ? polygon : null,
+    polygonClip: searchMode === 'polygon' ? polygonClip : false,
     vegsystemreferanse: searchMode === 'strekning' ? strekning : null,
     stedfestingFilterDirect: searchMode === 'stedfesting' ? (stedfestingParsed?.stedfestingFilter ?? null) : null,
   })
