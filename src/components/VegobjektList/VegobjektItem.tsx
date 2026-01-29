@@ -22,7 +22,7 @@ export default function VegobjektItem({
   isExpanded: boolean
   isHighlighted: boolean
   onToggle: () => void
-  itemRef?: React.RefObject<HTMLDivElement | null>
+  itemRef?: React.RefObject<HTMLLIElement | null>
 }) {
   const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom)
   const setLocateVegobjekt = useSetAtom(locateVegobjektAtom)
@@ -63,27 +63,18 @@ export default function VegobjektItem({
   }
 
   return (
-    <div
+    <li
       ref={itemRef}
       className={`vegobjekt-item${isHighlighted ? ' vegobjekt-highlight' : ''}`}
       onMouseEnter={() => setHoveredVegobjekt(vegobjekt)}
       onMouseLeave={() => setHoveredVegobjekt(null)}
     >
-      <div
-        className="vegobjekt-header"
-        role="button"
-        tabIndex={0}
-        onClick={onToggle}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onToggle()
-          }
-        }}
-      >
-        <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
-        <span className="vegobjekt-id">ID: {details.id}</span>
-        {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
+      <div className="vegobjekt-header">
+        <button type="button" className="vegobjekt-header-toggle" onClick={onToggle}>
+          <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
+          <span className="vegobjekt-id">ID: {details.id}</span>
+          {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
+        </button>
         <div className="vegobjekt-header-actions">
           <button
             type="button"
@@ -177,6 +168,6 @@ export default function VegobjektItem({
           )}
         </div>
       )}
-    </div>
+    </li>
   )
 }

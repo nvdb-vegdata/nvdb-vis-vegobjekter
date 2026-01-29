@@ -5,7 +5,7 @@ export const VEGLENKE_STYLE = new Style({
 })
 
 export const VEGLENKE_FADED_STYLE = new Style({
-  stroke: new Stroke({ color: 'rgba(52, 152, 219, 0.35)', width: 3 }),
+  stroke: new Stroke({ color: 'rgba(52, 152, 219, 0.35)', width: 2 }),
 })
 
 export const VEGLENKE_SELECTED_STYLE = new Style({
@@ -17,14 +17,14 @@ export const HIGHLIGHT_STYLE = new Style({
 })
 
 export const STEDFESTING_STYLE = new Style({
-  stroke: new Stroke({ color: '#1abc9c', width: 6 }),
+  stroke: new Stroke({ color: '#3498db', width: 4 }),
 })
 
 export const STEDFESTING_POINT_STYLE = new Style({
   image: new CircleStyle({
     radius: 8,
-    fill: new Fill({ color: 'rgba(26, 188, 156, 0.9)' }),
-    stroke: new Stroke({ color: '#16a085', width: 2 }),
+    fill: new Fill({ color: 'rgba(52, 152, 219, 0.9)' }),
+    stroke: new Stroke({ color: '#2e86c1', width: 2 }),
   }),
 })
 

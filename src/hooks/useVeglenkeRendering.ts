@@ -75,8 +75,9 @@ export function useVeglenkeRendering({
               continue
             }
 
+            let ranges: { start: number; end: number }[] | undefined
             if (stedfestingRangesById) {
-              const ranges = stedfestingRangesById.get(vs.id)
+              ranges = stedfestingRangesById.get(vs.id)
               if (!ranges) continue
               const overlaps = ranges.some((range) => range.end >= vl.startposisjon && range.start <= vl.sluttposisjon)
               if (!overlaps) continue
@@ -89,8 +90,7 @@ export function useVeglenkeRendering({
             })
             veglenkeSource.current.addFeature(feature)
 
-            if (stedfestingRangesById && geom.getType() === 'LineString') {
-              const ranges = stedfestingRangesById.get(vs.id) ?? []
+            if (ranges && geom.getType() === 'LineString') {
               const span = vl.sluttposisjon - vl.startposisjon
               if (span <= 0) continue
               const coords = (geom as LineString).getCoordinates()
@@ -127,12 +127,13 @@ export function useVeglenkeRendering({
 
     const clippedExtent = stedfestingSource.current.getExtent()
     const baseExtent = veglenkeSource.current.getExtent()
-    const extent = !isExtentEmpty(clippedExtent) ? clippedExtent : baseExtent
+    const polygonExtent = searchMode === 'polygon' ? drawnPolygon?.getExtent() : null
+    const extent = polygonExtent && !isExtentEmpty(polygonExtent) ? polygonExtent : !isExtentEmpty(clippedExtent) ? clippedExtent : baseExtent
     if (mapInstance.current && !isExtentEmpty(extent)) {
       mapInstance.current.getView().fit(extent, {
         padding: [40, 40, 40, 40],
         duration: 250,
-        maxZoom: 16,
+        maxZoom: 18,
       })
     }
   }, [veglenkesekvenser, searchMode, stedfesting, veglenkeSource, stedfestingSource, drawSource, mapInstance])

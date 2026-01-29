@@ -20,7 +20,7 @@ export default function TypeGroup({
   const [expanded, setExpanded] = useState(false)
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
   const [highlightedId, setHighlightedId] = useState<number | null>(null)
-  const focusedItemRef = useRef<HTMLDivElement | null>(null)
+  const focusedItemRef = useRef<HTMLLIElement | null>(null)
   const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom)
 
   const vegobjekttype = getVegobjekttypeForType(type.id)
@@ -83,7 +83,7 @@ export default function TypeGroup({
       </button>
 
       {expanded && (
-        <div className="vegobjekt-type-content">
+        <ul className="vegobjekt-type-content">
           {processedObjects.map(({ vegobjekt, details }) => (
             <VegobjektItem
               key={details.id}
@@ -95,7 +95,7 @@ export default function TypeGroup({
               itemRef={focusedVegobjektId === details.id ? focusedItemRef : undefined}
             />
           ))}
-        </div>
+        </ul>
       )}
     </div>
   )

@@ -149,7 +149,9 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         const geom = feature.getGeometry()
         if (geom) {
           const extent = geom.getExtent()
-          const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]
+          const [minX, minY, maxX, maxY] = extent
+          if (minX === undefined || minY === undefined || maxX === undefined || maxY === undefined) return
+          const center = [(minX + maxX) / 2, (minY + maxY) / 2]
           overlay.setPosition(center)
         }
       } else {
@@ -178,10 +180,12 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         if (!viewCenter) return
         const center = toLonLat(viewCenter)
         const z = view.getZoom()
+        const [centerLon, centerLat] = center
+        if (centerLon === undefined || centerLat === undefined || z === undefined) return
         const url = new URL(window.location.href)
-        url.searchParams.set('lon', center[0]?.toFixed(5))
-        url.searchParams.set('lat', center[1]?.toFixed(5))
-        url.searchParams.set('z', z?.toFixed(1))
+        url.searchParams.set('lon', centerLon.toFixed(5))
+        url.searchParams.set('lat', centerLat.toFixed(5))
+        url.searchParams.set('z', z.toFixed(1))
         window.history.replaceState({}, '', url)
       }, 200)
     })
@@ -288,11 +292,14 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const handlePolygonMode = useCallback(() => {
     if (searchMode !== 'polygon') {
       setSearchMode('polygon')
+      if (polygon) {
+        return
+      }
     }
     if (!isDrawing) {
       startDrawing()
     }
-  }, [isDrawing, searchMode, setSearchMode, startDrawing])
+  }, [isDrawing, polygon, searchMode, setSearchMode, startDrawing])
 
   const handleStrekningMode = useCallback(() => {
     setSearchMode('strekning')

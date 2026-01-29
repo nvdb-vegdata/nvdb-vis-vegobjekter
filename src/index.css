@@ -759,6 +759,9 @@ body,
 
 .vegobjekt-type-content {
   border-top: 1px solid #ddd;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .vegobjekt-loading {
@@ -770,6 +773,9 @@ body,
 
 .vegobjekt-item {
   border-bottom: 1px solid #eee;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .vegobjekt-item:last-child {
@@ -780,12 +786,29 @@ body,
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
+  position: relative;
   user-select: none;
 }
 
-.vegobjekt-header:hover {
+.vegobjekt-header-toggle {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  width: 100%;
+  padding-right: 56px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.vegobjekt-header-toggle:hover,
+.vegobjekt-header-toggle:focus-visible {
   background: #f8f9fa;
 }
 
@@ -801,7 +824,10 @@ body,
 }
 
 .vegobjekt-header-actions {
-  margin-left: auto;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   gap: 6px;
 }
