@@ -152,6 +152,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 5. **Query and Display**
    - App queries veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 10)
    - Veglenker with geometry overlapping polygon are rendered on map
+   - Stedfesting mode renders full veglenker in a lighter style and overlays clipped stedfesting geometry
    - Queries vegobjekter with stedfesting filter for polygon mode, direct stedfesting filter for stedfesting mode, or vegsystemreferanse for strekning mode
 
 5. **Inspect Vegobjekter**
