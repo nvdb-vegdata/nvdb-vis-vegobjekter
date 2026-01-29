@@ -9,11 +9,11 @@ The application is in **beta** and displays a visible beta badge in the header.
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
-2. **Choose Search Mode** - Toggle between drawing a polygon or searching by vegsystemreferanse (strekning)
-3. **Define Area/Route** - Draw a small polygon, or enter a vegsystemreferanse (e.g., "FV6666 S1")
-4. **Fetch Veglenker** - Query veglenkesekvenser by polygon or vegsystemreferanse (configurable limit, default 10)
+2. **Choose Search Mode** - Toggle between drawing a polygon, searching by vegsystemreferanse (strekning), or stedfesting
+3. **Define Area/Route** - Draw a small polygon, enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
+4. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 10)
 5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon)
-6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and stedfesting filter, or use vegsystemreferanse when searching by strekning. If `metadata.neste` is present, fetch subsequent pages using the `start` token.
+6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If `metadata.neste` is present, fetch subsequent pages using the `start` token.
 7. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
@@ -141,17 +141,18 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Must select at least one type before querying
 
 3. **Choose Search Mode**
-   - User toggles between polygon mode and strekning mode
+   - User toggles between polygon mode, strekning mode, and stedfesting mode
 
 4. **Define Area/Route**
    - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area)
    - Strekning mode: enter a vegsystemreferanse (e.g., "FV6666 S1") and click "Søk"
+   - Stedfesting mode: enter stedfesting expressions (e.g., "1234, 0.2-0.5@5678") and click "Søk"
    - Polygon is converted to UTM33 coordinates
 
 5. **Query and Display**
-   - App queries veglenkesekvenser by polygon or vegsystemreferanse (configurable limit, default 10)
+   - App queries veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 10)
    - Veglenker with geometry overlapping polygon are rendered on map
-   - Queries vegobjekter with stedfesting filter for polygon mode, or vegsystemreferanse for strekning mode
+   - Queries vegobjekter with stedfesting filter for polygon mode, direct stedfesting filter for stedfesting mode, or vegsystemreferanse for strekning mode
 
 5. **Inspect Vegobjekter**
    - Click on a veglenke to see related vegobjekter
@@ -172,6 +173,7 @@ The application synchronizes state with the URL for shareable links:
 - **Map view**: Center coordinates and zoom level
 - **Polygon**: Drawn selection polygon coordinates (polygon mode)
 - **Strekning**: Vegsystemreferanse query (strekning mode)
+- **Stedfesting**: Stedfesting expressions (stedfesting mode)
 - **Selected types**: List of selected vegobjekttype IDs, or `types=all` when all are selected
 - **Veglenkesekvens limit**: Max veglenkesekvenser selection (`veglenkesekvenslimit`)
 

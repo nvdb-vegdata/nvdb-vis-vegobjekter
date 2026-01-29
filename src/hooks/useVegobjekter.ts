@@ -63,6 +63,7 @@ type VegobjekterParams = {
   veglenkesekvenser: VeglenkesekvensMedPosisjoner[] | undefined;
   polygon: Polygon | null;
   vegsystemreferanse?: string | null;
+  stedfestingFilterDirect?: string | null;
 };
 
 export function useVegobjekter({
@@ -71,13 +72,16 @@ export function useVegobjekter({
   veglenkesekvenser,
   polygon,
   vegsystemreferanse,
+  stedfestingFilterDirect,
 }: VegobjekterParams) {
   const trimmedStrekning = vegsystemreferanse?.trim() ?? "";
+  const directFilter = stedfestingFilterDirect?.trim() ?? "";
   const stedfestingFilter = useMemo(() => {
+    if (directFilter.length > 0) return directFilter;
     if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return "";
     const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon);
     return buildStedfestingFilter(ranges);
-  }, [veglenkesekvenser, polygon, trimmedStrekning]);
+  }, [directFilter, veglenkesekvenser, polygon, trimmedStrekning]);
 
   const enabled =
     (allTypesSelected || selectedTypes.length > 0) &&
@@ -90,7 +94,13 @@ export function useVegobjekter({
   const typeIdList = useMemo(() => typeIds.join(","), [typeIds]);
 
   const query = useInfiniteQuery({
-    queryKey: ["vegobjekter", allTypesSelected ? "all" : typeIdList, stedfestingFilter, trimmedStrekning, today],
+    queryKey: [
+      "vegobjekter",
+      allTypesSelected ? "all" : typeIdList,
+      stedfestingFilter,
+      trimmedStrekning,
+      today,
+    ],
     queryFn: async ({ pageParam }: { pageParam?: string }) => {
       const typeIdsParam = allTypesSelected ? undefined : typeIds;
       if (trimmedStrekning.length > 0) {

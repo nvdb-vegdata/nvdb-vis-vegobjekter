@@ -63,16 +63,19 @@ type VeglenkesekvenserQuery = {
   polygon?: string;
   vegsystemreferanse?: string;
   antall?: number;
+  ider?: number[];
 };
 
 export async function hentVeglenkesekvenser({
   polygon,
   vegsystemreferanse,
   antall = 10,
+  ider,
 }: VeglenkesekvenserQuery): Promise<VeglenkesekvenserSide> {
   const response = await sdkHentVeglenkesekvenser({
     query: {
       antall,
+      ider,
       polygon,
       vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
       inkluder: ["alle"],

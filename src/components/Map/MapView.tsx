@@ -36,12 +36,15 @@ import {
   selectedTypesAtom,
   strekningAtom,
   strekningInputAtom,
+  stedfestingAtom,
+  stedfestingInputAtom,
 } from '../../state/atoms'
 import {
   getClippedGeometries,
   getPointAtFraction,
   sliceLineStringByFraction,
 } from '../../utils/geometryUtils'
+import { isValidStedfestingInput } from '../../utils/stedfestingParser'
 
 proj4.defs(
   'EPSG:25833',
@@ -130,6 +133,9 @@ export default function MapView({
   const [, setStrekning] = useAtom(strekningAtom)
   const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
   const [strekningError, setStrekningError] = useState<string | null>(null)
+  const [, setStedfesting] = useAtom(stedfestingAtom)
+  const [stedfestingInput, setStedfestingInput] = useAtom(stedfestingInputAtom)
+  const [stedfestingError, setStedfestingError] = useState<string | null>(null)
   const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
   const locateVegobjekt = useAtomValue(locateVegobjektAtom)
@@ -273,7 +279,7 @@ export default function MapView({
   }, [])
 
   useEffect(() => {
-    if (searchMode !== 'strekning') return
+    if (searchMode === 'polygon') return
     if (drawInteraction.current && mapInstance.current) {
       mapInstance.current.removeInteraction(drawInteraction.current)
       drawInteraction.current = null
@@ -565,6 +571,10 @@ export default function MapView({
     setSearchMode('strekning')
   }, [setSearchMode])
 
+  const handleStedfestingMode = useCallback(() => {
+    setSearchMode('stedfesting')
+  }, [setSearchMode])
+
   const cancelDrawing = useCallback(() => {
     if (drawInteraction.current && mapInstance.current) {
       mapInstance.current.removeInteraction(drawInteraction.current)
@@ -619,6 +629,45 @@ export default function MapView({
     setStrekningError(null)
   }, [setStrekningInput, setStrekning, setStrekningError])
 
+  const handleStedfestingChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setStedfestingInput(event.target.value)
+      setStedfestingError(null)
+    },
+    [setStedfestingError, setStedfestingInput],
+  )
+
+  const handleStedfestingSearch = useCallback(() => {
+    const trimmed = stedfestingInput.trim()
+    if (trimmed.length === 0) return
+    if (!isValidStedfestingInput(trimmed)) {
+      setStedfestingError(
+        'Ugyldig stedfesting. Bruk f.eks. 1234, 0.2-0.5@5678 eller 0.8@9999.',
+      )
+      return
+    }
+    setStedfestingError(null)
+    setStedfesting(trimmed)
+  }, [setStedfesting, setStedfestingError, stedfestingInput])
+
+  const handleStedfestingKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        if (stedfestingInput.trim().length > 0) {
+          handleStedfestingSearch()
+        }
+      }
+    },
+    [handleStedfestingSearch, stedfestingInput],
+  )
+
+  const clearStedfesting = useCallback(() => {
+    setStedfestingInput('')
+    setStedfesting('')
+    setStedfestingError(null)
+  }, [setStedfestingInput, setStedfesting, setStedfestingError])
+
   const getVegobjekterOnVeglenke = useCallback(
     (veglenkesekvensId: number, veglenke?: VeglenkeMedPosisjon) => {
       const result: {
@@ -662,6 +711,10 @@ export default function MapView({
   const isStrekningValid =
     trimmedStrekningInput.length === 0 ||
     isValidVegsystemreferanse(trimmedStrekningInput)
+  const trimmedStedfestingInput = stedfestingInput.trim()
+  const isStedfestingValid =
+    trimmedStedfestingInput.length === 0 ||
+    isValidStedfestingInput(trimmedStedfestingInput)
 
   return (
     <>
@@ -679,6 +732,12 @@ export default function MapView({
             onClick={handleStrekningMode}
           >
             Søk på strekning
+          </button>
+          <button
+            className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={handleStedfestingMode}
+          >
+            Stedfesting
           </button>
           {searchMode === 'polygon' &&
             !isDrawing &&
@@ -732,6 +791,49 @@ export default function MapView({
             </div>
             {strekningError && (
               <div className="strekning-error">{strekningError}</div>
+            )}
+          </div>
+        )}
+
+        {searchMode === 'stedfesting' && (
+          <div className="strekning-controls">
+            <label className="search-label" htmlFor="stedfesting-input">
+              Stedfesting
+            </label>
+            <div className="strekning-input-row">
+              <div className="search-input-wrapper">
+                <input
+                  id="stedfesting-input"
+                  className="search-input"
+                  placeholder="Eks.: 1234, 0.2-0.5@5678"
+                  value={stedfestingInput}
+                  onChange={handleStedfestingChange}
+                  onKeyDown={handleStedfestingKeyDown}
+                />
+                {stedfestingInput && (
+                  <button
+                    className="search-clear-btn"
+                    type="button"
+                    onClick={clearStedfesting}
+                    aria-label="Tøm stedfesting"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={handleStedfestingSearch}
+                disabled={
+                  trimmedStedfestingInput.length === 0 || !isStedfestingValid
+                }
+              >
+                Søk
+              </button>
+            </div>
+            {stedfestingError && (
+              <div className="strekning-error">{stedfestingError}</div>
             )}
           </div>
         )}
