@@ -1170,7 +1170,9 @@ body,
 
 .filter-popover {
   position-anchor: --filter-btn;
-  position-area: block-end span-inline-end;
+  position-area: block-end span-inline-start;
+  inset-inline-end: anchor(inline-end);
+  inset-inline-start: auto;
   justify-self: end;
   margin-top: 4px;
   padding: 8px 10px;
