@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { isValidStedfestingInput, parseStedfestingInput } from "./stedfestingParser";
+import {
+  isValidStedfestingInput,
+  parseStedfestingInput,
+  parseStedfestingRanges,
+} from "./stedfestingParser";
 
 describe("parseStedfestingInput", () => {
   test("parses mixed stedfesting tokens", () => {
@@ -48,5 +52,22 @@ describe("isValidStedfestingInput", () => {
 
     // Assert
     expect(result).toBe(false);
+  });
+});
+
+describe("parseStedfestingRanges", () => {
+  test("creates ranges for each token", () => {
+    // Arrange
+    const input = "1234, 0.2-0.5@5678, 0.8@9999";
+
+    // Act
+    const result = parseStedfestingRanges(input);
+
+    // Assert
+    expect(result).toEqual([
+      { id: 1234, start: 0, end: 1 },
+      { id: 5678, start: 0.2, end: 0.5 },
+      { id: 9999, start: 0.8, end: 0.8 },
+    ]);
   });
 });
