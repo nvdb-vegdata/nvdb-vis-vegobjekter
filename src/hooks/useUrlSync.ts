@@ -35,8 +35,8 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
     } else {
       url.searchParams.delete('polygon')
     }
-    if (searchMode === 'polygon' && polygonClip) {
-      url.searchParams.set('polygonclip', '1')
+    if (searchMode === 'polygon') {
+      url.searchParams.set('polygonclip', polygonClip ? '1' : '0')
     } else {
       url.searchParams.delete('polygonclip')
     }

@@ -27,14 +27,17 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
   return (
     <div className="vegobjekt-list">
       <div className="vegobjekt-list-header">
-        <span className="vegobjekt-list-title">Vegobjekter</span>
-        <div className="vegobjekt-list-actions">
-          {isLoading ? (
-            <span className="inline-spinner">
-              <span className="spinner spinner-small" />
-            </span>
-          ) : (
+        <div className="vegobjekt-list-heading">
+          <span className="vegobjekt-list-title">Vegobjekter</span>
+          {isLoading ? null : (
             <span className="vegobjekt-list-count">{totalCount} totalt</span>
+          )}
+        </div>
+        <div className="vegobjekt-list-actions">
+          {hasNextPage && !isLoading && (
+            <button type="button" className="btn btn-primary btn-small" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
+              {isFetchingNextPage ? 'Henter...' : 'Neste side'}
+            </button>
           )}
           {totalCount > 0 && !isLoading && (
             <>
@@ -64,11 +67,6 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                 </button>
               </div>
             </>
-          )}
-          {hasNextPage && !isLoading && (
-            <button type="button" className="btn btn-primary btn-small" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
-              {isFetchingNextPage ? 'Henter...' : 'Neste side'}
-            </button>
           )}
         </div>
       </div>

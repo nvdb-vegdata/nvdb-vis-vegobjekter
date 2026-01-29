@@ -69,7 +69,8 @@ function getInitialVeglenkesekvensLimit(): number {
 function getInitialPolygonClip(): boolean {
   const params = new URLSearchParams(window.location.search)
   const clipParam = params.get('polygonclip')?.toLowerCase()
-  if (!clipParam) return false
+  if (!clipParam) return true
+  if (clipParam === '0' || clipParam === 'false') return false
   return clipParam === '1' || clipParam === 'true'
 }
 

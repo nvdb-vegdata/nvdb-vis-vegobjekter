@@ -79,6 +79,21 @@ export function useVeglenkeRendering({
               continue
             }
 
+            const isLineString = geom.getType() === 'LineString'
+            const lineCoords = isLineString ? (geom as LineString).getCoordinates() : null
+            const polygonOverlapFractions = polygonGeometry && lineCoords ? getLineStringOverlapFractions(lineCoords, polygonGeometry) : null
+
+            if (polygonGeometry && isLineString && polygonOverlapFractions && polygonOverlapFractions.length === 0) {
+              continue
+            }
+
+            if (polygonGeometry && geom.getType() === 'Point') {
+              const point = (geom as Point).getCoordinates()
+              if (!polygonGeometry.containsXY(point[0] ?? 0, point[1] ?? 0)) {
+                continue
+              }
+            }
+
             let ranges: { start: number; end: number }[] | undefined
             if (stedfestingRangesById) {
               ranges = stedfestingRangesById.get(vs.id)
@@ -94,10 +109,9 @@ export function useVeglenkeRendering({
             })
             veglenkeSource.current.addFeature(feature)
 
-            if (ranges && geom.getType() === 'LineString') {
+            if (ranges && lineCoords) {
               const span = vl.sluttposisjon - vl.startposisjon
               if (span <= 0) continue
-              const coords = (geom as LineString).getCoordinates()
 
               for (const range of ranges) {
                 const clippedStart = Math.max(range.start, vl.startposisjon)
@@ -108,13 +122,13 @@ export function useVeglenkeRendering({
                 const endFraction = (clippedEnd - vl.startposisjon) / span
 
                 if (startFraction === endFraction) {
-                  const pointCoord = getPointAtFraction(coords, startFraction)
+                  const pointCoord = getPointAtFraction(lineCoords, startFraction)
                   const pointGeom = new Point(pointCoord)
                   stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
                   continue
                 }
 
-                const slicedCoords = sliceLineStringByFraction(coords, startFraction, endFraction)
+                const slicedCoords = sliceLineStringByFraction(lineCoords, startFraction, endFraction)
 
                 if (slicedCoords.length >= 2) {
                   const slicedGeom = new LineString(slicedCoords)
@@ -123,19 +137,16 @@ export function useVeglenkeRendering({
               }
             }
 
-            if (polygonGeometry && geom.getType() === 'LineString') {
-              const coords = (geom as LineString).getCoordinates()
-              const overlapFractions = getLineStringOverlapFractions(coords, polygonGeometry)
-
-              for (const overlap of overlapFractions) {
+            if (polygonOverlapFractions && lineCoords) {
+              for (const overlap of polygonOverlapFractions) {
                 if (overlap.startFraction === overlap.endFraction) {
-                  const pointCoord = getPointAtFraction(coords, overlap.startFraction)
+                  const pointCoord = getPointAtFraction(lineCoords, overlap.startFraction)
                   const pointGeom = new Point(pointCoord)
                   stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
                   continue
                 }
 
-                const slicedCoords = sliceLineStringByFraction(coords, overlap.startFraction, overlap.endFraction)
+                const slicedCoords = sliceLineStringByFraction(lineCoords, overlap.startFraction, overlap.endFraction)
 
                 if (slicedCoords.length >= 2) {
                   const slicedGeom = new LineString(slicedCoords)

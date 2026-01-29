@@ -140,6 +140,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       condition: click,
       layers: [veglenkeLayer],
       style: VEGLENKE_SELECTED_STYLE,
+      hitTolerance: 10,
     })
 
     select.on('select', (e) => {
@@ -168,6 +169,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     map.on('pointermove', (e) => {
       const hit = map.hasFeatureAtPixel(e.pixel, {
         layerFilter: (layer) => layer === veglenkeLayer,
+        hitTolerance: 10,
       })
       map.getTargetElement().style.cursor = hit ? 'pointer' : ''
     })

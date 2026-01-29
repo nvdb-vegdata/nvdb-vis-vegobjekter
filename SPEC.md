@@ -12,7 +12,7 @@ The application is in **beta** and displays a visible beta badge in the header.
 2. **Choose Search Mode** - Toggle between drawing a polygon, searching by vegsystemreferanse (strekning), or stedfesting
 3. **Define Area/Route** - Draw a small polygon, enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
 4. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 10)
-5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Optional polygon clipping fades the full veglenke and overlays only the portion inside the polygon.
+5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
 6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. If `metadata.neste` is present, fetch subsequent pages using the `start` token.
 7. **Inspect** - View detailed vegobjekt information in a collapsible list
 
@@ -31,8 +31,10 @@ The application is in **beta** and displays a visible beta badge in the header.
 - For points: single posisjon (format: "0.5@1234")
 - Overlap detection: check if object's position range intersects veglenke's position range
 
-### Polygon Clipping (Optional)
-- When enabled in polygon mode, the app calculates the intersection between each veglenke geometry and the polygon
+### Polygon Clipping (Default)
+- Enabled by default in polygon mode (can be toggled off)
+- The app calculates the intersection between each veglenke geometry and the polygon
+- Veglenker fully outside the polygon are filtered out
 - The stedfesting filter is based on the overlapping geometry only (not the full veglenke extent)
 - The map renders the full veglenke in a faded style with the clipped portion emphasized
 
