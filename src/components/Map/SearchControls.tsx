@@ -1,7 +1,10 @@
 import { useAtom } from 'jotai'
+import WKT from 'ol/format/WKT'
+import { Polygon } from 'ol/geom'
 import type { ChangeEvent, KeyboardEvent } from 'react'
-import { useCallback, useState } from 'react'
-import { stedfestingAtom, stedfestingInputAtom, strekningAtom, strekningInputAtom } from '../../state/atoms'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { polygonAtom, polygonWktInputAtom, stedfestingAtom, stedfestingInputAtom, strekningAtom, strekningInputAtom } from '../../state/atoms'
+import { roundPolygonToTwoDecimals } from '../../utils/polygonRounding'
 import { isValidStedfestingInput } from '../../utils/stedfestingParser'
 import { isValidVegsystemreferanse } from '../../utils/vegsystemreferanseValidator'
 
@@ -9,13 +12,98 @@ interface Props {
   searchMode: 'polygon' | 'strekning' | 'stedfesting'
 }
 
+const POLYGON_WKT_REGEX = /^POLYGON\s*\(\(\s*-?\d+(?:\.\d+)?\s+-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?\s+-?\d+(?:\.\d+)?)+\s*\)\)\s*$/i
+
+function isValidPolygonWkt(value: string): boolean {
+  return POLYGON_WKT_REGEX.test(value)
+}
+
 export default function SearchControls({ searchMode }: Props) {
+  const [polygon, setPolygon] = useAtom(polygonAtom)
+  const [polygonWktInput, setPolygonWktInput] = useAtom(polygonWktInputAtom)
+  const [polygonError, setPolygonError] = useState<string | null>(null)
+  const lastPolygonWktRef = useRef('')
   const [, setStrekning] = useAtom(strekningAtom)
   const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
   const [strekningError, setStrekningError] = useState<string | null>(null)
   const [, setStedfesting] = useAtom(stedfestingAtom)
   const [stedfestingInput, setStedfestingInput] = useAtom(stedfestingInputAtom)
   const [stedfestingError, setStedfestingError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!polygon) {
+      if (lastPolygonWktRef.current !== '') {
+        lastPolygonWktRef.current = ''
+        setPolygonWktInput('')
+      }
+      if (polygonError !== null) {
+        setPolygonError(null)
+      }
+      return
+    }
+    const format = new WKT()
+    const roundedPolygon = roundPolygonToTwoDecimals(polygon)
+    const currentWkt = format.writeGeometry(polygon)
+    const roundedWkt = format.writeGeometry(roundedPolygon)
+    if (currentWkt !== roundedWkt) {
+      setPolygon(roundedPolygon)
+    }
+    if (roundedWkt !== lastPolygonWktRef.current) {
+      lastPolygonWktRef.current = roundedWkt
+      setPolygonWktInput(roundedWkt)
+    }
+    if (polygonError !== null) {
+      setPolygonError(null)
+    }
+  }, [polygon, polygonError, setPolygon, setPolygonWktInput])
+
+  const handlePolygonChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setPolygonWktInput(event.target.value)
+      setPolygonError(null)
+    },
+    [setPolygonWktInput],
+  )
+
+  const handlePolygonSearch = useCallback(() => {
+    const trimmed = polygonWktInput.trim()
+    if (trimmed.length === 0) return
+    if (!isValidPolygonWkt(trimmed)) {
+      setPolygonError('Ugyldig WKT-format. Bruk f.eks. POLYGON((x y, ...)).')
+      return
+    }
+    try {
+      const format = new WKT()
+      const geometry = format.readGeometry(trimmed)
+      if (!(geometry instanceof Polygon)) {
+        setPolygonError('Kun POLYGON er støttet i WKT-feltet.')
+        return
+      }
+      setPolygonError(null)
+      setPolygon(roundPolygonToTwoDecimals(geometry))
+    } catch {
+      setPolygonError('Ugyldig WKT. Bruk f.eks. POLYGON((x y, ...)).')
+    }
+  }, [polygonWktInput, setPolygon])
+
+  const handlePolygonKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        if (polygonWktInput.trim().length > 0) {
+          handlePolygonSearch()
+        }
+      }
+    },
+    [handlePolygonSearch, polygonWktInput],
+  )
+
+  const clearPolygon = useCallback(() => {
+    setPolygonWktInput('')
+    lastPolygonWktRef.current = ''
+    setPolygon(null)
+    setPolygonError(null)
+  }, [setPolygon, setPolygonWktInput])
 
   const handleStrekningChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +183,9 @@ export default function SearchControls({ searchMode }: Props) {
   const isStrekningValid = trimmedStrekningInput.length === 0 || isValidVegsystemreferanse(trimmedStrekningInput)
   const trimmedStedfestingInput = stedfestingInput.trim()
   const isStedfestingValid = trimmedStedfestingInput.length === 0 || isValidStedfestingInput(trimmedStedfestingInput)
+  const trimmedPolygonInput = polygonWktInput.trim()
+  const isPolygonRegexValid = trimmedPolygonInput.length === 0 || isValidPolygonWkt(trimmedPolygonInput)
+  const isPolygonValid = trimmedPolygonInput.length === 0 || (isPolygonRegexValid && polygonError === null)
 
   return (
     <>
@@ -163,6 +254,35 @@ export default function SearchControls({ searchMode }: Props) {
             </button>
           </div>
           {stedfestingError && <div className="strekning-error">{stedfestingError}</div>}
+        </div>
+      )}
+
+      {searchMode === 'polygon' && (
+        <div className="strekning-controls">
+          <label className="search-label" htmlFor="polygon-wkt-input">
+            Polygon WKT
+          </label>
+          <div className="strekning-input-row">
+            <div className="search-input-wrapper">
+              <input
+                id="polygon-wkt-input"
+                className="search-input"
+                placeholder="POLYGON((x y, x y, ...))"
+                value={polygonWktInput}
+                onChange={handlePolygonChange}
+                onKeyDown={handlePolygonKeyDown}
+              />
+              {polygonWktInput && (
+                <button className="search-clear-btn" type="button" onClick={clearPolygon} aria-label="Tøm polygon WKT">
+                  ×
+                </button>
+              )}
+            </div>
+            <button className="btn btn-primary" type="button" onClick={handlePolygonSearch} disabled={trimmedPolygonInput.length === 0 || !isPolygonValid}>
+              Søk
+            </button>
+          </div>
+          {polygonError && <div className="strekning-error">{polygonError}</div>}
         </div>
       )}
     </>

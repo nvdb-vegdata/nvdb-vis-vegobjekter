@@ -9,8 +9,8 @@ The application is in **beta** and displays a visible beta badge in the header.
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
-2. **Choose Search Mode** - Toggle between drawing a polygon, searching by vegsystemreferanse (strekning), or stedfesting
-3. **Define Area/Route** - Draw a small polygon, enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
+2. **Choose Search Mode** - Toggle between polygon, vegsystemreferanse (strekning), or stedfesting
+3. **Define Area/Route** - Draw a small polygon or paste a polygon WKT and click "Søk", enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
 4. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 10)
 5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
 6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. If `metadata.neste` is present, fetch subsequent pages using the `start` token. The "Hent flere" button loads additional pages in batches of up to 10,000 objects per click.
@@ -151,7 +151,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - User toggles between polygon mode, strekning mode, and stedfesting mode
 
 4. **Define Area/Route**
-   - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area)
+   - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area), or paste a polygon WKT and click "Søk"
    - Strekning mode: enter a vegsystemreferanse (e.g., "FV6666 S1") and click "Søk"
    - Stedfesting mode: enter stedfesting expressions (e.g., "1234, 0.2-0.5@5678") and click "Søk"
    - Polygon is converted to UTM33 coordinates

@@ -21,6 +21,7 @@ import { useHighlightRendering } from '../../hooks/useHighlightRendering'
 import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
 import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
 import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
+import { roundPolygonToTwoDecimals } from '../../utils/polygonRounding'
 import {
   EGENGEOMETRI_LINE_STYLE,
   EGENGEOMETRI_POINT_STYLE,
@@ -224,8 +225,9 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
   useEffect(() => {
     if (searchMode !== 'polygon') return
-    if (!mapInstance.current || !polygon) return
-    if (drawSource.current.getFeatures().length > 0) return
+    if (!mapInstance.current) return
+    drawSource.current.clear()
+    if (!polygon) return
     const feature = new Feature({ geometry: polygon })
     drawSource.current.addFeature(feature)
   }, [polygon, searchMode])
@@ -284,7 +286,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     draw.on('drawend', (event) => {
       const feature = event.feature
       const geom = feature.getGeometry() as Polygon
-      setPolygon(geom)
+      setPolygon(roundPolygonToTwoDecimals(geom))
       mapInstance.current?.removeInteraction(draw)
       setIsDrawing(false)
     })

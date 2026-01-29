@@ -80,19 +80,6 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
           )}
           {overallCount > 0 && !isLoading && (
             <>
-              <button type="button" className="btn btn-secondary btn-small filter-popover-anchor" popoverTarget="filter-popover">
-                Filter
-              </button>
-              <div id="filter-popover" className="filter-popover" popover="auto">
-                <label className="filter-popover-field">
-                  <span className="filter-popover-label">Vis versjoner med startdato etter...</span>
-                  <input type="date" className="filter-popover-input" value={startDateAfter} onChange={(event) => setStartDateAfter(event.target.value)} />
-                </label>
-                <label className="filter-popover-field">
-                  <span className="filter-popover-label">Vis versjoner med startdato før...</span>
-                  <input type="date" className="filter-popover-input" value={startDateBefore} onChange={(event) => setStartDateBefore(event.target.value)} />
-                </label>
-              </div>
               <button type="button" className="btn btn-secondary btn-small csv-popover-anchor" popoverTarget="csv-popover">
                 Last ned CSV
               </button>
@@ -123,16 +110,37 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
         </div>
       </div>
       <div className="vegobjekt-list-content">
-        {filterSummaries.length > 0 && (
-          <div className="filter-summary">
-            {filterSummaries.map((filter) => (
-              <button key={filter.label} type="button" className="filter-chip" onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`}>
-                <span>{filter.label}</span>
-                <span className="filter-chip-remove" aria-hidden="true">
-                  ×
-                </span>
+        {overallCount > 0 && !isLoading && (
+          <div className="vegobjekt-list-toolbar">
+            <div className="vegobjekt-list-toolbar-left">
+              {filterSummaries.length > 0 && (
+                <div className="filter-summary">
+                  {filterSummaries.map((filter) => (
+                    <button key={filter.label} type="button" className="filter-chip" onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`}>
+                      <span>{filter.label}</span>
+                      <span className="filter-chip-remove" aria-hidden="true">
+                        ×
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="vegobjekt-list-toolbar-right">
+              <button type="button" className="btn btn-secondary btn-small filter-popover-anchor" popoverTarget="filter-popover">
+                Filter
               </button>
-            ))}
+              <div id="filter-popover" className="filter-popover" popover="auto">
+                <label className="filter-popover-field">
+                  <span className="filter-popover-label">Vis versjoner med startdato etter...</span>
+                  <input type="date" className="filter-popover-input" value={startDateAfter} onChange={(event) => setStartDateAfter(event.target.value)} />
+                </label>
+                <label className="filter-popover-field">
+                  <span className="filter-popover-label">Vis versjoner med startdato før...</span>
+                  <input type="date" className="filter-popover-input" value={startDateBefore} onChange={(event) => setStartDateBefore(event.target.value)} />
+                </label>
+              </div>
+            </div>
           </div>
         )}
         {isLoading ? (

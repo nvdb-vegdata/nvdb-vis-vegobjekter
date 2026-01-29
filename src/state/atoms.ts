@@ -3,6 +3,7 @@ import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import type { Vegobjekt } from '../api/uberiketClient'
+import { roundPolygonToTwoDecimals } from '../utils/polygonRounding'
 
 export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 10
 
@@ -29,12 +30,17 @@ function getInitialPolygon(): Polygon | null {
     const format = new WKT()
     const geom = format.readGeometry(wkt)
     if (geom instanceof Polygon) {
-      return geom
+      return roundPolygonToTwoDecimals(geom)
     }
   } catch {
     console.warn('Failed to parse WKT from URL')
   }
   return null
+}
+
+function getInitialPolygonWkt(): string {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('polygon')?.trim() ?? ''
 }
 
 export type SearchMode = 'polygon' | 'strekning' | 'stedfesting'
@@ -78,6 +84,7 @@ export const selectedTypeIdsAtom = atom<number[]>(getInitialTypeIds())
 export const selectedTypesAtom = atom<Vegobjekttype[]>([])
 export const allTypesSelectedAtom = atom(getInitialAllTypesSelected())
 export const polygonAtom = atom<Polygon | null>(getInitialPolygon())
+export const polygonWktInputAtom = atom<string>(getInitialPolygonWkt())
 export const polygonClipAtom = atom<boolean>(getInitialPolygonClip())
 export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
