@@ -13,7 +13,7 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.90.4",
+    "@hey-api/openapi-ts": "^0.91.0",
     "@types/bun": "latest",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3"
