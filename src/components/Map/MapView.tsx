@@ -69,12 +69,28 @@ const VEGLENKE_STYLE = new Style({
   stroke: new Stroke({ color: '#3498db', width: 4 }),
 })
 
+const VEGLENKE_FADED_STYLE = new Style({
+  stroke: new Stroke({ color: 'rgba(52, 152, 219, 0.35)', width: 3 }),
+})
+
 const VEGLENKE_SELECTED_STYLE = new Style({
   stroke: new Stroke({ color: '#e74c3c', width: 6 }),
 })
 
 const HIGHLIGHT_STYLE = new Style({
   stroke: new Stroke({ color: '#f39c12', width: 8 }),
+})
+
+const STEDFESTING_STYLE = new Style({
+  stroke: new Stroke({ color: '#1abc9c', width: 6 }),
+})
+
+const STEDFESTING_POINT_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 8,
+    fill: new Fill({ color: 'rgba(26, 188, 156, 0.9)' }),
+    stroke: new Stroke({ color: '#16a085', width: 2 }),
+  }),
 })
 
 const HIGHLIGHT_POINT_STYLE = new Style({
@@ -148,11 +164,13 @@ export default function MapView({
   const mapInstance = useRef<OLMap | null>(null)
   const drawSource = useRef(new VectorSource())
   const veglenkeSource = useRef(new VectorSource())
+  const stedfestingSource = useRef(new VectorSource())
   const highlightSource = useRef(new VectorSource())
   const egengeometriSource = useRef(new VectorSource())
   const overlayRef = useRef<Overlay | null>(null)
   const drawInteraction = useRef<Draw | null>(null)
   const selectInteraction = useRef<Select | null>(null)
+  const veglenkeLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
 
@@ -175,6 +193,15 @@ export default function MapView({
     const veglenkeLayer = new VectorLayer({
       source: veglenkeSource.current,
       style: VEGLENKE_STYLE,
+    })
+    veglenkeLayerRef.current = veglenkeLayer
+
+    const stedfestingLayer = new VectorLayer({
+      source: stedfestingSource.current,
+      style: (feature) =>
+        feature.getGeometry()?.getType() === 'Point'
+          ? STEDFESTING_POINT_STYLE
+          : STEDFESTING_STYLE,
     })
 
     const highlightLayer = new VectorLayer({
@@ -213,6 +240,7 @@ export default function MapView({
         new TileLayer({ source: new OSM() }),
         drawLayer,
         veglenkeLayer,
+        stedfestingLayer,
         highlightLayer,
         egengeometriLayer,
       ],
@@ -290,10 +318,18 @@ export default function MapView({
     setIsDrawing(false)
     drawSource.current.clear()
     veglenkeSource.current.clear()
+    stedfestingSource.current.clear()
     highlightSource.current.clear()
     egengeometriSource.current.clear()
     setSelectedFeature(null)
     overlayRef.current?.setPosition(undefined)
+  }, [searchMode])
+
+  useEffect(() => {
+    if (!veglenkeLayerRef.current) return
+    veglenkeLayerRef.current.setStyle(
+      searchMode === 'stedfesting' ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE,
+    )
   }, [searchMode])
 
   useEffect(() => {
@@ -307,10 +343,12 @@ export default function MapView({
   useEffect(() => {
     if (!veglenkesekvenser) {
       veglenkeSource.current.clear()
+      stedfestingSource.current.clear()
       return
     }
 
     veglenkeSource.current.clear()
+    stedfestingSource.current.clear()
     const wktFormat = new WKT()
     const today = new Date().toISOString().split('T')[0]!
 
@@ -365,6 +403,44 @@ export default function MapView({
               veglenke: vl,
             })
             veglenkeSource.current.addFeature(feature)
+
+            if (stedfestingRangesById && geom.getType() === 'LineString') {
+              const ranges = stedfestingRangesById.get(vs.id) ?? []
+              const span = vl.sluttposisjon - vl.startposisjon
+              if (span <= 0) continue
+              const coords = (geom as LineString).getCoordinates()
+
+              for (const range of ranges) {
+                const clippedStart = Math.max(range.start, vl.startposisjon)
+                const clippedEnd = Math.min(range.end, vl.sluttposisjon)
+                if (clippedEnd < clippedStart) continue
+
+                const startFraction = (clippedStart - vl.startposisjon) / span
+                const endFraction = (clippedEnd - vl.startposisjon) / span
+
+                if (startFraction === endFraction) {
+                  const pointCoord = getPointAtFraction(coords, startFraction)
+                  const pointGeom = new Point(pointCoord)
+                  stedfestingSource.current.addFeature(
+                    new Feature({ geometry: pointGeom }),
+                  )
+                  continue
+                }
+
+                const slicedCoords = sliceLineStringByFraction(
+                  coords,
+                  startFraction,
+                  endFraction,
+                )
+
+                if (slicedCoords.length >= 2) {
+                  const slicedGeom = new LineString(slicedCoords)
+                  stedfestingSource.current.addFeature(
+                    new Feature({ geometry: slicedGeom }),
+                  )
+                }
+              }
+            }
           } catch (e) {
             console.warn('Failed to parse geometry', e)
           }
@@ -372,7 +448,9 @@ export default function MapView({
       }
     }
 
-    const extent = veglenkeSource.current.getExtent()
+    const clippedExtent = stedfestingSource.current.getExtent()
+    const baseExtent = veglenkeSource.current.getExtent()
+    const extent = !isExtentEmpty(clippedExtent) ? clippedExtent : baseExtent
     if (mapInstance.current && !isExtentEmpty(extent)) {
       mapInstance.current.getView().fit(extent, {
         padding: [40, 40, 40, 40],
@@ -546,6 +624,7 @@ export default function MapView({
   const clearAll = useCallback(() => {
     drawSource.current.clear()
     veglenkeSource.current.clear()
+    stedfestingSource.current.clear()
     highlightSource.current.clear()
     egengeometriSource.current.clear()
     setSelectedFeature(null)
