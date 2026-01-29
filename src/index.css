@@ -11,6 +11,26 @@ body,
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
+:root {
+  --link-color: #3498db;
+  --link-hover-color: #2980b9;
+  --link-copied-color: #2ecc71;
+}
+
+.app a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.app a:hover {
+  color: var(--link-hover-color);
+}
+
+.app a:focus-visible {
+  outline: 1px solid var(--link-color);
+  outline-offset: 1px;
+}
+
 .app {
   display: flex;
   height: 100%;
@@ -980,6 +1000,30 @@ body,
   color: #333;
 }
 
+.vegobjekt-egenskap-copy {
+  margin-left: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--link-color);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.vegobjekt-egenskap-copy:hover {
+  color: var(--link-hover-color);
+}
+
+.vegobjekt-egenskap-copy:focus-visible {
+  outline: 1px solid var(--link-color);
+  outline-offset: 1px;
+}
+
+.vegobjekt-egenskap-copy.copied {
+  color: var(--link-copied-color);
+  text-decoration: none;
+}
+
 /* Loading indicators */
 @keyframes spin {
   to {
@@ -1051,7 +1095,7 @@ body,
   background: none;
   border: none;
   padding: 0;
-  color: #3498db;
+  color: var(--link-color);
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
@@ -1059,7 +1103,12 @@ body,
 }
 
 .popup-vegobjekt-link:hover {
-  color: #2980b9;
+  color: var(--link-hover-color);
+}
+
+.popup-vegobjekt-link:focus-visible {
+  outline: 1px solid var(--link-color);
+  outline-offset: 1px;
 }
 
 /* Vegobjekt highlight animation */

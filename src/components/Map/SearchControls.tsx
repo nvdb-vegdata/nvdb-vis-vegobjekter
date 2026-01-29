@@ -208,6 +208,30 @@ export default function SearchControls({ searchMode }: Props) {
     setStedfestingError(null)
   }, [setStedfestingInput, setStedfesting])
 
+  useEffect(() => {
+    if (searchMode !== 'polygon' && (polygon || polygonWktInput || polygonError)) {
+      clearPolygon()
+    }
+    if (searchMode !== 'strekning' && (strekningInput || strekningError)) {
+      clearStrekning()
+    }
+    if (searchMode !== 'stedfesting' && (stedfestingInput || stedfestingError)) {
+      clearStedfesting()
+    }
+  }, [
+    clearPolygon,
+    clearStedfesting,
+    clearStrekning,
+    polygon,
+    polygonError,
+    polygonWktInput,
+    searchMode,
+    stedfestingError,
+    stedfestingInput,
+    strekningError,
+    strekningInput,
+  ])
+
   const trimmedStrekningInput = strekningInput.trim()
   const isStrekningValid = trimmedStrekningInput.length === 0 || isValidVegsystemreferanse(trimmedStrekningInput)
   const trimmedStedfestingInput = stedfestingInput.trim()

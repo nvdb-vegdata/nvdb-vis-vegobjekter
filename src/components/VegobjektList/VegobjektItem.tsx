@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai'
 import type { MouseEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import type { Vegobjekt } from '../../api/uberiketClient'
+import type { GeometriEgenskap, Vegobjekt } from '../../api/uberiketClient'
 import { hoveredVegobjektAtom, locateVegobjektAtom } from '../../state/atoms'
 import type { VegobjektDetails } from '../../utils/vegobjektProcessing'
 
@@ -27,12 +27,17 @@ export default function VegobjektItem({
   const setHoveredVegobjekt = useSetAtom(hoveredVegobjektAtom)
   const setLocateVegobjekt = useSetAtom(locateVegobjektAtom)
   const [copied, setCopied] = useState(false)
+  const [copiedWktEgenskapId, setCopiedWktEgenskapId] = useState<string | null>(null)
   const copyTimeoutRef = useRef<number | null>(null)
+  const copyWktTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     return () => {
       if (copyTimeoutRef.current !== null) {
         window.clearTimeout(copyTimeoutRef.current)
+      }
+      if (copyWktTimeoutRef.current !== null) {
+        window.clearTimeout(copyWktTimeoutRef.current)
       }
     }
   }, [])
@@ -40,6 +45,8 @@ export default function VegobjektItem({
   const uberiketUrl = `${UBERIKET_API_BASE_URL}/api/v1/vegobjekter/${details.typeId}/${details.id}`
   const lesApiUrl = `${NVDB_API_BASE_URL}/vegobjekt?id=${details.id}`
   const vegkartUrl = `${VEGKART_BASE_URL}#valgt:${details.id}`
+
+  const isPolygonWkt = (wkt: string) => wkt.trim().toUpperCase().startsWith('POLYGON')
 
   const handleCopyId = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
@@ -59,6 +66,27 @@ export default function VegobjektItem({
       }, 1500)
     } catch {
       setCopied(false)
+    }
+  }
+
+  const handleCopyWkt = async (event: MouseEvent<HTMLButtonElement>, egenskapId: string, wkt: string) => {
+    event.stopPropagation()
+
+    if (!navigator.clipboard?.writeText) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(wkt)
+      setCopiedWktEgenskapId(egenskapId)
+      if (copyWktTimeoutRef.current !== null) {
+        window.clearTimeout(copyWktTimeoutRef.current)
+      }
+      copyWktTimeoutRef.current = window.setTimeout(() => {
+        setCopiedWktEgenskapId(null)
+      }, 1500)
+    } catch {
+      setCopiedWktEgenskapId(null)
     }
   }
 
@@ -162,6 +190,24 @@ export default function VegobjektItem({
               {details.egenskaper.map((e) => (
                 <div key={e.id} className="vegobjekt-property">
                   <span className="vegobjekt-egenskap-name">{e.name}:</span> <span className="vegobjekt-egenskap-value">{e.value}</span>
+                  {(() => {
+                    const egenskap = vegobjekt.egenskaper?.[e.id]
+                    if (!egenskap || egenskap.type !== 'GeometriEgenskap') return null
+                    const geometriEgenskap = egenskap as GeometriEgenskap
+                    if (!isPolygonWkt(geometriEgenskap.verdi.wkt)) return null
+                    const isCopied = copiedWktEgenskapId === e.id
+                    return (
+                      <button
+                        type="button"
+                        className={`vegobjekt-egenskap-copy${isCopied ? ' copied' : ''}`}
+                        aria-label={isCopied ? 'WKT kopiert' : 'Kopier WKT'}
+                        title={isCopied ? 'Kopiert!' : 'Kopier WKT'}
+                        onClick={(event) => handleCopyWkt(event, e.id, geometriEgenskap.verdi.wkt)}
+                      >
+                        {isCopied ? 'Kopiert!' : 'Kopier'}
+                      </button>
+                    )
+                  })()}
                 </div>
               ))}
             </div>

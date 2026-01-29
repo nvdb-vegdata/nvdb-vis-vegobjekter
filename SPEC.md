@@ -9,7 +9,7 @@ The application is in **beta** and displays a visible beta badge in the header.
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
-2. **Choose Search Mode** - Toggle between polygon, vegsystemreferanse (strekning), or stedfesting
+2. **Choose Search Mode** - Toggle between polygon, vegsystemreferanse (strekning), or stedfesting (switching mode clears other search inputs/state)
 3. **Define Area/Route** - Draw a small polygon or paste a polygon WKT and click "Søk"/"Kopier WKT", enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
 4. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 100)
 5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
@@ -148,7 +148,8 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Must select at least one type before querying
 
 3. **Choose Search Mode**
-   - User toggles between polygon mode, strekning mode, and stedfesting mode
+    - User toggles between polygon mode, strekning mode, and stedfesting mode
+    - Switching search mode clears inputs/state from the other modes
 
 4. **Define Area/Route**
    - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area), or paste a polygon WKT and click "Søk"/"Kopier WKT"
@@ -170,12 +171,13 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
       - "Vis versjoner med startdato før..." (client-side, before date - exclusive)
     - Hovering over a vegobjekt in the list highlights its stedfestinger on the map
    - Locate button recenters the map on the vegobjekt's stedfesting geometry
-   - Each vegobjekt displays:
-     - ID with copy button
-     - Gyldighetsperiode (validity period)
-     - Stedfestinger (format: "0.2-0.8@1234")
-     - Barn (child object references)
-     - Egenskaper (properties with names mapped from datakatalog)
+    - Each vegobjekt displays:
+      - ID with copy button
+      - Gyldighetsperiode (validity period)
+      - Stedfestinger (format: "0.2-0.8@1234")
+      - Barn (child object references)
+      - Egenskaper (properties with names mapped from datakatalog)
+      - Polygon geometri-egenskaper include a "Kopier" link to copy the WKT
    - Enum values are resolved to their display names
 
 ## URL Synchronization
@@ -271,3 +273,4 @@ interface GeometriEgenskap {
 - Line geometries are shown as dashed lines  
 - Polygon geometries are shown with semi-transparent fill
 - Hovering over a vegobjekt highlights both its stedfesting AND its geometri-egenskaper
+- Polygon geometri-egenskaper expose a WKT copy link in the details list
