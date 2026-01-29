@@ -1,9 +1,7 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { click } from 'ol/events/condition'
-import { createEmpty, extend, isEmpty as isExtentEmpty } from 'ol/extent'
 import Feature from 'ol/Feature'
-import WKT from 'ol/format/WKT'
-import { LineString, Point, type Polygon } from 'ol/geom'
+import type { Polygon } from 'ol/geom'
 import { Draw, Select } from 'ol/interaction'
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
@@ -15,33 +13,28 @@ import { fromLonLat, toLonLat } from 'ol/proj'
 import { register } from 'ol/proj/proj4'
 import OSM from 'ol/source/OSM'
 import VectorSource from 'ol/source/Vector'
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
+import { Fill, Stroke, Style } from 'ol/style'
 import proj4 from 'proj4'
-import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { VeglenkesekvensMedPosisjoner, Vegobjekt } from '../../api/uberiketClient'
+import { useHighlightRendering } from '../../hooks/useHighlightRendering'
+import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
+import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
+import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
 import {
-  getGeometriEgenskaper,
-  isOnVeglenke,
-  type Stedfesting,
-  type VeglenkeMedPosisjon,
-  type VeglenkesekvensMedPosisjoner,
-  type Vegobjekt,
-} from '../../api/uberiketClient'
-import {
-  focusedVegobjektAtom,
-  hoveredVegobjektAtom,
-  locateVegobjektAtom,
-  polygonAtom,
-  searchModeAtom,
-  selectedTypesAtom,
-  stedfestingAtom,
-  stedfestingInputAtom,
-  strekningAtom,
-  strekningInputAtom,
-} from '../../state/atoms'
-import { getTodayDate } from '../../utils/dateUtils'
-import { getClippedGeometries, getPointAtFraction, sliceLineStringByFraction } from '../../utils/geometryUtils'
-import { isValidStedfestingInput, parseStedfestingRanges } from '../../utils/stedfestingParser'
+  EGENGEOMETRI_LINE_STYLE,
+  EGENGEOMETRI_POINT_STYLE,
+  EGENGEOMETRI_POLYGON_STYLE,
+  HIGHLIGHT_POINT_STYLE,
+  HIGHLIGHT_STYLE,
+  STEDFESTING_POINT_STYLE,
+  STEDFESTING_STYLE,
+  VEGLENKE_FADED_STYLE,
+  VEGLENKE_SELECTED_STYLE,
+  VEGLENKE_STYLE,
+} from './mapStyles'
+import SearchControls from './SearchControls'
+import VeglenkePopup from './VeglenkePopup'
 
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
 proj4.defs('EPSG:5973', '+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs')
@@ -53,92 +46,10 @@ interface Props {
   isLoadingVeglenker?: boolean
 }
 
-const VEGLENKE_STYLE = new Style({
-  stroke: new Stroke({ color: '#3498db', width: 4 }),
-})
-
-const VEGLENKE_FADED_STYLE = new Style({
-  stroke: new Stroke({ color: 'rgba(52, 152, 219, 0.35)', width: 3 }),
-})
-
-const VEGLENKE_SELECTED_STYLE = new Style({
-  stroke: new Stroke({ color: '#e74c3c', width: 6 }),
-})
-
-const HIGHLIGHT_STYLE = new Style({
-  stroke: new Stroke({ color: '#f39c12', width: 8 }),
-})
-
-const STEDFESTING_STYLE = new Style({
-  stroke: new Stroke({ color: '#1abc9c', width: 6 }),
-})
-
-const STEDFESTING_POINT_STYLE = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({ color: 'rgba(26, 188, 156, 0.9)' }),
-    stroke: new Stroke({ color: '#16a085', width: 2 }),
-  }),
-})
-
-const HIGHLIGHT_POINT_STYLE = new Style({
-  image: new CircleStyle({
-    radius: 10,
-    fill: new Fill({ color: 'rgba(243, 156, 18, 0.8)' }),
-    stroke: new Stroke({ color: '#e67e22', width: 3 }),
-  }),
-})
-
-const EGENGEOMETRI_POINT_STYLE = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({ color: 'rgba(155, 89, 182, 0.8)' }),
-    stroke: new Stroke({ color: '#8e44ad', width: 2 }),
-  }),
-})
-
-const EGENGEOMETRI_LINE_STYLE = new Style({
-  stroke: new Stroke({
-    color: '#9b59b6',
-    width: 4,
-    lineDash: [8, 4],
-  }),
-})
-
-const EGENGEOMETRI_POLYGON_STYLE = new Style({
-  fill: new Fill({ color: 'rgba(155, 89, 182, 0.3)' }),
-  stroke: new Stroke({ color: '#8e44ad', width: 2 }),
-})
-
-const VEGSYSTEMREFERANSE_REGEX = /^(?:(\d{4})\s*)?([ERFKPS])(?:([VAPF])\s*)?(\d+)(?:\s*S(\d+(?:-\d+)?))?(?:\s*D(\d+(?:-\d+)?))?\s*$/i
-
-function isValidVegsystemreferanse(value: string): boolean {
-  const match = VEGSYSTEMREFERANSE_REGEX.exec(value.trim())
-  if (!match) return false
-  const kommune = match[1]
-  const kategori = match[2]?.toUpperCase() ?? ''
-  const strekning = match[5]
-  const delstrekning = match[6]
-  if (kommune && !['K', 'P', 'S'].includes(kategori)) {
-    return false
-  }
-  if (delstrekning && !strekning) {
-    return false
-  }
-  return true
-}
-
 export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadingVeglenker }: Props) {
-  const selectedTypes = useAtomValue(selectedTypesAtom)
   const [polygon, setPolygon] = useAtom(polygonAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
-  const [, setStrekning] = useAtom(strekningAtom)
-  const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
-  const [strekningError, setStrekningError] = useState<string | null>(null)
-  const [stedfesting, setStedfesting] = useAtom(stedfestingAtom)
-  const [stedfestingInput, setStedfestingInput] = useAtom(stedfestingInputAtom)
-  const [stedfestingError, setStedfestingError] = useState<string | null>(null)
-  const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom)
+  const stedfesting = useAtomValue(stedfestingAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
   const locateVegobjekt = useAtomValue(locateVegobjektAtom)
 
@@ -311,248 +222,30 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     drawSource.current.addFeature(feature)
   }, [polygon, searchMode])
 
-  useEffect(() => {
-    if (!veglenkesekvenser) {
-      veglenkeSource.current.clear()
-      stedfestingSource.current.clear()
-      return
-    }
+  useVeglenkeRendering({
+    veglenkesekvenser,
+    searchMode,
+    stedfesting,
+    veglenkeSource,
+    stedfestingSource,
+    drawSource,
+    mapInstance,
+  })
 
-    veglenkeSource.current.clear()
-    stedfestingSource.current.clear()
-    const wktFormat = new WKT()
-    const today = getTodayDate()
+  useHighlightRendering({
+    hoveredVegobjekt,
+    veglenkesekvenser,
+    highlightSource,
+    egengeometriSource,
+    veglenkeSource,
+  })
 
-    const drawnFeatures = drawSource.current.getFeatures()
-    const drawnPolygon = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
-
-    const stedfestingRangesById =
-      searchMode === 'stedfesting' && stedfesting.trim().length > 0
-        ? parseStedfestingRanges(stedfesting).reduce((map, range) => {
-            const existing = map.get(range.id)
-            if (existing) {
-              existing.push(range)
-            } else {
-              map.set(range.id, [range])
-            }
-            return map
-          }, new Map<number, { start: number; end: number }[]>())
-        : null
-
-    for (const vs of veglenkesekvenser) {
-      for (const vl of vs.veglenker ?? []) {
-        const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
-        if (sluttdato && sluttdato < today) {
-          continue
-        }
-
-        if (vl.geometri?.wkt) {
-          try {
-            const geom = wktFormat.readGeometry(vl.geometri.wkt, {
-              dataProjection: `EPSG:${vl.geometri.srid}`,
-              featureProjection: 'EPSG:3857',
-            })
-
-            if (drawnPolygon && !geom.intersectsExtent(drawnPolygon.getExtent())) {
-              continue
-            }
-
-            if (stedfestingRangesById) {
-              const ranges = stedfestingRangesById.get(vs.id)
-              if (!ranges) continue
-              const overlaps = ranges.some((range) => range.end >= vl.startposisjon && range.start <= vl.sluttposisjon)
-              if (!overlaps) continue
-            }
-
-            const feature = new Feature({
-              geometry: geom,
-              veglenkesekvensId: vs.id,
-              veglenke: vl,
-            })
-            veglenkeSource.current.addFeature(feature)
-
-            if (stedfestingRangesById && geom.getType() === 'LineString') {
-              const ranges = stedfestingRangesById.get(vs.id) ?? []
-              const span = vl.sluttposisjon - vl.startposisjon
-              if (span <= 0) continue
-              const coords = (geom as LineString).getCoordinates()
-
-              for (const range of ranges) {
-                const clippedStart = Math.max(range.start, vl.startposisjon)
-                const clippedEnd = Math.min(range.end, vl.sluttposisjon)
-                if (clippedEnd < clippedStart) continue
-
-                const startFraction = (clippedStart - vl.startposisjon) / span
-                const endFraction = (clippedEnd - vl.startposisjon) / span
-
-                if (startFraction === endFraction) {
-                  const pointCoord = getPointAtFraction(coords, startFraction)
-                  const pointGeom = new Point(pointCoord)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
-                  continue
-                }
-
-                const slicedCoords = sliceLineStringByFraction(coords, startFraction, endFraction)
-
-                if (slicedCoords.length >= 2) {
-                  const slicedGeom = new LineString(slicedCoords)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom }))
-                }
-              }
-            }
-          } catch (e) {
-            console.warn('Failed to parse geometry', e)
-          }
-        }
-      }
-    }
-
-    const clippedExtent = stedfestingSource.current.getExtent()
-    const baseExtent = veglenkeSource.current.getExtent()
-    const extent = !isExtentEmpty(clippedExtent) ? clippedExtent : baseExtent
-    if (mapInstance.current && !isExtentEmpty(extent)) {
-      mapInstance.current.getView().fit(extent, {
-        padding: [40, 40, 40, 40],
-        duration: 250,
-        maxZoom: 16,
-      })
-    }
-  }, [veglenkesekvenser, searchMode, stedfesting])
-
-  useEffect(() => {
-    highlightSource.current.clear()
-    egengeometriSource.current.clear()
-
-    if (!hoveredVegobjekt || !veglenkesekvenser) return
-
-    const stedfesting = hoveredVegobjekt.stedfesting as Stedfesting | undefined
-    if (stedfesting) {
-      const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser)
-
-      for (const clipped of clippedGeometries) {
-        const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
-          const vsId = f.get('veglenkesekvensId')
-          const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
-          return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer
-        })
-
-        if (!veglenkeFeature) continue
-
-        const geom = veglenkeFeature.getGeometry() as LineString | undefined
-        if (!geom) continue
-
-        try {
-          const coords = geom.getCoordinates()
-          const isPoint = clipped.startFraction === clipped.endFraction
-
-          if (isPoint) {
-            const pointCoord = getPointAtFraction(coords, clipped.startFraction)
-            const pointGeom = new Point(pointCoord)
-            const highlightFeature = new Feature({ geometry: pointGeom })
-            highlightSource.current.addFeature(highlightFeature)
-          } else {
-            const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction)
-
-            if (slicedCoords.length >= 2) {
-              const slicedGeom = new LineString(slicedCoords)
-              const highlightFeature = new Feature({ geometry: slicedGeom })
-              highlightSource.current.addFeature(highlightFeature)
-            }
-          }
-        } catch (e) {
-          console.warn('Failed to create highlight geometry', e)
-        }
-      }
-    }
-
-    const geometriEgenskaper = getGeometriEgenskaper(hoveredVegobjekt)
-    const wktFormat = new WKT()
-    for (const geometri of geometriEgenskaper) {
-      try {
-        const geom = wktFormat.readGeometry(geometri.wkt, {
-          dataProjection: `EPSG:${geometri.srid}`,
-          featureProjection: 'EPSG:3857',
-        })
-        const feature = new Feature({ geometry: geom })
-        egengeometriSource.current.addFeature(feature)
-      } catch (e) {
-        console.warn('Failed to parse geometri-egenskap', e)
-      }
-    }
-  }, [hoveredVegobjekt, veglenkesekvenser])
-
-  useEffect(() => {
-    if (!locateVegobjekt || !veglenkesekvenser || !mapInstance.current) return
-
-    const extents = [] as number[][]
-    const stedfesting = locateVegobjekt.vegobjekt.stedfesting as Stedfesting | undefined
-
-    if (stedfesting) {
-      const clippedGeometries = getClippedGeometries(stedfesting, veglenkesekvenser)
-
-      for (const clipped of clippedGeometries) {
-        const veglenkeFeature = veglenkeSource.current.getFeatures().find((f) => {
-          const vsId = f.get('veglenkesekvensId')
-          const vl = f.get('veglenke') as VeglenkeMedPosisjon | undefined
-          return vsId === clipped.veglenkesekvensId && vl?.nummer === clipped.veglenkeNummer
-        })
-
-        if (!veglenkeFeature) continue
-
-        const geom = veglenkeFeature.getGeometry() as LineString | undefined
-        if (!geom) continue
-
-        try {
-          const coords = geom.getCoordinates()
-          const isPoint = clipped.startFraction === clipped.endFraction
-
-          if (isPoint) {
-            const pointCoord = getPointAtFraction(coords, clipped.startFraction)
-            const pointGeom = new Point(pointCoord)
-            extents.push(pointGeom.getExtent())
-          } else {
-            const slicedCoords = sliceLineStringByFraction(coords, clipped.startFraction, clipped.endFraction)
-
-            if (slicedCoords.length >= 2) {
-              const slicedGeom = new LineString(slicedCoords)
-              extents.push(slicedGeom.getExtent())
-            }
-          }
-        } catch (e) {
-          console.warn('Failed to create locate geometry', e)
-        }
-      }
-    }
-
-    const wktFormat = new WKT()
-    const geometriEgenskaper = getGeometriEgenskaper(locateVegobjekt.vegobjekt)
-    for (const geometri of geometriEgenskaper) {
-      try {
-        const geom = wktFormat.readGeometry(geometri.wkt, {
-          dataProjection: `EPSG:${geometri.srid}`,
-          featureProjection: 'EPSG:3857',
-        })
-        extents.push(geom.getExtent())
-      } catch (e) {
-        console.warn('Failed to parse locate geometri-egenskap', e)
-      }
-    }
-
-    if (extents.length === 0) return
-
-    const combinedExtent = createEmpty()
-    for (const extent of extents) {
-      extend(combinedExtent, extent)
-    }
-
-    if (!isExtentEmpty(combinedExtent)) {
-      mapInstance.current.getView().fit(combinedExtent, {
-        padding: [60, 60, 60, 60],
-        duration: 250,
-        maxZoom: 17,
-      })
-    }
-  }, [locateVegobjekt, veglenkesekvenser])
+  useLocateVegobjekt({
+    locateVegobjekt,
+    veglenkesekvenser,
+    veglenkeSource,
+    mapInstance,
+  })
 
   const clearAll = useCallback(() => {
     drawSource.current.clear()
@@ -617,118 +310,6 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     setIsDrawing(false)
   }, [])
 
-  const handleVegobjektClick = useCallback(
-    (typeId: number, vegobjektId: number) => {
-      setFocusedVegobjekt({ typeId, id: vegobjektId, token: Date.now() })
-    },
-    [setFocusedVegobjekt],
-  )
-
-  const handleStrekningChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setStrekningInput(event.target.value)
-      setStrekningError(null)
-    },
-    [setStrekningInput],
-  )
-
-  const handleStrekningSearch = useCallback(() => {
-    const trimmed = strekningInput.trim()
-    if (trimmed.length === 0) return
-    if (!isValidVegsystemreferanse(trimmed)) {
-      setStrekningError('Ugyldig vegsystemreferanse. Bruk f.eks. FV6 S1D1 (KSP kan ha kommunenummer). Kryssdel/sideanleggsdel og meterverdier er ikke støttet.')
-      return
-    }
-    setStrekningError(null)
-    setStrekning(trimmed)
-  }, [setStrekning, strekningInput])
-
-  const handleStrekningKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        if (strekningInput.trim().length > 0) {
-          handleStrekningSearch()
-        }
-      }
-    },
-    [handleStrekningSearch, strekningInput],
-  )
-
-  const clearStrekning = useCallback(() => {
-    setStrekningInput('')
-    setStrekning('')
-    setStrekningError(null)
-  }, [setStrekningInput, setStrekning])
-
-  const handleStedfestingChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setStedfestingInput(event.target.value)
-      setStedfestingError(null)
-    },
-    [setStedfestingInput],
-  )
-
-  const handleStedfestingSearch = useCallback(() => {
-    const trimmed = stedfestingInput.trim()
-    if (trimmed.length === 0) return
-    if (!isValidStedfestingInput(trimmed)) {
-      setStedfestingError('Ugyldig stedfesting. Bruk f.eks. 1234, 0.2-0.5@5678 eller 0.8@9999.')
-      return
-    }
-    setStedfestingError(null)
-    setStedfesting(trimmed)
-  }, [setStedfesting, stedfestingInput])
-
-  const handleStedfestingKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        if (stedfestingInput.trim().length > 0) {
-          handleStedfestingSearch()
-        }
-      }
-    },
-    [handleStedfestingSearch, stedfestingInput],
-  )
-
-  const clearStedfesting = useCallback(() => {
-    setStedfestingInput('')
-    setStedfesting('')
-    setStedfestingError(null)
-  }, [setStedfestingInput, setStedfesting])
-
-  const getVegobjekterOnVeglenke = useCallback(
-    (veglenkesekvensId: number, veglenke?: VeglenkeMedPosisjon) => {
-      const result: {
-        type: { id: number; navn?: string }
-        objects: Vegobjekt[]
-      }[] = []
-      const startposisjon = veglenke?.startposisjon ?? 0
-      const sluttposisjon = veglenke?.sluttposisjon ?? 1
-
-      for (const type of selectedTypes) {
-        const objects = vegobjekterByType.get(type.id) ?? []
-        const matching = objects.filter((obj) => isOnVeglenke(obj.stedfesting as Stedfesting | undefined, veglenkesekvensId, startposisjon, sluttposisjon))
-        if (matching.length > 0) {
-          result.push({ type, objects: matching })
-        }
-      }
-
-      return result
-    },
-    [vegobjekterByType, selectedTypes],
-  )
-
-  const selectedVeglenkesekvensId = selectedFeature?.get('veglenkesekvensId') as number | undefined
-  const selectedVeglenke = selectedFeature?.get('veglenke') as VeglenkeMedPosisjon | undefined
-  const vegobjekterOnSelected = selectedVeglenkesekvensId ? getVegobjekterOnVeglenke(selectedVeglenkesekvensId, selectedVeglenke) : []
-
-  const trimmedStrekningInput = strekningInput.trim()
-  const isStrekningValid = trimmedStrekningInput.length === 0 || isValidVegsystemreferanse(trimmedStrekningInput)
-  const trimmedStedfestingInput = stedfestingInput.trim()
-  const isStedfestingValid = trimmedStedfestingInput.length === 0 || isValidStedfestingInput(trimmedStedfestingInput)
-
   return (
     <>
       <div className="draw-controls">
@@ -760,73 +341,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
           </button>
         )}
 
-        {searchMode === 'strekning' && (
-          <div className="strekning-controls">
-            <label className="search-label" htmlFor="strekning-input">
-              Søk på strekning
-            </label>
-            <div className="strekning-input-row">
-              <div className="search-input-wrapper">
-                <input
-                  id="strekning-input"
-                  className="search-input"
-                  placeholder="Eks.: FV6666 S1"
-                  value={strekningInput}
-                  onChange={handleStrekningChange}
-                  onKeyDown={handleStrekningKeyDown}
-                />
-                {strekningInput && (
-                  <button className="search-clear-btn" type="button" onClick={clearStrekning} aria-label="Tøm strekning">
-                    ×
-                  </button>
-                )}
-              </div>
-              <button
-                className="btn btn-primary"
-                type="button"
-                onClick={handleStrekningSearch}
-                disabled={trimmedStrekningInput.length === 0 || !isStrekningValid}
-              >
-                Søk
-              </button>
-            </div>
-            {strekningError && <div className="strekning-error">{strekningError}</div>}
-          </div>
-        )}
-
-        {searchMode === 'stedfesting' && (
-          <div className="strekning-controls">
-            <label className="search-label" htmlFor="stedfesting-input">
-              Stedfesting
-            </label>
-            <div className="strekning-input-row">
-              <div className="search-input-wrapper">
-                <input
-                  id="stedfesting-input"
-                  className="search-input"
-                  placeholder="Eks.: 1234, 0.2-0.5@5678"
-                  value={stedfestingInput}
-                  onChange={handleStedfestingChange}
-                  onKeyDown={handleStedfestingKeyDown}
-                />
-                {stedfestingInput && (
-                  <button className="search-clear-btn" type="button" onClick={clearStedfesting} aria-label="Tøm stedfesting">
-                    ×
-                  </button>
-                )}
-              </div>
-              <button
-                className="btn btn-primary"
-                type="button"
-                onClick={handleStedfestingSearch}
-                disabled={trimmedStedfestingInput.length === 0 || !isStedfestingValid}
-              >
-                Søk
-              </button>
-            </div>
-            {stedfestingError && <div className="strekning-error">{stedfestingError}</div>}
-          </div>
-        )}
+        <SearchControls searchMode={searchMode} />
       </div>
 
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
@@ -836,36 +351,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         <div className="map-loading-text">Henter veglenker...</div>
       </div>
 
-      <div ref={popupRef} className="ol-popup">
-        {selectedFeature && (
-          <div className="popup-content">
-            <div className="popup-title">
-              Veglenke {selectedVeglenkesekvensId}:{selectedVeglenke?.nummer}
-            </div>
-            {vegobjekterOnSelected.length === 0 ? (
-              <p style={{ fontSize: 12, color: '#666' }}>Ingen vegobjekter funnet på denne veglenken</p>
-            ) : (
-              vegobjekterOnSelected.map(({ type, objects }) => (
-                <div key={type.id} style={{ marginBottom: 8 }}>
-                  <div style={{ fontWeight: 500, fontSize: 13 }}>
-                    {type.navn} ({objects.length})
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
-                    {objects.slice(0, 5).map((obj) => (
-                      <li key={obj.id}>
-                        <button type="button" className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
-                          ID: {obj.id}
-                        </button>
-                      </li>
-                    ))}
-                    {objects.length > 5 && <li>...og {objects.length - 5} til</li>}
-                  </ul>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
+      <VeglenkePopup selectedFeature={selectedFeature} vegobjekterByType={vegobjekterByType} popupRef={popupRef} />
     </>
   )
 }

@@ -1,19 +1,18 @@
 import { useAtom, useAtomValue } from 'jotai'
-import WKT from 'ol/format/WKT'
 import type { Polygon } from 'ol/geom'
 import { transform } from 'ol/proj'
 import { useEffect, useMemo } from 'react'
 import { isSelectableVegobjekttype, type Vegobjekttype } from './api/datakatalogClient'
-import { isVegobjekterRequestError } from './api/uberiketClient'
 import MapView from './components/Map/MapView'
 import ObjectTypeSelector from './components/ObjectTypeSelector/ObjectTypeSelector'
 import VegobjektList from './components/VegobjektList/VegobjektList'
+import { useUrlSync } from './hooks/useUrlSync'
 import { useVeglenkesekvenser } from './hooks/useVeglenkesekvenser'
 import { useVegobjekter } from './hooks/useVegobjekter'
+import { useVegobjekterErrorMessage } from './hooks/useVegobjekterErrorMessage'
 import { useVegobjekttyper } from './hooks/useVegobjekttyper'
 import {
   allTypesSelectedAtom,
-  DEFAULT_VEGLENKESEKVENSER_LIMIT,
   polygonAtom,
   searchModeAtom,
   selectedTypeIdsAtom,
@@ -21,32 +20,13 @@ import {
   stedfestingAtom,
   strekningAtom,
   veglenkesekvensLimitAtom,
-  vegobjekterErrorAtom,
 } from './state/atoms'
 import { parseStedfestingInput } from './utils/stedfestingParser'
-
-function polygonToUtm33(polygon: Polygon): string {
-  const coords = polygon.getCoordinates()[0]
-  if (!coords) return ''
-
-  const utm33Coords = coords.map((coord) => {
-    const [x = 0, y = 0] = transform(coord, 'EPSG:3857', 'EPSG:25833')
-    return `${Math.round(x)} ${Math.round(y)}`
-  })
-
-  return utm33Coords.join(', ')
-}
-
-function polygonToWkt(polygon: Polygon): string {
-  const format = new WKT()
-  return format.writeGeometry(polygon)
-}
 
 export default function App() {
   const [selectedTypeIds, setSelectedTypeIds] = useAtom(selectedTypeIdsAtom)
   const [selectedTypes, setSelectedTypes] = useAtom(selectedTypesAtom)
   const allTypesSelected = useAtomValue(allTypesSelectedAtom)
-  const [, setVegobjekterError] = useAtom(vegobjekterErrorAtom)
   const polygon = useAtomValue(polygonAtom)
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
   const searchMode = useAtomValue(searchModeAtom)
@@ -66,37 +46,7 @@ export default function App() {
     setSelectedTypeIds([])
   }, [allTypes, selectedTypeIds, setSelectedTypes, setSelectedTypeIds])
 
-  useEffect(() => {
-    const url = new URL(window.location.href)
-    if (searchMode === 'polygon' && polygon) {
-      url.searchParams.set('polygon', polygonToWkt(polygon))
-    } else {
-      url.searchParams.delete('polygon')
-    }
-    if (searchMode === 'strekning' && strekning.trim().length > 0) {
-      url.searchParams.set('strekning', strekning.trim())
-    } else {
-      url.searchParams.delete('strekning')
-    }
-    if (searchMode === 'stedfesting' && stedfesting.trim().length > 0) {
-      url.searchParams.set('stedfesting', stedfesting.trim())
-    } else {
-      url.searchParams.delete('stedfesting')
-    }
-    if (allTypesSelected) {
-      url.searchParams.set('types', 'all')
-    } else if (selectedTypes.length > 0) {
-      url.searchParams.set('types', selectedTypes.map((t) => t.id).join(','))
-    } else {
-      url.searchParams.delete('types')
-    }
-    if (veglenkesekvensLimit !== DEFAULT_VEGLENKESEKVENSER_LIMIT) {
-      url.searchParams.set('veglenkesekvenslimit', veglenkesekvensLimit.toString())
-    } else {
-      url.searchParams.delete('veglenkesekvenslimit')
-    }
-    window.history.replaceState({}, '', url)
-  }, [allTypesSelected, polygon, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
+  useUrlSync(selectedTypes)
 
   const polygonUtm33 = useMemo(() => (searchMode === 'polygon' && polygon ? polygonToUtm33(polygon) : null), [polygon, searchMode])
 
@@ -132,27 +82,7 @@ export default function App() {
     stedfestingFilterDirect: searchMode === 'stedfesting' ? (stedfestingParsed?.stedfestingFilter ?? null) : null,
   })
 
-  const vegobjekterErrorMessage = useMemo(() => {
-    if (!vegobjekterError) return null
-    if (isVegobjekterRequestError(vegobjekterError)) {
-      if (vegobjekterError.status === 400) {
-        return 'Vegobjektsøket ble for stort. Prøv et mindre område eller færre typer.'
-      }
-      if (vegobjekterError.status === 504) {
-        return 'Kunne ikke hente data, forespørselen tok for lang tid. Prøv et mindre område eller færre typer.'
-      }
-    }
-
-    if (vegobjekterError instanceof TypeError || (vegobjekterError instanceof Error && vegobjekterError.message.toLowerCase().includes('failed to fetch'))) {
-      return 'Vegobjektsøket feilet. Prøv et mindre område eller færre typer.'
-    }
-
-    return 'Kunne ikke hente vegobjekter. Prøv igjen senere.'
-  }, [vegobjekterError])
-
-  useEffect(() => {
-    setVegobjekterError(vegobjekterErrorMessage)
-  }, [setVegobjekterError, vegobjekterErrorMessage])
+  useVegobjekterErrorMessage(vegobjekterError)
 
   const isLoading = datakatalogLoading || veglenkerLoading || vegobjekterLoading
 
@@ -240,4 +170,16 @@ export default function App() {
       )}
     </div>
   )
+}
+
+function polygonToUtm33(polygon: Polygon): string {
+  const coords = polygon.getCoordinates()[0]
+  if (!coords) return ''
+
+  const utm33Coords = coords.map((coord) => {
+    const [x = 0, y = 0] = transform(coord, 'EPSG:3857', 'EPSG:25833')
+    return `${Math.round(x)} ${Math.round(y)}`
+  })
+
+  return utm33Coords.join(', ')
 }
