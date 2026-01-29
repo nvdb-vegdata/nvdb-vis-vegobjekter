@@ -37,14 +37,21 @@ function getInitialPolygon(): Polygon | null {
   return null
 }
 
-export type SearchMode = 'polygon' | 'strekning'
+export type SearchMode = 'polygon' | 'strekning' | 'stedfesting'
 
 function getInitialStrekning(): string {
   const params = new URLSearchParams(window.location.search)
   return params.get('strekning')?.trim() ?? ''
 }
 
+function getInitialStedfesting(): string {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('stedfesting')?.trim() ?? ''
+}
+
 function getInitialSearchMode(): SearchMode {
+  const stedfesting = getInitialStedfesting()
+  if (stedfesting.length > 0) return 'stedfesting'
   const strekning = getInitialStrekning()
   return strekning.length > 0 ? 'strekning' : 'polygon'
 }
@@ -69,6 +76,8 @@ export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
 export const strekningAtom = atom<string>(getInitialStrekning())
 export const strekningInputAtom = atom<string>(getInitialStrekning())
+export const stedfestingAtom = atom<string>(getInitialStedfesting())
+export const stedfestingInputAtom = atom<string>(getInitialStedfesting())
 export const focusedVegobjektAtom = atom<{
   typeId: number
   id: number
