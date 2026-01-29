@@ -722,12 +722,17 @@ body,
 }
 
 .vegobjekt-type-header {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  font: inherit;
   display: flex;
   align-items: center;
   padding: 10px 12px;
   background: #f8f9fa;
   cursor: pointer;
   user-select: none;
+  appearance: none;
 }
 
 .vegobjekt-type-header:hover {

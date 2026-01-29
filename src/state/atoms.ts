@@ -13,7 +13,7 @@ function getInitialTypeIds(): number[] {
   return typesParam
     .split(',')
     .map(Number)
-    .filter((n) => !isNaN(n) && n > 0)
+    .filter((n) => !Number.isNaN(n) && n > 0)
 }
 
 function getInitialAllTypesSelected(): boolean {

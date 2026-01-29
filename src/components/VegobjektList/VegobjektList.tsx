@@ -131,7 +131,18 @@ function VegobjektItem({
       onMouseEnter={() => setHoveredVegobjekt(vegobjekt)}
       onMouseLeave={() => setHoveredVegobjekt(null)}
     >
-      <div className="vegobjekt-header" onClick={onToggle}>
+      <div
+        className="vegobjekt-header"
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onToggle()
+          }
+        }}
+      >
         <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
         <span className="vegobjekt-id">ID: {details.id}</span>
         {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
@@ -179,8 +190,8 @@ function VegobjektItem({
           {details.stedfestinger.length > 0 && (
             <div className="vegobjekt-section">
               <div className="vegobjekt-section-title">Stedfesting</div>
-              {details.stedfestinger.map((s, i) => (
-                <div key={i} className="vegobjekt-property vegobjekt-stedfesting">
+              {details.stedfestinger.map((s) => (
+                <div key={s} className="vegobjekt-property vegobjekt-stedfesting">
                   {s}
                 </div>
               ))}
@@ -190,8 +201,8 @@ function VegobjektItem({
           {details.barn.length > 0 && (
             <div className="vegobjekt-section">
               <div className="vegobjekt-section-title">Barn</div>
-              {details.barn.map((b, i) => (
-                <div key={i} className="vegobjekt-property">
+              {details.barn.map((b) => (
+                <div key={b.typeId} className="vegobjekt-property">
                   <span className="vegobjekt-barn-type">Type {b.typeId}:</span> {b.ids.slice(0, 5).join(', ')}
                   {b.ids.length > 5 && ` (+${b.ids.length - 5} til)`}
                 </div>
@@ -302,11 +313,11 @@ function TypeGroup({
 
   return (
     <div className="vegobjekt-type-group">
-      <div className="vegobjekt-type-header" onClick={() => setExpanded(!expanded)}>
+      <button type="button" className="vegobjekt-type-header" onClick={() => setExpanded(!expanded)}>
         <span className="vegobjekt-expand">{expanded ? '-' : '+'}</span>
         <span className="vegobjekt-type-name">{type.navn}</span>
         <span className="vegobjekt-type-count">({objects.length})</span>
-      </div>
+      </button>
 
       {expanded && (
         <div className="vegobjekt-type-content">

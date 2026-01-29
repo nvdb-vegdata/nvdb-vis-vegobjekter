@@ -1,7 +1,15 @@
 import { describe, expect, test } from 'bun:test'
 import type { StedfestingLinjer, StedfestingPunkter } from '../api/generated/uberiket/types.gen'
-import type { VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
+import type { VeglenkeMedPosisjon, VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
 import { getClippedGeometries, getPointAtFraction, sliceLineStringByFraction } from './geometryUtils'
+
+function veglenke(partial: Pick<VeglenkeMedPosisjon, 'nummer' | 'startposisjon' | 'sluttposisjon'>): VeglenkeMedPosisjon {
+  return partial as VeglenkeMedPosisjon
+}
+
+function veglenkesekvens(partial: { id: number; veglenker: VeglenkeMedPosisjon[] }): VeglenkesekvensMedPosisjoner {
+  return partial as VeglenkesekvensMedPosisjoner
+}
 
 describe('getPointAtFraction', () => {
   test('returns first point at fraction 0', () => {
@@ -131,7 +139,7 @@ describe('sliceLineStringByFraction', () => {
     const result = sliceLineStringByFraction(coords, 0, 0.5)
     expect(result.length).toBeGreaterThanOrEqual(2)
     expect(result[0]).toEqual([0, 0])
-    expect(result[result.length - 1]![0]).toBeCloseTo(10, 5)
+    expect(result[result.length - 1]?.[0]).toBeCloseTo(10, 5)
   })
 
   test('returns second half for 0.5-1 fraction', () => {
@@ -142,7 +150,7 @@ describe('sliceLineStringByFraction', () => {
     ]
     const result = sliceLineStringByFraction(coords, 0.5, 1)
     expect(result.length).toBeGreaterThanOrEqual(2)
-    expect(result[0]![0]).toBeCloseTo(10, 5)
+    expect(result[0]?.[0]).toBeCloseTo(10, 5)
     expect(result[result.length - 1]).toEqual([20, 0])
   })
 })
@@ -150,16 +158,16 @@ describe('sliceLineStringByFraction', () => {
 describe('getClippedGeometries', () => {
   test('returns clipped geometry for point stedfesting within veglenke range', () => {
     const veglenkesekvenser: VeglenkesekvensMedPosisjoner[] = [
-      {
+      veglenkesekvens({
         id: 605710,
         veglenker: [
-          {
+          veglenke({
             nummer: 19,
             startposisjon: 0.3552159,
             sluttposisjon: 0.39458101,
-          } as any,
+          }),
         ],
-      } as any,
+      }),
     ]
 
     const stedfesting: StedfestingPunkter = {
@@ -178,21 +186,21 @@ describe('getClippedGeometries', () => {
     const result = getClippedGeometries(stedfesting, veglenkesekvenser)
 
     expect(result.length).toBe(1)
-    expect(result[0]!.veglenkesekvensId).toBe(605710)
-    expect(result[0]!.veglenkeNummer).toBe(19)
-    expect(result[0]!.startFraction).toBe(result[0]!.endFraction) // Point has same start/end
+    expect(result[0]?.veglenkesekvensId).toBe(605710)
+    expect(result[0]?.veglenkeNummer).toBe(19)
+    expect(result[0]?.startFraction).toBe(result[0]?.endFraction) // Point has same start/end
 
     // Fraction should be (0.3880223 - 0.3552159) / (0.39458101 - 0.3552159)
     const expectedFraction = (0.3880223 - 0.3552159) / (0.39458101 - 0.3552159)
-    expect(result[0]!.startFraction).toBeCloseTo(expectedFraction, 5)
+    expect(result[0]?.startFraction).toBeCloseTo(expectedFraction, 5)
   })
 
   test('returns empty for point stedfesting outside veglenke range', () => {
     const veglenkesekvenser: VeglenkesekvensMedPosisjoner[] = [
-      {
+      veglenkesekvens({
         id: 605710,
-        veglenker: [{ nummer: 19, startposisjon: 0.5, sluttposisjon: 0.6 } as any],
-      } as any,
+        veglenker: [veglenke({ nummer: 19, startposisjon: 0.5, sluttposisjon: 0.6 })],
+      }),
     ]
 
     const stedfesting: StedfestingPunkter = {
@@ -214,10 +222,10 @@ describe('getClippedGeometries', () => {
 
   test('returns empty for point stedfesting on different veglenkesekvens', () => {
     const veglenkesekvenser: VeglenkesekvensMedPosisjoner[] = [
-      {
+      veglenkesekvens({
         id: 999999,
-        veglenker: [{ nummer: 1, startposisjon: 0, sluttposisjon: 1 } as any],
-      } as any,
+        veglenker: [veglenke({ nummer: 1, startposisjon: 0, sluttposisjon: 1 })],
+      }),
     ]
 
     const stedfesting: StedfestingPunkter = {
@@ -240,10 +248,10 @@ describe('getClippedGeometries', () => {
   test('excludes line overlap when sharing endpoint', () => {
     // Arrange
     const veglenkesekvenser: VeglenkesekvensMedPosisjoner[] = [
-      {
+      veglenkesekvens({
         id: 123,
-        veglenker: [{ nummer: 1, startposisjon: 0.4, sluttposisjon: 0.6 } as any],
-      } as any,
+        veglenker: [veglenke({ nummer: 1, startposisjon: 0.4, sluttposisjon: 0.6 })],
+      }),
     ]
 
     const stedfesting: StedfestingLinjer = {

@@ -4,15 +4,12 @@ import type { Polygon } from 'ol/geom'
 import { useMemo } from 'react'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import { buildStedfestingFilter, hentVegobjekter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt } from '../api/uberiketClient'
-
-function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10)
-}
+import { getTodayDate } from '../utils/dateUtils'
 
 function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosisjoner[], polygon: Polygon): VeglenkeRange[] {
   const ranges: VeglenkeRange[] = []
   const wktFormat = new WKT()
-  const today = new Date().toISOString().split('T')[0]!
+  const today = getTodayDate()
   const polygonExtent = polygon.getExtent()
 
   for (const vs of veglenkesekvenser) {

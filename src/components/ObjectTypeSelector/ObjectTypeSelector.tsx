@@ -147,7 +147,7 @@ export default function ObjectTypeSelector() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button className="search-clear-btn" onClick={() => setSearchQuery('')} aria-label="Tøm søk">
+            <button type="button" className="search-clear-btn" onClick={() => setSearchQuery('')} aria-label="Tøm søk">
               ×
             </button>
           )}
@@ -162,7 +162,7 @@ export default function ObjectTypeSelector() {
           <option value="">Velg kategori</option>
           {categories.map((kategori) => (
             <option key={kategori.id} value={kategori.id}>
-              {(kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`) + ` (#${kategori.id})`}
+              {`${kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`} (#${kategori.id})`}
             </option>
           ))}
         </select>
@@ -208,6 +208,12 @@ export default function ObjectTypeSelector() {
             className={`object-type-item ${isSelected(type) ? 'selected' : ''}`}
             onClick={() => {
               if (!allTypesSelected) {
+                handleTypeToggle(type)
+              }
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && !allTypesSelected) {
+                e.preventDefault()
                 handleTypeToggle(type)
               }
             }}

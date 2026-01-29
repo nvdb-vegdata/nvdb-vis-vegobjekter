@@ -124,7 +124,7 @@ export function downloadCsvAllTypes(vegobjekterByType: Map<number, Vegobjekt[]>,
 }
 
 function downloadCsv(csvContent: string, filename: string): void {
-  const blob = new Blob(['\uFEFF' + csvContent], {
+  const blob = new Blob([`\uFEFF${csvContent}`], {
     type: 'text/csv;charset=utf-8;',
   })
   const url = URL.createObjectURL(blob)

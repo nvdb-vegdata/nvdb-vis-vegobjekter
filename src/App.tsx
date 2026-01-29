@@ -30,8 +30,8 @@ function polygonToUtm33(polygon: Polygon): string {
   if (!coords) return ''
 
   const utm33Coords = coords.map((coord) => {
-    const [x, y] = transform(coord, 'EPSG:3857', 'EPSG:25833')
-    return `${Math.round(x!)} ${Math.round(y!)}`
+    const [x = 0, y = 0] = transform(coord, 'EPSG:3857', 'EPSG:25833')
+    return `${Math.round(x)} ${Math.round(y)}`
   })
 
   return utm33Coords.join(', ')

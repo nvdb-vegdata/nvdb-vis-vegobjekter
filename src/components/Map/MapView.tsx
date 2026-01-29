@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { click } from 'ol/events/condition'
-import { createEmpty, type Extent, extend, isEmpty as isExtentEmpty } from 'ol/extent'
+import { createEmpty, extend, isEmpty as isExtentEmpty } from 'ol/extent'
 import Feature from 'ol/Feature'
 import WKT from 'ol/format/WKT'
 import { LineString, Point, type Polygon } from 'ol/geom'
@@ -39,6 +39,7 @@ import {
   strekningAtom,
   strekningInputAtom,
 } from '../../state/atoms'
+import { getTodayDate } from '../../utils/dateUtils'
 import { getClippedGeometries, getPointAtFraction, sliceLineStringByFraction } from '../../utils/geometryUtils'
 import { isValidStedfestingInput, parseStedfestingRanges } from '../../utils/stedfestingParser'
 
@@ -208,7 +209,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     })
 
     const overlay = new Overlay({
-      element: popupRef.current!,
+      element: popupRef.current ?? undefined,
       autoPan: { animation: { duration: 250 } },
     })
     overlayRef.current = overlay
@@ -231,12 +232,13 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
     select.on('select', (e) => {
       if (e.selected.length > 0) {
-        const feature = e.selected[0]!
+        const feature = e.selected[0]
+        if (!feature) return
         setSelectedFeature(feature)
         const geom = feature.getGeometry()
         if (geom) {
           const extent = geom.getExtent()
-          const center = [(extent[0]! + extent[2]!) / 2, (extent[1]! + extent[3]!) / 2]
+          const center = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]
           overlay.setPosition(center)
         }
       } else {
@@ -261,12 +263,14 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       if (updateUrlTimeout) clearTimeout(updateUrlTimeout)
       updateUrlTimeout = setTimeout(() => {
         const view = map.getView()
-        const center = toLonLat(view.getCenter()!)
+        const viewCenter = view.getCenter()
+        if (!viewCenter) return
+        const center = toLonLat(viewCenter)
         const z = view.getZoom()
         const url = new URL(window.location.href)
-        url.searchParams.set('lon', center[0]!.toFixed(5))
-        url.searchParams.set('lat', center[1]!.toFixed(5))
-        url.searchParams.set('z', z!.toFixed(1))
+        url.searchParams.set('lon', center[0]?.toFixed(5))
+        url.searchParams.set('lat', center[1]?.toFixed(5))
+        url.searchParams.set('z', z?.toFixed(1))
         window.history.replaceState({}, '', url)
       }, 200)
     })
@@ -317,7 +321,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     veglenkeSource.current.clear()
     stedfestingSource.current.clear()
     const wktFormat = new WKT()
-    const today = new Date().toISOString().split('T')[0]!
+    const today = getTodayDate()
 
     const drawnFeatures = drawSource.current.getFeatures()
     const drawnPolygon = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
@@ -625,7 +629,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       setStrekningInput(event.target.value)
       setStrekningError(null)
     },
-    [setStrekningError, setStrekningInput],
+    [setStrekningInput],
   )
 
   const handleStrekningSearch = useCallback(() => {
@@ -637,7 +641,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     }
     setStrekningError(null)
     setStrekning(trimmed)
-  }, [setStrekning, setStrekningError, strekningInput])
+  }, [setStrekning, strekningInput])
 
   const handleStrekningKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -655,14 +659,14 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     setStrekningInput('')
     setStrekning('')
     setStrekningError(null)
-  }, [setStrekningInput, setStrekning, setStrekningError])
+  }, [setStrekningInput, setStrekning])
 
   const handleStedfestingChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setStedfestingInput(event.target.value)
       setStedfestingError(null)
     },
-    [setStedfestingError, setStedfestingInput],
+    [setStedfestingInput],
   )
 
   const handleStedfestingSearch = useCallback(() => {
@@ -674,7 +678,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     }
     setStedfestingError(null)
     setStedfesting(trimmed)
-  }, [setStedfesting, setStedfestingError, stedfestingInput])
+  }, [setStedfesting, stedfestingInput])
 
   const handleStedfestingKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -692,7 +696,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     setStedfestingInput('')
     setStedfesting('')
     setStedfestingError(null)
-  }, [setStedfestingInput, setStedfesting, setStedfestingError])
+  }, [setStedfestingInput, setStedfesting])
 
   const getVegobjekterOnVeglenke = useCallback(
     (veglenkesekvensId: number, veglenke?: VeglenkeMedPosisjon) => {
@@ -730,27 +734,28 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       <div className="draw-controls">
         <div className="draw-controls-row">
           <button
+            type="button"
             className={`btn ${searchMode === 'polygon' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={handlePolygonMode}
             disabled={isDrawing && searchMode === 'polygon'}
           >
             Tegn område
           </button>
-          <button className={`btn ${searchMode === 'strekning' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStrekningMode}>
+          <button type="button" className={`btn ${searchMode === 'strekning' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStrekningMode}>
             Søk på strekning
           </button>
-          <button className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStedfestingMode}>
+          <button type="button" className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStedfestingMode}>
             Stedfesting
           </button>
           {searchMode === 'polygon' && !isDrawing && (polygon || veglenkesekvenser) && (
-            <button className="btn btn-danger" onClick={clearAll}>
+            <button type="button" className="btn btn-danger" onClick={clearAll}>
               Nullstill
             </button>
           )}
         </div>
 
         {searchMode === 'polygon' && isDrawing && (
-          <button className="btn btn-secondary" onClick={cancelDrawing}>
+          <button type="button" className="btn btn-secondary" onClick={cancelDrawing}>
             Avbryt tegning
           </button>
         )}
@@ -848,7 +853,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
                   <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
                     {objects.slice(0, 5).map((obj) => (
                       <li key={obj.id}>
-                        <button className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
+                        <button type="button" className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
                           ID: {obj.id}
                         </button>
                       </li>

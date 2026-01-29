@@ -204,7 +204,7 @@ export function buildStedfestingFilter(ranges: VeglenkeRange[]): string {
     let currentEnd = Math.max(current.startposisjon, current.sluttposisjon)
 
     for (let i = 1; i < sorted.length; i += 1) {
-      const next = sorted[i]!
+      const next = sorted[i] as typeof current
       const nextStart = Math.min(next.startposisjon, next.sluttposisjon)
       const nextEnd = Math.max(next.startposisjon, next.sluttposisjon)
 
