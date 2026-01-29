@@ -44,7 +44,10 @@ import {
   getPointAtFraction,
   sliceLineStringByFraction,
 } from '../../utils/geometryUtils'
-import { isValidStedfestingInput } from '../../utils/stedfestingParser'
+import {
+  isValidStedfestingInput,
+  parseStedfestingRanges,
+} from '../../utils/stedfestingParser'
 
 proj4.defs(
   'EPSG:25833',
@@ -133,7 +136,7 @@ export default function MapView({
   const [, setStrekning] = useAtom(strekningAtom)
   const [strekningInput, setStrekningInput] = useAtom(strekningInputAtom)
   const [strekningError, setStrekningError] = useState<string | null>(null)
-  const [, setStedfesting] = useAtom(stedfestingAtom)
+  const [stedfesting, setStedfesting] = useAtom(stedfestingAtom)
   const [stedfestingInput, setStedfestingInput] = useAtom(stedfestingInputAtom)
   const [stedfestingError, setStedfestingError] = useState<string | null>(null)
   const setFocusedVegobjekt = useSetAtom(focusedVegobjektAtom)
@@ -315,6 +318,19 @@ export default function MapView({
     const drawnPolygon =
       drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
 
+    const stedfestingRangesById =
+      searchMode === 'stedfesting' && stedfesting.trim().length > 0
+        ? parseStedfestingRanges(stedfesting).reduce((map, range) => {
+            const existing = map.get(range.id)
+            if (existing) {
+              existing.push(range)
+            } else {
+              map.set(range.id, [range])
+            }
+            return map
+          }, new Map<number, { start: number; end: number }[]>())
+        : null
+
     for (const vs of veglenkesekvenser) {
       for (const vl of vs.veglenker ?? []) {
         const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } })
@@ -330,11 +346,17 @@ export default function MapView({
               featureProjection: 'EPSG:3857',
             })
 
-            if (
-              drawnPolygon &&
-              !geom.intersectsExtent(drawnPolygon.getExtent())
-            ) {
+            if (drawnPolygon && !geom.intersectsExtent(drawnPolygon.getExtent())) {
               continue
+            }
+
+            if (stedfestingRangesById) {
+              const ranges = stedfestingRangesById.get(vs.id)
+              if (!ranges) continue
+              const overlaps = ranges.some(
+                (range) => range.end >= vl.startposisjon && range.start <= vl.sluttposisjon,
+              )
+              if (!overlaps) continue
             }
 
             const feature = new Feature({
@@ -358,7 +380,7 @@ export default function MapView({
         maxZoom: 16,
       })
     }
-  }, [veglenkesekvenser])
+  }, [veglenkesekvenser, searchMode, stedfesting])
 
   useEffect(() => {
     highlightSource.current.clear()
