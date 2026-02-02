@@ -35,7 +35,7 @@ body,
   --ui-space-1: 4px;
   --ui-space-2: 8px;
   --ui-space-3: 12px;
-  --ui-control-height: 38px;
+  --ui-control-height: 32px;
 
   --link-color: var(--color-primary);
   --link-hover-color: var(--color-primary-hover);
@@ -466,6 +466,7 @@ body,
   border: none;
   border-radius: var(--ui-radius-sm);
   font-size: 14px;
+  line-height: 16px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -480,6 +481,7 @@ body,
 .btn-small {
   padding: 4px 10px;
   font-size: 12px;
+  line-height: 14px;
 }
 
 .btn-primary {
@@ -541,7 +543,7 @@ body,
 
 .map-settings-popover {
   position: absolute;
-  top: 44px;
+  top: calc(var(--ui-control-height) + var(--ui-space-2));
   right: 0;
   width: 220px;
 }

@@ -10,7 +10,7 @@ ensureProjections()
 
 export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 100
 
-export const DEFAULT_VEGLENKE_COLOR = '#3498db'
+export const DEFAULT_VEGLENKE_COLOR = 'rgb(0,110,184)'
 
 function readLocalStorageString(key: string): string | null {
   if (typeof window === 'undefined') return null

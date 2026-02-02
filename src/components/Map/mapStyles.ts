@@ -1,20 +1,60 @@
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 
-function hexToRgba(hex: string, alpha: number): string {
-  const trimmed = hex.trim().replace(/^#/, '')
+const DEFAULT_RGB = { r: 0, g: 110, b: 184 }
+
+function clampByte(value: number): number {
+  return Math.max(0, Math.min(255, Math.round(value)))
+}
+
+function toHexByte(value: number): string {
+  return clampByte(value).toString(16).padStart(2, '0')
+}
+
+function parseHexColor(input: string): { r: number; g: number; b: number } | null {
+  const trimmed = input.trim()
+  if (!trimmed.startsWith('#')) return null
+  const raw = trimmed.slice(1)
   const normalized =
-    trimmed.length === 3
-      ? trimmed
+    raw.length === 3
+      ? raw
           .split('')
           .map((c) => `${c}${c}`)
           .join('')
-      : trimmed
-  if (normalized.length !== 6) return `rgba(52, 152, 219, ${alpha})`
+      : raw
+
+  if (normalized.length !== 6) return null
+
   const r = Number.parseInt(normalized.slice(0, 2), 16)
   const g = Number.parseInt(normalized.slice(2, 4), 16)
   const b = Number.parseInt(normalized.slice(4, 6), 16)
-  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return `rgba(52, 152, 219, ${alpha})`
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+
+  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return null
+  return { r, g, b }
+}
+
+function parseRgbColor(input: string): { r: number; g: number; b: number } | null {
+  const trimmed = input.trim()
+  const match = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/i.exec(trimmed)
+  if (!match) return null
+  const r = Number(match[1])
+  const g = Number(match[2])
+  const b = Number(match[3])
+  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return null
+  return { r: clampByte(r), g: clampByte(g), b: clampByte(b) }
+}
+
+function parseColorToRgb(input: string): { r: number; g: number; b: number } | null {
+  return parseHexColor(input) ?? parseRgbColor(input)
+}
+
+function colorToRgba(input: string, alpha: number): string {
+  const rgb = parseColorToRgb(input) ?? DEFAULT_RGB
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`
+}
+
+export function normalizeToHexColor(input: string): string {
+  const rgb = parseColorToRgb(input) ?? DEFAULT_RGB
+  return `#${toHexByte(rgb.r)}${toHexByte(rgb.g)}${toHexByte(rgb.b)}`
 }
 
 export function createVeglenkeStyle(color: string): Style {
@@ -25,7 +65,7 @@ export function createVeglenkeStyle(color: string): Style {
 
 export function createVeglenkeFadedStyle(color: string): Style {
   return new Style({
-    stroke: new Stroke({ color: hexToRgba(color, 0.35), width: 2 }),
+    stroke: new Stroke({ color: colorToRgba(color, 0.35), width: 2 }),
   })
 }
 

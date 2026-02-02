@@ -59,6 +59,7 @@ import {
   EGENGEOMETRI_POLYGON_STYLE,
   HIGHLIGHT_POINT_STYLE,
   HIGHLIGHT_STYLE,
+  normalizeToHexColor,
   STEDFESTING_POINT_STYLE,
 } from './mapStyles'
 import SearchControls from './SearchControls'
@@ -85,6 +86,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const veglenkeStyle = useMemo(() => createVeglenkeStyle(veglenkeColor), [veglenkeColor])
   const veglenkeFadedStyle = useMemo(() => createVeglenkeFadedStyle(veglenkeColor), [veglenkeColor])
   const stedfestingLineStyle = useMemo(() => createStedfestingStyle(veglenkeColor), [veglenkeColor])
+  const veglenkeColorHex = useMemo(() => normalizeToHexColor(veglenkeColor), [veglenkeColor])
 
   const mapRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
@@ -148,13 +150,13 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     const drawLayer = new VectorLayer({
       source: drawSource.current,
       style: new Style({
-        fill: new Fill({ color: 'rgba(52, 152, 219, 0.2)' }),
-        stroke: new Stroke({ color: '#3498db', width: 2 }),
+        fill: new Fill({ color: 'rgba(0, 110, 184, 0.2)' }),
+        stroke: new Stroke({ color: 'rgb(0,110,184)', width: 2 }),
       }),
     })
 
-    const initialVeglenkeStyle = createVeglenkeStyle('#3498db')
-    const initialStedfestingLineStyle = createStedfestingStyle('#3498db')
+    const initialVeglenkeStyle = createVeglenkeStyle('rgb(0,110,184)')
+    const initialStedfestingLineStyle = createStedfestingStyle('rgb(0,110,184)')
     const initialSelectedStyle = new Style({ stroke: new Stroke({ color: '#e74c3c', width: 6 }) })
 
     const veglenkeLayer = new VectorLayer({
@@ -513,7 +515,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
               <label className="map-settings-label" htmlFor="veglenke-color">
                 Veglenke-farge
               </label>
-              <input id="veglenke-color" type="color" value={veglenkeColor} onChange={(e) => setVeglenkeColor(e.target.value)} aria-label="Veglenke-farge" />
+              <input id="veglenke-color" type="color" value={veglenkeColorHex} onChange={(e) => setVeglenkeColor(e.target.value)} aria-label="Veglenke-farge" />
             </div>
             <div className="map-settings-actions">
               <button type="button" className="btn btn-secondary btn-small" onClick={() => setVeglenkeColor(DEFAULT_VEGLENKE_COLOR)}>
