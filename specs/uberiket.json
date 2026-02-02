@@ -272,6 +272,68 @@
         }
       }
     },
+    "/api/v1/vegobjekter/stream": {
+      "get": {
+        "tags": ["Vegobjekter"],
+        "summary": "Strøm vegobjekter fra flere typer som NDJSON.",
+        "operationId": "hentVegobjekterMultiTypeStream",
+        "parameters": [
+          {
+            "name": "ider",
+            "in": "query",
+            "description": "Hent kun vegobjekter med angitte IDer",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "integer", "format": "int64" }, "uniqueItems": true }
+          },
+          {
+            "name": "typeIder",
+            "in": "query",
+            "description": "Kommaseparert liste med vegobjekttype-IDer. Hvis tom, hentes alle vegobjekter som ikke er skjermet.",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "integer", "format": "int32" }, "uniqueItems": true }
+          },
+          {
+            "name": "antall",
+            "in": "query",
+            "description": "Antall vegobjekter som skal hentes. Fra 1 til 10000, standard 1000.",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "dato",
+            "in": "query",
+            "description": "Hvis satt, hentes bare vegobjektversjoner som var gyldige på denne datoen",
+            "required": false,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "stedfesting",
+            "in": "query",
+            "description": "Finn vegobjekter med stedfestinger som overlapper gitte utstrekninger (komma-separert liste).\n\nEksempel: 0-0.5@123,125,1.0@126\n",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          },
+          {
+            "name": "vegsystemreferanse",
+            "in": "query",
+            "description": "Filtrer vegobjekter på [vegsystemreferanse](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/introduksjon/Vegsystemreferanse). Kommaseparert liste. Legg til kommunenummer i starten av vegsystemreferansen for KSP-veger.\n\nMERK:\n- Meterverdier, trafikantgruppe, kryssystem og sideanlegg støttes ikke.\n- Inkluderer både vegobjekter stedfestet på hovednivå (VT, VTKB) og detaljert nivå (KB, KF)\n\nEksempel: `EV6S1D1`",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          }
+        ],
+        "responses": {
+          "404": { "description": "Not Found", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "401": { "description": "Unauthorized", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "403": { "description": "Forbidden", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "400": { "description": "Bad Request", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "500": { "description": "Internal Server Error", "content": { "*/*": { "schema": { "$ref": "#/components/schemas/ProblemDetail" } } } },
+          "200": {
+            "description": "OK",
+            "content": { "application/x-ndjson": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vegobjekt" } } } }
+          }
+        }
+      }
+    },
     "/api/v1/vegobjekter/id/{vegobjektId}": {
       "get": {
         "tags": ["Vegobjekter"],
@@ -425,25 +487,25 @@
         "operationId": "streamVeglenkesekvenser",
         "parameters": [
           {
-            "name": "start",
-            "in": "query",
-            "description": "Hent veglenkesekvenser etterfølgende denne IDen",
-            "required": false,
-            "schema": { "type": "integer", "format": "int64" }
-          },
-          {
-            "name": "slutt",
-            "in": "query",
-            "description": "Hent veglenkesekvenser opp til og med denne ID",
-            "required": false,
-            "schema": { "type": "integer", "format": "int64" }
-          },
-          {
             "name": "ider",
             "in": "query",
             "description": "Hent kun veglenkesekvenser med angitte IDer",
             "required": false,
             "schema": { "type": "array", "items": { "type": "integer", "format": "int64" }, "uniqueItems": true }
+          },
+          {
+            "name": "polygon",
+            "in": "query",
+            "description": "Filtrer med polygon i UTM 33. Merk: Objekter opp til 1 m unna polygon kan bli med.\n\nEksempel: `20000 6520000, 20500 6520000, 21000 6500000, 20000 6520000`",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "vegsystemreferanse",
+            "in": "query",
+            "description": "Filtrer veglenkesekvenser på [vegsystemreferanse](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/introduksjon/Vegsystemreferanse). Kommaseparert liste. Legg til kommunenummer i starten av vegsystemreferansen for KSP-veger.\n\nMERK:\n- Meterverdier, trafikantgruppe, kryssystem og sideanlegg støttes ikke.\n- Både historisk og detaljert vegnett returneres.\n\nEksempel: `EV6S1D1`",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
           },
           {
             "name": "antall",
@@ -1202,7 +1264,7 @@
         "type": "object",
         "properties": {
           "wkt": { "type": "string" },
-          "srid": { "$ref": "#/components/schemas/SRID" },
+          "srid": { "type": "integer", "format": "int32" },
           "lengde": { "type": "number", "format": "double" },
           "datafangstdato": { "type": "string", "format": "date" },
           "temakode": { "type": "integer", "format": "int32" },
@@ -1250,7 +1312,6 @@
         "required": ["href", "start"]
       },
       "Retning": { "type": "string", "enum": ["MED", "MOT"] },
-      "SRID": { "type": "string", "enum": ["5972", "5973", "5974", "5975", "4326"] },
       "SideMetadata": {
         "type": "object",
         "properties": {

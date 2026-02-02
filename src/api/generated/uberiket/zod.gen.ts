@@ -61,6 +61,28 @@ export const zGeometriKvalitet = z.object({
     maksimaltAvvik: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }))
 });
 
+export const zGeometristruktur = z.object({
+    wkt: z.string(),
+    srid: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    lengde: z.optional(z.number()),
+    datafangstdato: z.optional(z.iso.date()),
+    temakode: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    medium: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    kommune: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    hoydereferanse: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    sosiNavn: z.optional(z.string()),
+    referansegeometri: z.optional(z.boolean()),
+    verifiseringsdato: z.optional(z.iso.date()),
+    oppdateringsdato: z.optional(z.iso.date()),
+    prosesshistorikk: z.optional(z.string()),
+    kvalitet: z.optional(zGeometriKvalitet)
+});
+
+export const zGeometriEgenskap = zEgenskapVerdi.and(z.object({
+    verdi: zGeometristruktur,
+    type: z.literal('GeometriEgenskap')
+}));
+
 export const zGyldighetsperiode = z.object({
     startdato: z.iso.date(),
     sluttdato: z.optional(z.iso.date())
@@ -87,36 +109,6 @@ export const zNesteSide = z.object({
 });
 
 export const zRetning = z.enum(['MED', 'MOT']);
-
-export const zSrid = z.enum([
-    '5972',
-    '5973',
-    '5974',
-    '5975',
-    '4326'
-]);
-
-export const zGeometristruktur = z.object({
-    wkt: z.string(),
-    srid: zSrid,
-    lengde: z.optional(z.number()),
-    datafangstdato: z.optional(z.iso.date()),
-    temakode: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
-    medium: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
-    kommune: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
-    hoydereferanse: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
-    sosiNavn: z.optional(z.string()),
-    referansegeometri: z.optional(z.boolean()),
-    verifiseringsdato: z.optional(z.iso.date()),
-    oppdateringsdato: z.optional(z.iso.date()),
-    prosesshistorikk: z.optional(z.string()),
-    kvalitet: z.optional(zGeometriKvalitet)
-});
-
-export const zGeometriEgenskap = zEgenskapVerdi.and(z.object({
-    verdi: zGeometristruktur,
-    type: z.literal('GeometriEgenskap')
-}));
 
 export const zSideMetadata = z.object({
     returnert: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
@@ -617,6 +609,24 @@ export const zHentVegobjekterStreamData = z.object({
  */
 export const zHentVegobjekterStreamResponse = z.array(zVegobjekt);
 
+export const zHentVegobjekterMultiTypeStreamData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        ider: z.optional(z.array(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }))),
+        typeIder: z.optional(z.array(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }))),
+        antall: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+        dato: z.optional(z.iso.date()),
+        stedfesting: z.optional(z.array(z.string())),
+        vegsystemreferanse: z.optional(z.array(z.string()))
+    }))
+});
+
+/**
+ * OK
+ */
+export const zHentVegobjekterMultiTypeStreamResponse = z.array(zVegobjekt);
+
 export const zHentVegobjektData = z.object({
     body: z.optional(z.never()),
     path: z.object({
@@ -683,9 +693,9 @@ export const zStreamVeglenkesekvenserData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
     query: z.optional(z.object({
-        start: z.optional(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })),
-        slutt: z.optional(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })),
         ider: z.optional(z.array(z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }))),
+        polygon: z.optional(z.string()),
+        vegsystemreferanse: z.optional(z.array(z.string())),
         antall: z.optional(z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }))
     }))
 });

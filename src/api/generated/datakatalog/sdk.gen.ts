@@ -3,6 +3,7 @@
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
 import type { GetEgenskapstypeData, GetEgenskapstypeErrors, GetEgenskapstypeForVegobjekttypeData, GetEgenskapstypeForVegobjekttypeErrors, GetEgenskapstypeForVegobjekttypeResponses, GetEgenskapstypeKategorierData, GetEgenskapstypeKategorierErrors, GetEgenskapstypeKategorierResponses, GetEgenskapstypeResponses, GetEnheterData, GetEnheterErrors, GetEnheterResponses, GetKategorierData, GetKategorierErrors, GetKategorierResponses, GetProduktspesifikasjonData, GetProduktspesifikasjonErrors, GetProduktspesifikasjonResponses, GetVegobjekttypeData, GetVegobjekttypeErrors, GetVegobjekttyperData, GetVegobjekttyperErrors, GetVegobjekttypeResponses, GetVegobjekttyperHistoriskData, GetVegobjekttyperHistoriskErrors, GetVegobjekttyperHistoriskResponses, GetVegobjekttyperResponses, GetVersjonData, GetVersjonErrors, GetVersjonResponses } from './types.gen';
+import { zGetEgenskapstypeData, zGetEgenskapstypeForVegobjekttypeData, zGetEgenskapstypeForVegobjekttypeResponse, zGetEgenskapstypeKategorierData, zGetEgenskapstypeKategorierResponse, zGetEgenskapstypeResponse, zGetEnheterData, zGetEnheterResponse, zGetKategorierData, zGetKategorierResponse, zGetProduktspesifikasjonData, zGetProduktspesifikasjonResponse, zGetVegobjekttypeData, zGetVegobjekttyperData, zGetVegobjekttypeResponse, zGetVegobjekttyperHistoriskData, zGetVegobjekttyperHistoriskResponse, zGetVegobjekttyperResponse, zGetVersjonData, zGetVersjonResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -21,49 +22,99 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * Returnerer aktiv versjon på datakatalog
  */
-export const getVersjon = <ThrowOnError extends boolean = false>(options?: Options<GetVersjonData, ThrowOnError>) => (options?.client ?? client).get<GetVersjonResponses, GetVersjonErrors, ThrowOnError>({ url: '/api/v1/versjon', ...options });
+export const getVersjon = <ThrowOnError extends boolean = false>(options?: Options<GetVersjonData, ThrowOnError>) => (options?.client ?? client).get<GetVersjonResponses, GetVersjonErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetVersjonData.parseAsync(data),
+    responseValidator: async (data) => await zGetVersjonResponse.parseAsync(data),
+    url: '/api/v1/versjon',
+    ...options
+});
 
 /**
  * Returnerer alle vegobjekttypene
  */
-export const getVegobjekttyper = <ThrowOnError extends boolean = false>(options?: Options<GetVegobjekttyperData, ThrowOnError>) => (options?.client ?? client).get<GetVegobjekttyperResponses, GetVegobjekttyperErrors, ThrowOnError>({ url: '/api/v1/vegobjekttyper', ...options });
+export const getVegobjekttyper = <ThrowOnError extends boolean = false>(options?: Options<GetVegobjekttyperData, ThrowOnError>) => (options?.client ?? client).get<GetVegobjekttyperResponses, GetVegobjekttyperErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetVegobjekttyperData.parseAsync(data),
+    responseValidator: async (data) => await zGetVegobjekttyperResponse.parseAsync(data),
+    url: '/api/v1/vegobjekttyper',
+    ...options
+});
 
 /**
  * Returnerer angitt vegobjekttype
  */
-export const getVegobjekttype = <ThrowOnError extends boolean = false>(options: Options<GetVegobjekttypeData, ThrowOnError>) => (options.client ?? client).get<GetVegobjekttypeResponses, GetVegobjekttypeErrors, ThrowOnError>({ url: '/api/v1/vegobjekttyper/{vegobjekttypeid}', ...options });
+export const getVegobjekttype = <ThrowOnError extends boolean = false>(options: Options<GetVegobjekttypeData, ThrowOnError>) => (options.client ?? client).get<GetVegobjekttypeResponses, GetVegobjekttypeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetVegobjekttypeData.parseAsync(data),
+    responseValidator: async (data) => await zGetVegobjekttypeResponse.parseAsync(data),
+    url: '/api/v1/vegobjekttyper/{vegobjekttypeid}',
+    ...options
+});
 
 /**
  * Returnerer angitt egenskapstype for angitt vegobjekttype
  */
-export const getEgenskapstypeForVegobjekttype = <ThrowOnError extends boolean = false>(options: Options<GetEgenskapstypeForVegobjekttypeData, ThrowOnError>) => (options.client ?? client).get<GetEgenskapstypeForVegobjekttypeResponses, GetEgenskapstypeForVegobjekttypeErrors, ThrowOnError>({ url: '/api/v1/vegobjekttyper/{vegobjekttypeid}/{egenskapstypeid}', ...options });
+export const getEgenskapstypeForVegobjekttype = <ThrowOnError extends boolean = false>(options: Options<GetEgenskapstypeForVegobjekttypeData, ThrowOnError>) => (options.client ?? client).get<GetEgenskapstypeForVegobjekttypeResponses, GetEgenskapstypeForVegobjekttypeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetEgenskapstypeForVegobjekttypeData.parseAsync(data),
+    responseValidator: async (data) => await zGetEgenskapstypeForVegobjekttypeResponse.parseAsync(data),
+    url: '/api/v1/vegobjekttyper/{vegobjekttypeid}/{egenskapstypeid}',
+    ...options
+});
 
 /**
  * Returnerer produktspesifikasjonen til den angitte vegobjekttypen
  */
-export const getProduktspesifikasjon = <ThrowOnError extends boolean = false>(options: Options<GetProduktspesifikasjonData, ThrowOnError>) => (options.client ?? client).get<GetProduktspesifikasjonResponses, GetProduktspesifikasjonErrors, ThrowOnError>({ url: '/api/v1/vegobjekttyper/{vegobjekttypeid}/produktspesifikasjon', ...options });
+export const getProduktspesifikasjon = <ThrowOnError extends boolean = false>(options: Options<GetProduktspesifikasjonData, ThrowOnError>) => (options.client ?? client).get<GetProduktspesifikasjonResponses, GetProduktspesifikasjonErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetProduktspesifikasjonData.parseAsync(data),
+    responseValidator: async (data) => await zGetProduktspesifikasjonResponse.parseAsync(data),
+    url: '/api/v1/vegobjekttyper/{vegobjekttypeid}/produktspesifikasjon',
+    ...options
+});
 
 /**
  * Returnerer alle vegobjekttypene for en gitt versjon av datakatalogen, f.eks. 2.31
  */
-export const getVegobjekttyperHistorisk = <ThrowOnError extends boolean = false>(options: Options<GetVegobjekttyperHistoriskData, ThrowOnError>) => (options.client ?? client).get<GetVegobjekttyperHistoriskResponses, GetVegobjekttyperHistoriskErrors, ThrowOnError>({ url: '/api/v1/vegobjekttyper/historisk/{versjon}', ...options });
+export const getVegobjekttyperHistorisk = <ThrowOnError extends boolean = false>(options: Options<GetVegobjekttyperHistoriskData, ThrowOnError>) => (options.client ?? client).get<GetVegobjekttyperHistoriskResponses, GetVegobjekttyperHistoriskErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetVegobjekttyperHistoriskData.parseAsync(data),
+    responseValidator: async (data) => await zGetVegobjekttyperHistoriskResponse.parseAsync(data),
+    url: '/api/v1/vegobjekttyper/historisk/{versjon}',
+    ...options
+});
 
 /**
  * Returnerer alle kategorier for vegobjekter
  */
-export const getKategorier = <ThrowOnError extends boolean = false>(options?: Options<GetKategorierData, ThrowOnError>) => (options?.client ?? client).get<GetKategorierResponses, GetKategorierErrors, ThrowOnError>({ url: '/api/v1/kategorier', ...options });
+export const getKategorier = <ThrowOnError extends boolean = false>(options?: Options<GetKategorierData, ThrowOnError>) => (options?.client ?? client).get<GetKategorierResponses, GetKategorierErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetKategorierData.parseAsync(data),
+    responseValidator: async (data) => await zGetKategorierResponse.parseAsync(data),
+    url: '/api/v1/kategorier',
+    ...options
+});
 
 /**
  * Returnerer alle enheter
  */
-export const getEnheter = <ThrowOnError extends boolean = false>(options?: Options<GetEnheterData, ThrowOnError>) => (options?.client ?? client).get<GetEnheterResponses, GetEnheterErrors, ThrowOnError>({ url: '/api/v1/enheter', ...options });
+export const getEnheter = <ThrowOnError extends boolean = false>(options?: Options<GetEnheterData, ThrowOnError>) => (options?.client ?? client).get<GetEnheterResponses, GetEnheterErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetEnheterData.parseAsync(data),
+    responseValidator: async (data) => await zGetEnheterResponse.parseAsync(data),
+    url: '/api/v1/enheter',
+    ...options
+});
 
 /**
  * Returnerer angitt egenskapstype
  */
-export const getEgenskapstype = <ThrowOnError extends boolean = false>(options: Options<GetEgenskapstypeData, ThrowOnError>) => (options.client ?? client).get<GetEgenskapstypeResponses, GetEgenskapstypeErrors, ThrowOnError>({ url: '/api/v1/egenskapstyper/{egenskapstypeid}', ...options });
+export const getEgenskapstype = <ThrowOnError extends boolean = false>(options: Options<GetEgenskapstypeData, ThrowOnError>) => (options.client ?? client).get<GetEgenskapstypeResponses, GetEgenskapstypeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetEgenskapstypeData.parseAsync(data),
+    responseValidator: async (data) => await zGetEgenskapstypeResponse.parseAsync(data),
+    url: '/api/v1/egenskapstyper/{egenskapstypeid}',
+    ...options
+});
 
 /**
  * Returnerer alle kategorier for egenskapstypene
  */
-export const getEgenskapstypeKategorier = <ThrowOnError extends boolean = false>(options?: Options<GetEgenskapstypeKategorierData, ThrowOnError>) => (options?.client ?? client).get<GetEgenskapstypeKategorierResponses, GetEgenskapstypeKategorierErrors, ThrowOnError>({ url: '/api/v1/egenskapstypekategorier', ...options });
+export const getEgenskapstypeKategorier = <ThrowOnError extends boolean = false>(options?: Options<GetEgenskapstypeKategorierData, ThrowOnError>) => (options?.client ?? client).get<GetEgenskapstypeKategorierResponses, GetEgenskapstypeKategorierErrors, ThrowOnError>({
+    requestValidator: async (data) => await zGetEgenskapstypeKategorierData.parseAsync(data),
+    responseValidator: async (data) => await zGetEgenskapstypeKategorierResponse.parseAsync(data),
+    url: '/api/v1/egenskapstypekategorier',
+    ...options
+});

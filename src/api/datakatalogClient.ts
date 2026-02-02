@@ -1,4 +1,4 @@
-import { client } from './generated/datakatalog/client.gen'
+import './apiConfig'
 import { getKategorier as sdkGetKategorier, getVegobjekttyper as sdkGetVegobjekttyper } from './generated/datakatalog/sdk.gen'
 import type {
   Egenskapstype,
@@ -11,15 +11,6 @@ import type {
   Kategori,
   Vegobjekttype,
 } from './generated/datakatalog/types.gen'
-
-const BASE_URL = 'https://nvdbapiles.atlas.vegvesen.no/datakatalog'
-
-client.setConfig({
-  baseUrl: BASE_URL,
-  headers: {
-    'X-Client': 'nvdb-vis-vegobjekter',
-  },
-})
 
 export type { Vegobjekttype, Egenskapstype, Kategori }
 

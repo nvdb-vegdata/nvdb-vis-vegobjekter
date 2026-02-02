@@ -3,7 +3,9 @@ import WKT from 'ol/format/WKT'
 import type { LineString, Polygon } from 'ol/geom'
 import { useCallback, useMemo, useState } from 'react'
 import type { Vegobjekttype } from '../api/datakatalogClient'
-import { buildStedfestingFilter, hentVegobjekter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt } from '../api/uberiketClient'
+import { hentVegobjekterMultiType } from '../api/generated/uberiket/sdk.gen'
+import type { InkluderIVegobjekt } from '../api/generated/uberiket/types.gen'
+import { buildStedfestingFilter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt, VegobjekterRequestError } from '../api/uberiketClient'
 import { getTodayDate } from '../utils/dateUtils'
 import { getLineStringOverlapFractions } from '../utils/geometryUtils'
 
@@ -99,27 +101,52 @@ export function useVegobjekter({
   const typeIds = useMemo(() => selectedTypes.map((type) => type.id).sort((a, b) => a - b), [selectedTypes])
   const typeIdList = useMemo(() => typeIds.join(','), [typeIds])
 
+  const queryParams = useMemo(
+    () => ({
+      typeIder: allTypesSelected ? undefined : typeIds,
+      antall: 1000,
+      inkluder: ['alle'] as InkluderIVegobjekt[],
+      dato: today,
+      vegsystemreferanse: trimmedStrekning.length > 0 ? [trimmedStrekning] : undefined,
+      stedfesting: trimmedStrekning.length > 0 ? undefined : [stedfestingFilter],
+    }),
+    [allTypesSelected, stedfestingFilter, today, trimmedStrekning, typeIds],
+  )
+
   const query = useInfiniteQuery({
-    queryKey: ['vegobjekter', allTypesSelected ? 'all' : typeIdList, stedfestingFilter, trimmedStrekning, today],
-    queryFn: async ({ pageParam }: { pageParam?: string }) => {
-      const typeIdsParam = allTypesSelected ? undefined : typeIds
-      if (trimmedStrekning.length > 0) {
-        return hentVegobjekter({
-          typeIds: typeIdsParam,
-          vegsystemreferanse: trimmedStrekning,
-          dato: today,
-          start: pageParam,
+    queryFn: async ({ pageParam, signal }) => {
+      try {
+        let start: string | undefined
+        if (typeof pageParam === 'string') {
+          start = pageParam || undefined
+        } else if (pageParam && typeof pageParam === 'object') {
+          start = (pageParam as { query?: { start?: string } }).query?.start
+        }
+        const { data } = await hentVegobjekterMultiType({
+          query: {
+            ...queryParams,
+            start,
+          },
+          signal,
+          throwOnError: true,
         })
+        return data
+      } catch (error) {
+        const e = error as { status?: number; detail?: string; title?: string } | undefined
+        const status = typeof e?.status === 'number' ? e.status : undefined
+        const detail = typeof e?.detail === 'string' ? e.detail : undefined
+
+        if (status || detail) {
+          throw new VegobjekterRequestError(`Failed to fetch vegobjekter: ${e?.title ?? 'request failed'}`, status, detail)
+        }
+
+        const message = error instanceof Error ? error.message : String(error)
+        throw new Error(message)
       }
-      return hentVegobjekter({
-        typeIds: typeIdsParam,
-        stedfesting: stedfestingFilter,
-        dato: today,
-        start: pageParam,
-      })
     },
+    queryKey: ['vegobjekter', allTypesSelected ? 'all' : typeIdList, stedfestingFilter, trimmedStrekning, today],
     enabled,
-    initialPageParam: undefined,
+    initialPageParam: '',
     getNextPageParam: (lastPage) => lastPage.metadata.neste?.start,
   })
 
@@ -162,11 +189,19 @@ export function useVegobjekter({
     }
   }
 
+  const error = useMemo(() => {
+    if (!query.error) return null
+    if (query.error instanceof Error) return query.error
+    const e = query.error as { detail?: string; title?: string; status?: number } | undefined
+    const message = e?.detail ?? e?.title ?? 'Kunne ikke hente vegobjekter. Prv igjen senere.'
+    return new Error(message)
+  }, [query.error])
+
   return {
     vegobjekterByType,
     isLoading: query.isLoading,
     isError: query.isError,
-    error: query.error,
+    error,
     hasNextPage: query.hasNextPage ?? false,
     fetchNextPage: fetchNextBatch,
     isFetchingNextPage: isFetchingBatch,

@@ -2,7 +2,8 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { HentHendelserForEndringssettData, HentHendelserForEndringssettErrors, HentHendelserForEndringssettResponses, HentNodeData, HentNodeErrors, HentNodeHendelserData, HentNodeHendelserErrors, HentNodeHendelserResponses, HentNoderData, HentNoderErrors, HentNodeResponses, HentNoderResponses, HentSisteNodeHendelseData, HentSisteNodeHendelseErrors, HentSisteNodeHendelseResponses, HentSisteVeglenkesekvensHendelseData, HentSisteVeglenkesekvensHendelseErrors, HentSisteVeglenkesekvensHendelseResponses, HentSisteVegnettHendelseData, HentSisteVegnettHendelseErrors, HentSisteVegnettHendelseResponses, HentSisteVegobjektHendelseId1Data, HentSisteVegobjektHendelseId1Errors, HentSisteVegobjektHendelseId1Responses, HentSisteVegobjektHendelseIdData, HentSisteVegobjektHendelseIdErrors, HentSisteVegobjektHendelseIdResponses, HentVeglenkesekvensData, HentVeglenkesekvenserData, HentVeglenkesekvenserErrors, HentVeglenkesekvenserResponses, HentVeglenkesekvensErrors, HentVeglenkesekvensHendelserData, HentVeglenkesekvensHendelserErrors, HentVeglenkesekvensHendelserResponses, HentVeglenkesekvensHistoriskData, HentVeglenkesekvensHistoriskErrors, HentVeglenkesekvensHistoriskResponses, HentVeglenkesekvensResponses, HentVegnettHendelserData, HentVegnettHendelserErrors, HentVegnettHendelserResponses, HentVegobjektData, HentVegobjekterData, HentVegobjekterErrors, HentVegobjekterMultiTypeData, HentVegobjekterMultiTypeErrors, HentVegobjekterMultiTypeResponses, HentVegobjekterResponses, HentVegobjektErrors, HentVegobjekterStreamData, HentVegobjekterStreamErrors, HentVegobjekterStreamResponses, HentVegobjektHendelserData, HentVegobjektHendelserErrors, HentVegobjektHendelserForTyperData, HentVegobjektHendelserForTyperErrors, HentVegobjektHendelserForTyperResponses, HentVegobjektHendelserResponses, HentVegobjektHistoriskData, HentVegobjektHistoriskErrors, HentVegobjektHistoriskResponses, HentVegobjektMedTypeData, HentVegobjektMedTypeErrors, HentVegobjektMedTypeResponses, HentVegobjektResponses, HentVegobjektVersjonData, HentVegobjektVersjonErrors, HentVegobjektVersjonResponses, StreamVeglenkerData, StreamVeglenkerErrors, StreamVeglenkerResponses, StreamVeglenkesekvenserData, StreamVeglenkesekvenserErrors, StreamVeglenkesekvenserResponses, StreamVeglenkesekvensHendelserData, StreamVeglenkesekvensHendelserErrors, StreamVeglenkesekvensHendelserResponses, StreamVegobjekthendelserData, StreamVegobjekthendelserErrors, StreamVegobjekthendelserResponses } from './types.gen';
+import type { HentHendelserForEndringssettData, HentHendelserForEndringssettErrors, HentHendelserForEndringssettResponses, HentNodeData, HentNodeErrors, HentNodeHendelserData, HentNodeHendelserErrors, HentNodeHendelserResponses, HentNoderData, HentNoderErrors, HentNodeResponses, HentNoderResponses, HentSisteNodeHendelseData, HentSisteNodeHendelseErrors, HentSisteNodeHendelseResponses, HentSisteVeglenkesekvensHendelseData, HentSisteVeglenkesekvensHendelseErrors, HentSisteVeglenkesekvensHendelseResponses, HentSisteVegnettHendelseData, HentSisteVegnettHendelseErrors, HentSisteVegnettHendelseResponses, HentSisteVegobjektHendelseId1Data, HentSisteVegobjektHendelseId1Errors, HentSisteVegobjektHendelseId1Responses, HentSisteVegobjektHendelseIdData, HentSisteVegobjektHendelseIdErrors, HentSisteVegobjektHendelseIdResponses, HentVeglenkesekvensData, HentVeglenkesekvenserData, HentVeglenkesekvenserErrors, HentVeglenkesekvenserResponses, HentVeglenkesekvensErrors, HentVeglenkesekvensHendelserData, HentVeglenkesekvensHendelserErrors, HentVeglenkesekvensHendelserResponses, HentVeglenkesekvensHistoriskData, HentVeglenkesekvensHistoriskErrors, HentVeglenkesekvensHistoriskResponses, HentVeglenkesekvensResponses, HentVegnettHendelserData, HentVegnettHendelserErrors, HentVegnettHendelserResponses, HentVegobjektData, HentVegobjekterData, HentVegobjekterErrors, HentVegobjekterMultiTypeData, HentVegobjekterMultiTypeErrors, HentVegobjekterMultiTypeResponses, HentVegobjekterMultiTypeStreamData, HentVegobjekterMultiTypeStreamErrors, HentVegobjekterMultiTypeStreamResponses, HentVegobjekterResponses, HentVegobjektErrors, HentVegobjekterStreamData, HentVegobjekterStreamErrors, HentVegobjekterStreamResponses, HentVegobjektHendelserData, HentVegobjektHendelserErrors, HentVegobjektHendelserForTyperData, HentVegobjektHendelserForTyperErrors, HentVegobjektHendelserForTyperResponses, HentVegobjektHendelserResponses, HentVegobjektHistoriskData, HentVegobjektHistoriskErrors, HentVegobjektHistoriskResponses, HentVegobjektMedTypeData, HentVegobjektMedTypeErrors, HentVegobjektMedTypeResponses, HentVegobjektResponses, HentVegobjektVersjonData, HentVegobjektVersjonErrors, HentVegobjektVersjonResponses, StreamVeglenkerData, StreamVeglenkerErrors, StreamVeglenkerResponses, StreamVeglenkesekvenserData, StreamVeglenkesekvenserErrors, StreamVeglenkesekvenserResponses, StreamVeglenkesekvensHendelserData, StreamVeglenkesekvensHendelserErrors, StreamVeglenkesekvensHendelserResponses, StreamVegobjekthendelserData, StreamVegobjekthendelserErrors, StreamVegobjekthendelserResponses } from './types.gen';
+import { zHentHendelserForEndringssettData, zHentHendelserForEndringssettResponse, zHentNodeData, zHentNodeHendelserData, zHentNodeHendelserResponse, zHentNoderData, zHentNodeResponse, zHentNoderResponse, zHentSisteNodeHendelseData, zHentSisteNodeHendelseResponse, zHentSisteVeglenkesekvensHendelseData, zHentSisteVeglenkesekvensHendelseResponse, zHentSisteVegnettHendelseData, zHentSisteVegnettHendelseResponse, zHentSisteVegobjektHendelseId1Data, zHentSisteVegobjektHendelseId1Response, zHentSisteVegobjektHendelseIdData, zHentSisteVegobjektHendelseIdResponse, zHentVeglenkesekvensData, zHentVeglenkesekvenserData, zHentVeglenkesekvenserResponse, zHentVeglenkesekvensHendelserData, zHentVeglenkesekvensHendelserResponse, zHentVeglenkesekvensHistoriskData, zHentVeglenkesekvensHistoriskResponse, zHentVeglenkesekvensResponse, zHentVegnettHendelserData, zHentVegnettHendelserResponse, zHentVegobjektData, zHentVegobjekterData, zHentVegobjekterMultiTypeData, zHentVegobjekterMultiTypeResponse, zHentVegobjekterMultiTypeStreamData, zHentVegobjekterMultiTypeStreamResponse, zHentVegobjekterResponse, zHentVegobjekterStreamData, zHentVegobjekterStreamResponse, zHentVegobjektHendelserData, zHentVegobjektHendelserForTyperData, zHentVegobjektHendelserForTyperResponse, zHentVegobjektHendelserResponse, zHentVegobjektHistoriskData, zHentVegobjektHistoriskResponse, zHentVegobjektMedTypeData, zHentVegobjektMedTypeResponse, zHentVegobjektResponse, zHentVegobjektVersjonData, zHentVegobjektVersjonResponse, zStreamVeglenkerData, zStreamVeglenkerResponse, zStreamVeglenkesekvenserData, zStreamVeglenkesekvenserResponse, zStreamVeglenkesekvensHendelserData, zStreamVeglenkesekvensHendelserResponse, zStreamVegobjekthendelserData, zStreamVegobjekthendelserResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -22,6 +23,8 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Hent vegobjekter fra flere typer
  */
 export const hentVegobjekterMultiType = <ThrowOnError extends boolean = false>(options?: Options<HentVegobjekterMultiTypeData, ThrowOnError>) => (options?.client ?? client).get<HentVegobjekterMultiTypeResponses, HentVegobjekterMultiTypeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjekterMultiTypeData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjekterMultiTypeResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter',
     ...options
@@ -31,6 +34,8 @@ export const hentVegobjekterMultiType = <ThrowOnError extends boolean = false>(o
  * Hent vegobjekter
  */
 export const hentVegobjekter = <ThrowOnError extends boolean = false>(options: Options<HentVegobjekterData, ThrowOnError>) => (options.client ?? client).get<HentVegobjekterResponses, HentVegobjekterErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjekterData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjekterResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/{typeId}',
     ...options
@@ -40,6 +45,8 @@ export const hentVegobjekter = <ThrowOnError extends boolean = false>(options: O
  * Hent siste versjon av vegobjekt med type og ID
  */
 export const hentVegobjektMedType = <ThrowOnError extends boolean = false>(options: Options<HentVegobjektMedTypeData, ThrowOnError>) => (options.client ?? client).get<HentVegobjektMedTypeResponses, HentVegobjektMedTypeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektMedTypeData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektMedTypeResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/{typeId}/{vegobjektId}',
     ...options
@@ -49,6 +56,8 @@ export const hentVegobjektMedType = <ThrowOnError extends boolean = false>(optio
  * Hent spesifikk versjon av vegobjekt
  */
 export const hentVegobjektVersjon = <ThrowOnError extends boolean = false>(options: Options<HentVegobjektVersjonData, ThrowOnError>) => (options.client ?? client).get<HentVegobjektVersjonResponses, HentVegobjektVersjonErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektVersjonData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektVersjonResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/{typeId}/{vegobjektId}/{versjon}',
     ...options
@@ -58,6 +67,8 @@ export const hentVegobjektVersjon = <ThrowOnError extends boolean = false>(optio
  * Hent vegobjekt på dato (ukorrigert)
  */
 export const hentVegobjektHistorisk = <ThrowOnError extends boolean = false>(options: Options<HentVegobjektHistoriskData, ThrowOnError>) => (options.client ?? client).get<HentVegobjektHistoriskResponses, HentVegobjektHistoriskErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektHistoriskData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektHistoriskResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/{typeId}/{vegobjektId}/historisk',
     ...options
@@ -67,8 +78,21 @@ export const hentVegobjektHistorisk = <ThrowOnError extends boolean = false>(opt
  * Strøm aktive vegobjekter som NDJSON.
  */
 export const hentVegobjekterStream = <ThrowOnError extends boolean = false>(options: Options<HentVegobjekterStreamData, ThrowOnError>) => (options.client ?? client).get<HentVegobjekterStreamResponses, HentVegobjekterStreamErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjekterStreamData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjekterStreamResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/{typeId}/stream',
+    ...options
+});
+
+/**
+ * Strøm vegobjekter fra flere typer som NDJSON.
+ */
+export const hentVegobjekterMultiTypeStream = <ThrowOnError extends boolean = false>(options?: Options<HentVegobjekterMultiTypeStreamData, ThrowOnError>) => (options?.client ?? client).get<HentVegobjekterMultiTypeStreamResponses, HentVegobjekterMultiTypeStreamErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjekterMultiTypeStreamData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjekterMultiTypeStreamResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/vegobjekter/stream',
     ...options
 });
 
@@ -76,6 +100,8 @@ export const hentVegobjekterStream = <ThrowOnError extends boolean = false>(opti
  * Hent siste versjon av vegobjekt kun med ID
  */
 export const hentVegobjekt = <ThrowOnError extends boolean = false>(options: Options<HentVegobjektData, ThrowOnError>) => (options.client ?? client).get<HentVegobjektResponses, HentVegobjektErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegobjekter/id/{vegobjektId}',
     ...options
@@ -85,6 +111,8 @@ export const hentVegobjekt = <ThrowOnError extends boolean = false>(options: Opt
  * Hent veglenkesekvenser
  */
 export const hentVeglenkesekvenser = <ThrowOnError extends boolean = false>(options?: Options<HentVeglenkesekvenserData, ThrowOnError>) => (options?.client ?? client).get<HentVeglenkesekvenserResponses, HentVeglenkesekvenserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVeglenkesekvenserData.parseAsync(data),
+    responseValidator: async (data) => await zHentVeglenkesekvenserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/veglenkesekvenser',
     ...options
@@ -94,6 +122,8 @@ export const hentVeglenkesekvenser = <ThrowOnError extends boolean = false>(opti
  * Hent veglenkesekvens
  */
 export const hentVeglenkesekvens = <ThrowOnError extends boolean = false>(options: Options<HentVeglenkesekvensData, ThrowOnError>) => (options.client ?? client).get<HentVeglenkesekvensResponses, HentVeglenkesekvensErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVeglenkesekvensData.parseAsync(data),
+    responseValidator: async (data) => await zHentVeglenkesekvensResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/veglenkesekvenser/{veglenkesekvensId}',
     ...options
@@ -103,6 +133,8 @@ export const hentVeglenkesekvens = <ThrowOnError extends boolean = false>(option
  * Hent veglenkesekvens på dato (ukorrigert)
  */
 export const hentVeglenkesekvensHistorisk = <ThrowOnError extends boolean = false>(options: Options<HentVeglenkesekvensHistoriskData, ThrowOnError>) => (options.client ?? client).get<HentVeglenkesekvensHistoriskResponses, HentVeglenkesekvensHistoriskErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVeglenkesekvensHistoriskData.parseAsync(data),
+    responseValidator: async (data) => await zHentVeglenkesekvensHistoriskResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/veglenkesekvenser/{veglenkesekvensId}/historisk',
     ...options
@@ -112,6 +144,8 @@ export const hentVeglenkesekvensHistorisk = <ThrowOnError extends boolean = fals
  * Strøm veglenkesekvenser som NDJSON.
  */
 export const streamVeglenkesekvenser = <ThrowOnError extends boolean = false>(options?: Options<StreamVeglenkesekvenserData, ThrowOnError>) => (options?.client ?? client).get<StreamVeglenkesekvenserResponses, StreamVeglenkesekvenserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zStreamVeglenkesekvenserData.parseAsync(data),
+    responseValidator: async (data) => await zStreamVeglenkesekvenserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/veglenkesekvenser/stream',
     ...options
@@ -121,6 +155,8 @@ export const streamVeglenkesekvenser = <ThrowOnError extends boolean = false>(op
  * Strøm veglenker som NDJSON.
  */
 export const streamVeglenker = <ThrowOnError extends boolean = false>(options?: Options<StreamVeglenkerData, ThrowOnError>) => (options?.client ?? client).get<StreamVeglenkerResponses, StreamVeglenkerErrors, ThrowOnError>({
+    requestValidator: async (data) => await zStreamVeglenkerData.parseAsync(data),
+    responseValidator: async (data) => await zStreamVeglenkerResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/veglenker/stream',
     ...options
@@ -130,6 +166,8 @@ export const streamVeglenker = <ThrowOnError extends boolean = false>(options?: 
  * Hent noder
  */
 export const hentNoder = <ThrowOnError extends boolean = false>(options?: Options<HentNoderData, ThrowOnError>) => (options?.client ?? client).get<HentNoderResponses, HentNoderErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentNoderData.parseAsync(data),
+    responseValidator: async (data) => await zHentNoderResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/noder',
     ...options
@@ -139,6 +177,8 @@ export const hentNoder = <ThrowOnError extends boolean = false>(options?: Option
  * Hent node
  */
 export const hentNode = <ThrowOnError extends boolean = false>(options: Options<HentNodeData, ThrowOnError>) => (options.client ?? client).get<HentNodeResponses, HentNodeErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentNodeData.parseAsync(data),
+    responseValidator: async (data) => await zHentNodeResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/vegnett/noder/{nodeId}',
     ...options
@@ -148,6 +188,8 @@ export const hentNode = <ThrowOnError extends boolean = false>(options: Options<
  * Hent vegobjekthendelser for alle eller enkelte vegobjekttyper
  */
 export const hentVegobjektHendelserForTyper = <ThrowOnError extends boolean = false>(options?: Options<HentVegobjektHendelserForTyperData, ThrowOnError>) => (options?.client ?? client).get<HentVegobjektHendelserForTyperResponses, HentVegobjektHendelserForTyperErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektHendelserForTyperData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektHendelserForTyperResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegobjekter',
     ...options
@@ -157,6 +199,8 @@ export const hentVegobjektHendelserForTyper = <ThrowOnError extends boolean = fa
  * Hent vegobjekthendelser
  */
 export const hentVegobjektHendelser = <ThrowOnError extends boolean = false>(options: Options<HentVegobjektHendelserData, ThrowOnError>) => (options.client ?? client).get<HentVegobjektHendelserResponses, HentVegobjektHendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegobjektHendelserData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegobjektHendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegobjekter/{typeId}',
     ...options
@@ -166,6 +210,8 @@ export const hentVegobjektHendelser = <ThrowOnError extends boolean = false>(opt
  * Strøm vegobjekthendelser som NDJSON
  */
 export const streamVegobjekthendelser = <ThrowOnError extends boolean = false>(options: Options<StreamVegobjekthendelserData, ThrowOnError>) => (options.client ?? client).get<StreamVegobjekthendelserResponses, StreamVegobjekthendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zStreamVegobjekthendelserData.parseAsync(data),
+    responseValidator: async (data) => await zStreamVegobjekthendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegobjekter/{typeId}/stream',
     ...options
@@ -175,6 +221,8 @@ export const streamVegobjekthendelser = <ThrowOnError extends boolean = false>(o
  * Hent siste vegobjekthendelse
  */
 export const hentSisteVegobjektHendelseId = <ThrowOnError extends boolean = false>(options: Options<HentSisteVegobjektHendelseIdData, ThrowOnError>) => (options.client ?? client).get<HentSisteVegobjektHendelseIdResponses, HentSisteVegobjektHendelseIdErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentSisteVegobjektHendelseIdData.parseAsync(data),
+    responseValidator: async (data) => await zHentSisteVegobjektHendelseIdResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegobjekter/{typeId}/siste',
     ...options
@@ -184,6 +232,8 @@ export const hentSisteVegobjektHendelseId = <ThrowOnError extends boolean = fals
  * Hent siste vegobjekthendelse for gitte vegobjekttyper
  */
 export const hentSisteVegobjektHendelseId1 = <ThrowOnError extends boolean = false>(options: Options<HentSisteVegobjektHendelseId1Data, ThrowOnError>) => (options.client ?? client).get<HentSisteVegobjektHendelseId1Responses, HentSisteVegobjektHendelseId1Errors, ThrowOnError>({
+    requestValidator: async (data) => await zHentSisteVegobjektHendelseId1Data.parseAsync(data),
+    responseValidator: async (data) => await zHentSisteVegobjektHendelseId1Response.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegobjekter/siste',
     ...options
@@ -193,6 +243,8 @@ export const hentSisteVegobjektHendelseId1 = <ThrowOnError extends boolean = fal
  * Hent vegnetthendelser (noder og veglenkesekvenser)
  */
 export const hentVegnettHendelser = <ThrowOnError extends boolean = false>(options?: Options<HentVegnettHendelserData, ThrowOnError>) => (options?.client ?? client).get<HentVegnettHendelserResponses, HentVegnettHendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVegnettHendelserData.parseAsync(data),
+    responseValidator: async (data) => await zHentVegnettHendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegnett',
     ...options
@@ -202,6 +254,8 @@ export const hentVegnettHendelser = <ThrowOnError extends boolean = false>(optio
  * Hent siste vegnetthendelse (node eller veglenkesekvens)
  */
 export const hentSisteVegnettHendelse = <ThrowOnError extends boolean = false>(options?: Options<HentSisteVegnettHendelseData, ThrowOnError>) => (options?.client ?? client).get<HentSisteVegnettHendelseResponses, HentSisteVegnettHendelseErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentSisteVegnettHendelseData.parseAsync(data),
+    responseValidator: async (data) => await zHentSisteVegnettHendelseResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/vegnett/siste',
     ...options
@@ -211,6 +265,8 @@ export const hentSisteVegnettHendelse = <ThrowOnError extends boolean = false>(o
  * Hent veglenkesekvenshendelser
  */
 export const hentVeglenkesekvensHendelser = <ThrowOnError extends boolean = false>(options?: Options<HentVeglenkesekvensHendelserData, ThrowOnError>) => (options?.client ?? client).get<HentVeglenkesekvensHendelserResponses, HentVeglenkesekvensHendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentVeglenkesekvensHendelserData.parseAsync(data),
+    responseValidator: async (data) => await zHentVeglenkesekvensHendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/veglenkesekvenser',
     ...options
@@ -220,6 +276,8 @@ export const hentVeglenkesekvensHendelser = <ThrowOnError extends boolean = fals
  * Strøm veglenkesekvenshendelser som NDJSON
  */
 export const streamVeglenkesekvensHendelser = <ThrowOnError extends boolean = false>(options?: Options<StreamVeglenkesekvensHendelserData, ThrowOnError>) => (options?.client ?? client).get<StreamVeglenkesekvensHendelserResponses, StreamVeglenkesekvensHendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zStreamVeglenkesekvensHendelserData.parseAsync(data),
+    responseValidator: async (data) => await zStreamVeglenkesekvensHendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/veglenkesekvenser/stream',
     ...options
@@ -229,6 +287,8 @@ export const streamVeglenkesekvensHendelser = <ThrowOnError extends boolean = fa
  * Hent siste veglenkesekvenshendelse
  */
 export const hentSisteVeglenkesekvensHendelse = <ThrowOnError extends boolean = false>(options?: Options<HentSisteVeglenkesekvensHendelseData, ThrowOnError>) => (options?.client ?? client).get<HentSisteVeglenkesekvensHendelseResponses, HentSisteVeglenkesekvensHendelseErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentSisteVeglenkesekvensHendelseData.parseAsync(data),
+    responseValidator: async (data) => await zHentSisteVeglenkesekvensHendelseResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/veglenkesekvenser/siste',
     ...options
@@ -238,6 +298,8 @@ export const hentSisteVeglenkesekvensHendelse = <ThrowOnError extends boolean = 
  * Hent nodehendelser
  */
 export const hentNodeHendelser = <ThrowOnError extends boolean = false>(options?: Options<HentNodeHendelserData, ThrowOnError>) => (options?.client ?? client).get<HentNodeHendelserResponses, HentNodeHendelserErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentNodeHendelserData.parseAsync(data),
+    responseValidator: async (data) => await zHentNodeHendelserResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/noder',
     ...options
@@ -247,6 +309,8 @@ export const hentNodeHendelser = <ThrowOnError extends boolean = false>(options?
  * Hent siste nodehendelse
  */
 export const hentSisteNodeHendelse = <ThrowOnError extends boolean = false>(options?: Options<HentSisteNodeHendelseData, ThrowOnError>) => (options?.client ?? client).get<HentSisteNodeHendelseResponses, HentSisteNodeHendelseErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentSisteNodeHendelseData.parseAsync(data),
+    responseValidator: async (data) => await zHentSisteNodeHendelseResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/noder/siste',
     ...options
@@ -256,6 +320,8 @@ export const hentSisteNodeHendelse = <ThrowOnError extends boolean = false>(opti
  * Hent hendelser generert fra endringssett
  */
 export const hentHendelserForEndringssett = <ThrowOnError extends boolean = false>(options: Options<HentHendelserForEndringssettData, ThrowOnError>) => (options.client ?? client).get<HentHendelserForEndringssettResponses, HentHendelserForEndringssettErrors, ThrowOnError>({
+    requestValidator: async (data) => await zHentHendelserForEndringssettData.parseAsync(data),
+    responseValidator: async (data) => await zHentHendelserForEndringssettResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/hendelser/endringssett/{endringssettId}',
     ...options

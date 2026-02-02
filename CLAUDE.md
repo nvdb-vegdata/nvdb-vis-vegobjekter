@@ -129,3 +129,7 @@ Always use the uberiket API when fetching vegobjekter data.
 ## Formatting
 
 After making changes to `.ts`, `.tsx`, `.js`, `.jsx`, or `.json` files, run `bun lint` silently to format and lint.
+
+## Generated code
+
+Never edit files under `src/api/generated` directly. Regenerate them with `bun run generate:api` after updating specs or `openapi-ts.config.ts`.

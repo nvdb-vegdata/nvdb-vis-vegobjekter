@@ -1,4 +1,4 @@
-import { client } from './generated/uberiket/client.gen'
+import './apiConfig'
 import { hentVeglenkesekvenser as sdkHentVeglenkesekvenser, hentVegobjekterMultiType as sdkHentVegobjekterMultiType } from './generated/uberiket/sdk.gen'
 import type {
   BoolskEgenskap,
@@ -22,15 +22,7 @@ import type {
   Vegobjekt,
   VegobjekterSide,
 } from './generated/uberiket/types.gen'
-
-const BASE_URL = 'https://nvdbapiles.atlas.vegvesen.no/uberiket'
-
-client.setConfig({
-  baseUrl: BASE_URL,
-  headers: {
-    'X-Client': 'nvdb-vis-vegobjekter',
-  },
-})
+import { zHentVeglenkesekvenserResponse } from './generated/uberiket/zod.gen'
 
 export type Stedfesting = StedfestingLinjer | StedfestingPunkter | StedfestingSving | StedfestingMangler
 
@@ -68,6 +60,20 @@ export async function hentVeglenkesekvenser({ polygon, vegsystemreferanse, antal
       vegsystemreferanse: vegsystemreferanse ? [vegsystemreferanse] : undefined,
       inkluder: ['alle'],
     },
+    responseValidator: async (data) => {
+      normalizeVeglenkesekvenserResponseInPlace(data)
+
+      try {
+        await zHentVeglenkesekvenserResponse.parseAsync(data)
+      } catch (error) {
+        const issues = typeof error === 'object' && error && 'issues' in error ? (error as { issues?: unknown }).issues : undefined
+        if (issues) {
+          console.error('Uberiket response validation error (veglenkesekvenser)', issues)
+        } else {
+          console.error('Uberiket response validation error (veglenkesekvenser)', error)
+        }
+      }
+    },
   })
 
   if (response.error) {
@@ -75,6 +81,22 @@ export async function hentVeglenkesekvenser({ polygon, vegsystemreferanse, antal
   }
 
   return response.data as VeglenkesekvenserSide
+}
+
+function normalizeVeglenkesekvenserResponseInPlace(data: unknown) {
+  if (!data || typeof data !== 'object') return
+
+  const root = data as { veglenkesekvenser?: unknown }
+  if (!Array.isArray(root.veglenkesekvenser)) return
+
+  for (const vs of root.veglenkesekvenser) {
+    if (!vs || typeof vs !== 'object') continue
+    const seq = vs as { id?: unknown }
+
+    if (typeof seq.id === 'bigint') {
+      seq.id = Number(seq.id)
+    }
+  }
 }
 
 type VegobjekterQuery = {

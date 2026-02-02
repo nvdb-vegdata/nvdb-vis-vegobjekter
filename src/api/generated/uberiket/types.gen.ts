@@ -67,7 +67,7 @@ export type GeometriKvalitet = {
 
 export type Geometristruktur = {
     wkt: string;
-    srid: Srid;
+    srid: number;
     lengde?: number;
     datafangstdato?: string;
     temakode?: number;
@@ -114,8 +114,6 @@ export type NesteSide = {
 };
 
 export type Retning = 'MED' | 'MOT';
-
-export type Srid = '5972' | '5973' | '5974' | '5975' | '4326';
 
 export type SideMetadata = {
     /**
@@ -1026,6 +1024,81 @@ export type HentVegobjekterStreamResponses = {
 
 export type HentVegobjekterStreamResponse = HentVegobjekterStreamResponses[keyof HentVegobjekterStreamResponses];
 
+export type HentVegobjekterMultiTypeStreamData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Hent kun vegobjekter med angitte IDer
+         */
+        ider?: Array<number>;
+        /**
+         * Kommaseparert liste med vegobjekttype-IDer. Hvis tom, hentes alle vegobjekter som ikke er skjermet.
+         */
+        typeIder?: Array<number>;
+        /**
+         * Antall vegobjekter som skal hentes. Fra 1 til 10000, standard 1000.
+         */
+        antall?: number;
+        /**
+         * Hvis satt, hentes bare vegobjektversjoner som var gyldige på denne datoen
+         */
+        dato?: string;
+        /**
+         * Finn vegobjekter med stedfestinger som overlapper gitte utstrekninger (komma-separert liste).
+         *
+         * Eksempel: 0-0.5@123,125,1.0@126
+         *
+         */
+        stedfesting?: Array<string>;
+        /**
+         * Filtrer vegobjekter på [vegsystemreferanse](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/introduksjon/Vegsystemreferanse). Kommaseparert liste. Legg til kommunenummer i starten av vegsystemreferansen for KSP-veger.
+         *
+         * MERK:
+         * - Meterverdier, trafikantgruppe, kryssystem og sideanlegg støttes ikke.
+         * - Inkluderer både vegobjekter stedfestet på hovednivå (VT, VTKB) og detaljert nivå (KB, KF)
+         *
+         * Eksempel: `EV6S1D1`
+         */
+        vegsystemreferanse?: Array<string>;
+    };
+    url: '/api/v1/vegobjekter/stream';
+};
+
+export type HentVegobjekterMultiTypeStreamErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetail;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetail;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetail;
+    /**
+     * Not Found
+     */
+    404: ProblemDetail;
+    /**
+     * Internal Server Error
+     */
+    500: ProblemDetail;
+};
+
+export type HentVegobjekterMultiTypeStreamError = HentVegobjekterMultiTypeStreamErrors[keyof HentVegobjekterMultiTypeStreamErrors];
+
+export type HentVegobjekterMultiTypeStreamResponses = {
+    /**
+     * OK
+     */
+    200: Array<Vegobjekt>;
+};
+
+export type HentVegobjekterMultiTypeStreamResponse = HentVegobjekterMultiTypeStreamResponses[keyof HentVegobjekterMultiTypeStreamResponses];
+
 export type HentVegobjektData = {
     body?: never;
     path: {
@@ -1257,17 +1330,25 @@ export type StreamVeglenkesekvenserData = {
     path?: never;
     query?: {
         /**
-         * Hent veglenkesekvenser etterfølgende denne IDen
-         */
-        start?: number;
-        /**
-         * Hent veglenkesekvenser opp til og med denne ID
-         */
-        slutt?: number;
-        /**
          * Hent kun veglenkesekvenser med angitte IDer
          */
         ider?: Array<number>;
+        /**
+         * Filtrer med polygon i UTM 33. Merk: Objekter opp til 1 m unna polygon kan bli med.
+         *
+         * Eksempel: `20000 6520000, 20500 6520000, 21000 6500000, 20000 6520000`
+         */
+        polygon?: string;
+        /**
+         * Filtrer veglenkesekvenser på [vegsystemreferanse](https://nvdb-docs.atlas.vegvesen.no/nvdbapil/v4/introduksjon/Vegsystemreferanse). Kommaseparert liste. Legg til kommunenummer i starten av vegsystemreferansen for KSP-veger.
+         *
+         * MERK:
+         * - Meterverdier, trafikantgruppe, kryssystem og sideanlegg støttes ikke.
+         * - Både historisk og detaljert vegnett returneres.
+         *
+         * Eksempel: `EV6S1D1`
+         */
+        vegsystemreferanse?: Array<string>;
         /**
          * Antall veglenkesekvenser som skal hentes. Fra 1 til 10000, standard 1000.
          */

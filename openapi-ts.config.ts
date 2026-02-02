@@ -1,4 +1,20 @@
-import { defineConfig } from '@hey-api/openapi-ts'
+import { defineConfig, type UserConfig } from '@hey-api/openapi-ts'
+
+const plugins = [
+  '@hey-api/typescript',
+  '@hey-api/client-fetch',
+  {
+    name: 'zod',
+    exportFromIndex: true,
+  },
+  {
+    name: '@hey-api/sdk',
+    validator: {
+      request: 'zod',
+      response: 'zod',
+    },
+  },
+] satisfies UserConfig['plugins']
 
 export default defineConfig([
   {
@@ -9,15 +25,7 @@ export default defineConfig([
       path: 'src/api/generated/datakatalog',
       clean: true,
     },
-    plugins: [
-      '@hey-api/typescript',
-      '@hey-api/client-fetch',
-      '@hey-api/sdk',
-      {
-        name: 'zod',
-        exportFromIndex: true,
-      },
-    ],
+    plugins
   },
   {
     input: {
@@ -27,14 +35,6 @@ export default defineConfig([
       path: 'src/api/generated/uberiket',
       clean: true,
     },
-    plugins: [
-      '@hey-api/typescript',
-      '@hey-api/client-fetch',
-      '@hey-api/sdk',
-      {
-        name: 'zod',
-        exportFromIndex: true,
-      },
-    ],
+    plugins
   },
 ])

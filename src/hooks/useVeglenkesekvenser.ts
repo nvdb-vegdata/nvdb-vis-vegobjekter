@@ -21,18 +21,17 @@ export function useVeglenkesekvenser({
 
   return useQuery({
     queryKey: ['veglenkesekvenser', polygonUtm33, trimmedStrekning, limit, normalizedIds?.join(',') ?? null],
-    queryFn: async () => {
-      const response = await hentVeglenkesekvenser({
-        polygon: polygonUtm33 ?? undefined,
-        vegsystemreferanse: trimmedStrekning || undefined,
+    queryFn: async () =>
+      hentVeglenkesekvenser({
         antall: limit,
         ider: normalizedIds ?? undefined,
-      })
-      return {
-        ...response,
-        veglenkesekvenser: enrichVeglenkesekvenser(response.veglenkesekvenser),
-      }
-    },
+        polygon: polygonUtm33 ?? undefined,
+        vegsystemreferanse: trimmedStrekning || undefined,
+      }),
+    select: (response) => ({
+      ...response,
+      veglenkesekvenser: enrichVeglenkesekvenser(response.veglenkesekvenser),
+    }),
     enabled,
   })
 }

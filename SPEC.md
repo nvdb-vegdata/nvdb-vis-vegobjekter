@@ -72,6 +72,7 @@ The application is in **beta** and displays a visible beta badge in the header.
 - Use `@hey-api/openapi-ts` for TypeScript client generation
 - Specs are fetched from API docs endpoints via `bun run fetch:specs`
 - Run `bunx openapi-ts` to regenerate clients after spec updates
+- Generate Zod schemas and enable SDK request/response validation, but treat validation issues as runtime warnings when the upstream spec/implementation diverge
 
 ## Project Structure
 
