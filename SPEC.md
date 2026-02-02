@@ -165,8 +165,9 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 
 1. **Load Application**
    - Map loads centered on Norway
-   - Full datakatalog loads with `inkluder=alle` (shows "Laster datakatalog..." indicator)
-   - All vegobjekttyper with egenskapstyper and tillatte_verdier are cached for synchronous lookup
+   - Default zoom level is 4
+    - Full datakatalog loads with `inkluder=alle` (shows "Laster datakatalog..." indicator)
+    - All vegobjekttyper with egenskapstyper and tillatte_verdier are cached for synchronous lookup
 
 2. **Select Object Types**
    - User searches by name or ID and selects types of interest

@@ -27,4 +27,4 @@ export const KARTVERKET_LAYER = 'topo'
 export const KARTVERKET_MATRIX_SET = 'utm33n'
 
 export const DEFAULT_VIEW_CENTER_LON_LAT = [10, 64] as const
-export const DEFAULT_VIEW_ZOOM = 3
+export const DEFAULT_VIEW_ZOOM = 4
