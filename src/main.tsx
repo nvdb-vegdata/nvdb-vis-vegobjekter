@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import './api/apiConfig'
 import './index.css'
+import "./components/svv/_core/svv.css";
 
 function logQueryError(error: unknown) {
   if (!error) return
