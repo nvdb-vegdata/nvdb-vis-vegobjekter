@@ -10,7 +10,7 @@ ensureProjections()
 
 export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 100
 
-const DEFAULT_VEGLENKE_COLOR = '#3498db'
+export const DEFAULT_VEGLENKE_COLOR = '#3498db'
 
 function readLocalStorageString(key: string): string | null {
   if (typeof window === 'undefined') return null
@@ -25,6 +25,15 @@ function writeLocalStorageString(key: string, value: string): void {
   if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(key, value)
+  } catch {
+    // ignore
+  }
+}
+
+function removeLocalStorageItem(key: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(key)
   } catch {
     // ignore
   }
@@ -116,6 +125,10 @@ export const veglenkeColorAtom = atom(
   (get) => get(veglenkeColorBaseAtom),
   (_get, set, next: string) => {
     set(veglenkeColorBaseAtom, next)
+    if (next === DEFAULT_VEGLENKE_COLOR) {
+      removeLocalStorageItem('nvdb.vis.veglenkeColor')
+      return
+    }
     writeLocalStorageString('nvdb.vis.veglenkeColor', next)
   },
 )

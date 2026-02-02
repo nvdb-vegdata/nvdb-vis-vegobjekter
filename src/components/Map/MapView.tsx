@@ -23,7 +23,16 @@ import { getBaatToken, useBaatToken } from '../../hooks/useBaatToken'
 import { useHighlightRendering } from '../../hooks/useHighlightRendering'
 import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
 import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
-import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom, veglenkeColorAtom } from '../../state/atoms'
+import {
+  DEFAULT_VEGLENKE_COLOR,
+  hoveredVegobjektAtom,
+  locateVegobjektAtom,
+  polygonAtom,
+  polygonClipAtom,
+  searchModeAtom,
+  stedfestingAtom,
+  veglenkeColorAtom,
+} from '../../state/atoms'
 import { safeReplaceState } from '../../utils/historyUtils'
 import {
   DEFAULT_VIEW_CENTER_LON_LAT,
@@ -93,6 +102,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const stedfestingLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const selectedLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
+  const clipOnlySelectionRef = useRef(false)
   const [isDrawing, setIsDrawing] = useState(false)
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
 
@@ -256,7 +266,9 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
     const select = new Select({
       condition: click,
-      layers: [veglenkeLayer, stedfestingLayer],
+      layers: (layer) => {
+        return clipOnlySelectionRef.current ? layer === stedfestingLayer : layer === veglenkeLayer || layer === stedfestingLayer
+      },
       style: null,
       hitTolerance: 10,
     })
@@ -294,7 +306,9 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
     map.on('pointermove', (e) => {
       const hit = map.hasFeatureAtPixel(e.pixel, {
-        layerFilter: (layer) => layer === veglenkeLayer || layer === stedfestingLayer,
+        layerFilter: (layer) => {
+          return clipOnlySelectionRef.current ? layer === stedfestingLayer : layer === veglenkeLayer || layer === stedfestingLayer
+        },
         hitTolerance: 10,
       })
       map.getTargetElement().style.cursor = hit ? 'pointer' : ''
@@ -346,6 +360,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
   useEffect(() => {
     const shouldFade = searchMode === 'stedfesting' || (searchMode === 'polygon' && polygonClip)
+    clipOnlySelectionRef.current = searchMode === 'polygon' && polygonClip
     if (veglenkeLayerRef.current) {
       veglenkeLayerRef.current.setStyle(shouldFade ? veglenkeFadedStyle : veglenkeStyle)
     }
@@ -486,19 +501,24 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       </div>
 
       <div className="map-settings" ref={settingsRef}>
-        <button type="button" className="map-settings-btn" aria-label="Innstillinger" title="Innstillinger" onClick={() => setSettingsOpen((prev) => !prev)}>
+        <button type="button" className="btn-icon" aria-label="Innstillinger" title="Innstillinger" onClick={() => setSettingsOpen((prev) => !prev)}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96c-.5-.38-1.04-.69-1.64-.92l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.6.23-1.14.54-1.64.92l-2.39-.96a.5.5 0 0 0-.6.22L2.7 7.46a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.82 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.38 1.04.69 1.64.92l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.6-.23 1.14-.54 1.64-.92l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
           </svg>
         </button>
 
         {settingsOpen && (
-          <div className="map-settings-popover" role="dialog" aria-label="Kartinnstillinger">
+          <div className="map-settings-popover ui-popover" role="dialog" aria-label="Kartinnstillinger">
             <div className="map-settings-row">
               <label className="map-settings-label" htmlFor="veglenke-color">
                 Veglenke-farge
               </label>
               <input id="veglenke-color" type="color" value={veglenkeColor} onChange={(e) => setVeglenkeColor(e.target.value)} aria-label="Veglenke-farge" />
+            </div>
+            <div className="map-settings-actions">
+              <button type="button" className="btn btn-secondary btn-small" onClick={() => setVeglenkeColor(DEFAULT_VEGLENKE_COLOR)}>
+                Tilbakestill
+              </button>
             </div>
           </div>
         )}

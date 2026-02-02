@@ -45,6 +45,25 @@ The application is in **beta** and displays a visible beta badge in the header.
 - Colors are persisted in localStorage
 - A debug console API is available on `window.nvdbMap` (e.g. `nvdbMap.setVeglenkeColor('#00ff00')`, `nvdbMap.getVeglenkeColor()`)
 
+## UI Design System
+
+The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) to keep spacing, borders, radii and shadows consistent.
+
+### Tokens
+- Prefer existing `--ui-*` tokens over hard-coded values when the style is meant to match existing UI
+- Add a new token only when a value is reused or represents a real semantic choice (e.g. surface, border, radius)
+
+### Reusable Building Blocks
+- Use `.btn` for primary/secondary/danger actions
+- Use `.btn-icon` for square icon-only actions (same focus ring as `.btn`)
+- Use `.ui-surface` for white panels with border + radius
+- Use `.ui-popover` for popovers (surface + border + radius + shadow)
+
+### Avoiding Accidental Duplication
+- When adding UI, first search for an existing class/token that matches what you need
+- If two components look identical, they should share a class/token rather than duplicating CSS
+- Not everything must be reusable, but truly identical styles should be
+
 ### Uberiket API
 - "Uberiket" means "unenriched" - no geometry on vegobjekter
 - Geometry comes from the veglenker (road network)

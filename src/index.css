@@ -24,9 +24,68 @@ body,
   --focus-ring-inner: #ffffff;
   --focus-ring-outer: #111827;
 
+  --ui-surface: #ffffff;
+  --ui-surface-hover: #f7f7f7;
+  --ui-border: #dddddd;
+  --ui-text: #2c3e50;
+  --ui-radius-sm: 4px;
+  --ui-radius-md: 8px;
+  --ui-shadow-popover: 0 10px 22px rgba(0, 0, 0, 0.12);
+
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-control-height: 38px;
+
   --link-color: var(--color-primary);
   --link-hover-color: var(--color-primary-hover);
   --link-copied-color: #2ecc71;
+}
+
+/* Design system: reusable building blocks for truly identical UI */
+.ui-surface {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+}
+
+.ui-popover {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-md);
+  box-shadow: var(--ui-shadow-popover);
+  padding: 10px 12px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ui-control-height);
+  height: var(--ui-control-height);
+  padding: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: var(--ui-surface);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-icon:hover {
+  background: var(--ui-surface-hover);
+}
+
+.btn-icon:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--focus-ring-inner),
+    0 0 0 5px var(--focus-ring-outer);
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--ui-text);
 }
 
 .app a {
@@ -105,9 +164,9 @@ body,
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
   font-size: 13px;
 }
 
@@ -118,10 +177,10 @@ body,
 
 .limit-selector select {
   padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
   font-size: 13px;
-  background: white;
+  background: var(--ui-surface);
   cursor: pointer;
 }
 
@@ -405,7 +464,7 @@ body,
 .btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--ui-radius-sm);
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
@@ -480,39 +539,11 @@ body,
   z-index: 1000;
 }
 
-.map-settings-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: white;
-  cursor: pointer;
-}
-
-.map-settings-btn:hover {
-  background: #f7f7f7;
-}
-
-.map-settings-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: #2c3e50;
-}
-
 .map-settings-popover {
   position: absolute;
   top: 44px;
   right: 0;
   width: 220px;
-  padding: 10px 12px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
 .map-settings-row {
@@ -522,9 +553,15 @@ body,
   gap: 10px;
 }
 
+.map-settings-actions {
+  margin-top: var(--ui-space-2);
+  display: flex;
+  justify-content: flex-end;
+}
+
 .map-settings-label {
   font-size: 12px;
-  color: #2c3e50;
+  color: var(--ui-text);
 }
 
 .map-settings-popover input[type="color"] {
@@ -545,11 +582,11 @@ body,
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
   font-size: 12px;
-  color: #2c3e50;
+  color: var(--ui-text);
   align-self: flex-start;
   margin-top: 6px;
 }
