@@ -27,7 +27,7 @@ function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosis
       try {
         const geom = wktFormat.readGeometry(vl.geometri.wkt, {
           dataProjection: `EPSG:${vl.geometri.srid}`,
-          featureProjection: 'EPSG:3857',
+          featureProjection: 'EPSG:25833',
         })
 
         if (!geom.intersectsExtent(polygonExtent)) {

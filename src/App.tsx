@@ -1,6 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
 import type { Polygon } from 'ol/geom'
-import { transform } from 'ol/proj'
 import { useEffect, useMemo } from 'react'
 import { isSelectableVegobjekttype, type Vegobjekttype } from './api/datakatalogClient'
 import MapView from './components/Map/MapView'
@@ -183,7 +182,7 @@ function polygonToUtm33(polygon: Polygon): string {
   if (!coords) return ''
 
   const utm33Coords = coords.map((coord) => {
-    const [x = 0, y = 0] = transform(coord, 'EPSG:3857', 'EPSG:25833')
+    const [x = 0, y = 0] = coord
     return `${Math.round(x)} ${Math.round(y)}`
   })
 

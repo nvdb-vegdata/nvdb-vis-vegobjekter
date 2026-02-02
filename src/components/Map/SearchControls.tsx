@@ -56,7 +56,7 @@ export default function SearchControls({ searchMode }: Props) {
       return
     }
     const format = new WKT()
-    const roundedUtm = roundPolygonToTwoDecimals(polygon.clone().transform('EPSG:3857', 'EPSG:5973'))
+    const roundedUtm = roundPolygonToTwoDecimals(polygon.clone())
     const roundedWkt = format.writeGeometry(roundedUtm)
     if (roundedWkt !== lastPolygonWktRef.current) {
       lastPolygonWktRef.current = roundedWkt
@@ -84,14 +84,14 @@ export default function SearchControls({ searchMode }: Props) {
     }
     try {
       const format = new WKT()
-      const geometry = format.readGeometry(trimmed, { dataProjection: 'EPSG:5973', featureProjection: 'EPSG:5973' })
+      const geometry = format.readGeometry(trimmed, { dataProjection: 'EPSG:25833', featureProjection: 'EPSG:25833' })
       if (!(geometry instanceof Polygon)) {
         setPolygonError('Kun POLYGON er støttet i WKT-feltet.')
         return
       }
       setPolygonError(null)
       const roundedUtm = roundPolygonToTwoDecimals(geometry)
-      setPolygon(roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857'))
+      setPolygon(roundedUtm)
     } catch {
       setPolygonError('Ugyldig WKT. Bruk f.eks. POLYGON((x y, ...)).')
     }

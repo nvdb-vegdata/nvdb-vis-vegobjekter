@@ -25,7 +25,7 @@ export default defineConfig([
       path: 'src/api/generated/datakatalog',
       clean: true,
     },
-    plugins
+    plugins,
   },
   {
     input: {
@@ -35,6 +35,6 @@ export default defineConfig([
       path: 'src/api/generated/uberiket',
       clean: true,
     },
-    plugins
+    plugins,
   },
 ])

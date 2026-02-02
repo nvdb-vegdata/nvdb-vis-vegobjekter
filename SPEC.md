@@ -4,6 +4,8 @@
 
 A static web application for visualizing road objects (vegobjekter) from the Norwegian Public Roads Administration's database (NVDB) on an interactive map of Norway. The app visualizes road segments (veglenker) and shows which road objects are located on each segment.
 
+The map uses EPSG:25833 (UTM33) and switches between Geodata.no XYZ tiles for overview levels and Kartverket topo WMTS tiles for detailed views. The Kartverket tiles use a BAAT token fetched from `https://nvdb-baat-dispenser.atlas.vegvesen.no/api/v1/token`.
+
 The application is in **beta** and displays a visible beta badge in the header.
 
 ## Core Workflow
@@ -38,6 +40,11 @@ The application is in **beta** and displays a visible beta badge in the header.
 - The stedfesting filter is based on the overlapping geometry only (not the full veglenke extent)
 - The map renders the full veglenke in a faded style with the clipped portion emphasized
 
+### Map Styling
+- Veglenke line color can be changed at runtime via the "Innstillinger" menu in the map
+- Colors are persisted in localStorage
+- A debug console API is available on `window.nvdbMap` (e.g. `nvdbMap.setVeglenkeColor('#00ff00')`, `nvdbMap.getVeglenkeColor()`)
+
 ### Uberiket API
 - "Uberiket" means "unenriched" - no geometry on vegobjekter
 - Geometry comes from the veglenker (road network)
@@ -51,7 +58,8 @@ The application is in **beta** and displays a visible beta badge in the header.
 - **Framework**: React 18+ with TypeScript
 - **Build**: Bun.serve() with HTML imports
 - **Map Library**: OpenLayers 9+
-- **Projections**: proj4 for UTM33 support
+- **Map Tiles**: Geodata.no XYZ (zoom 0-14) + Kartverket topo WMTS (zoom 15+)
+- **Projections**: proj4 with EPSG:25833 (UTM33)
 - **HTTP Client**: Axios
 - **Data Fetching**: TanStack Query (React Query)
 - **Geometry Manipulation**: Turf.js (@turf/along, @turf/length, @turf/helpers)

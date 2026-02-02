@@ -73,7 +73,7 @@ export function useHighlightRendering({
       try {
         const geom = wktFormat.readGeometry(geometri.wkt, {
           dataProjection: `EPSG:${geometri.srid}`,
-          featureProjection: 'EPSG:3857',
+          featureProjection: 'EPSG:25833',
         })
         const feature = new Feature({ geometry: geom })
         egengeometriSource.current.addFeature(feature)

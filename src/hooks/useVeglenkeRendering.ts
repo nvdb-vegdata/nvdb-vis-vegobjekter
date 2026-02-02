@@ -6,7 +6,7 @@ import type OLMap from 'ol/Map'
 import type VectorSource from 'ol/source/Vector'
 import type { MutableRefObject } from 'react'
 import { useEffect } from 'react'
-import type { VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
+import type { VeglenkeMedPosisjon, VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
 import type { SearchMode } from '../state/atoms'
 import { getTodayDate } from '../utils/dateUtils'
 import { getLineStringOverlapFractions, getPointAtFraction, sliceLineStringByFraction } from '../utils/geometryUtils'
@@ -61,6 +61,14 @@ export function useVeglenkeRendering({
           }, new Map<number, { start: number; end: number }[]>())
         : null
 
+    const withClippedPositions = (veglenke: VeglenkeMedPosisjon, startposisjon: number, sluttposisjon: number): VeglenkeMedPosisjon => {
+      return {
+        ...veglenke,
+        startposisjon,
+        sluttposisjon,
+      }
+    }
+
     for (const vs of veglenkesekvenser) {
       for (const vl of vs.veglenker ?? []) {
         const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
@@ -72,7 +80,7 @@ export function useVeglenkeRendering({
           try {
             const geom = wktFormat.readGeometry(vl.geometri.wkt, {
               dataProjection: `EPSG:${vl.geometri.srid}`,
-              featureProjection: 'EPSG:3857',
+              featureProjection: 'EPSG:25833',
             })
 
             if (drawnGeometry && !geom.intersectsExtent(drawnGeometry.getExtent())) {
@@ -124,7 +132,8 @@ export function useVeglenkeRendering({
                 if (startFraction === endFraction) {
                   const pointCoord = getPointAtFraction(lineCoords, startFraction)
                   const pointGeom = new Point(pointCoord)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
+                  const clippedVeglenke = withClippedPositions(vl as VeglenkeMedPosisjon, clippedStart, clippedEnd)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom, veglenkesekvensId: vs.id, veglenke: clippedVeglenke }))
                   continue
                 }
 
@@ -132,17 +141,25 @@ export function useVeglenkeRendering({
 
                 if (slicedCoords.length >= 2) {
                   const slicedGeom = new LineString(slicedCoords)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom }))
+                  const clippedVeglenke = withClippedPositions(vl as VeglenkeMedPosisjon, clippedStart, clippedEnd)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom, veglenkesekvensId: vs.id, veglenke: clippedVeglenke }))
                 }
               }
             }
 
             if (polygonOverlapFractions && lineCoords) {
+              const span = vl.sluttposisjon - vl.startposisjon
+              if (span <= 0) continue
+
               for (const overlap of polygonOverlapFractions) {
+                const clippedStart = vl.startposisjon + span * overlap.startFraction
+                const clippedEnd = vl.startposisjon + span * overlap.endFraction
+
                 if (overlap.startFraction === overlap.endFraction) {
                   const pointCoord = getPointAtFraction(lineCoords, overlap.startFraction)
                   const pointGeom = new Point(pointCoord)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom }))
+                  const clippedVeglenke = withClippedPositions(vl as VeglenkeMedPosisjon, clippedStart, clippedEnd)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: pointGeom, veglenkesekvensId: vs.id, veglenke: clippedVeglenke }))
                   continue
                 }
 
@@ -150,7 +167,8 @@ export function useVeglenkeRendering({
 
                 if (slicedCoords.length >= 2) {
                   const slicedGeom = new LineString(slicedCoords)
-                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom }))
+                  const clippedVeglenke = withClippedPositions(vl as VeglenkeMedPosisjon, clippedStart, clippedEnd)
+                  stedfestingSource.current.addFeature(new Feature({ geometry: slicedGeom, veglenkesekvensId: vs.id, veglenke: clippedVeglenke }))
                 }
               }
             }

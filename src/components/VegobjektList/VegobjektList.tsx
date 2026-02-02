@@ -80,7 +80,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
           )}
           {overallCount > 0 && !isLoading && (
             <>
-              <button type="button" className="btn btn-secondary btn-small csv-popover-anchor" popoverTarget="csv-popover">
+              <button type="button" className="btn btn-primary btn-small csv-popover-anchor" popoverTarget="csv-popover">
                 Last ned CSV
               </button>
               <div id="csv-popover" className="csv-popover" popover="auto">

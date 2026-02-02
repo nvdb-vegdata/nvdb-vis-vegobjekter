@@ -19,7 +19,7 @@ import { ensureProjections } from '../utils/projections'
 
 function polygonToWkt(polygon: Polygon): string {
   const format = new WKT()
-  const roundedUtm = roundPolygonToTwoDecimals(polygon.clone().transform('EPSG:3857', 'EPSG:5973'))
+  const roundedUtm = roundPolygonToTwoDecimals(polygon.clone())
   return format.writeGeometry(roundedUtm)
 }
 

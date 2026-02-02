@@ -69,7 +69,7 @@ export function useLocateVegobjekt({
       try {
         const geom = wktFormat.readGeometry(geometri.wkt, {
           dataProjection: `EPSG:${geometri.srid}`,
-          featureProjection: 'EPSG:3857',
+          featureProjection: 'EPSG:25833',
         })
         extents.push(geom.getExtent())
       } catch (e) {

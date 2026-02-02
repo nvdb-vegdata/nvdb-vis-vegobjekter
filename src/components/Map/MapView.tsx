@@ -2,6 +2,7 @@ import { useAtom, useAtomValue } from 'jotai'
 import { click } from 'ol/events/condition'
 import Feature from 'ol/Feature'
 import type { Polygon } from 'ol/geom'
+import type ImageTile from 'ol/ImageTile'
 import { Draw, Select } from 'ol/interaction'
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
@@ -9,30 +10,47 @@ import OLMap from 'ol/Map'
 import Overlay from 'ol/Overlay'
 import View from 'ol/View'
 import 'ol/ol.css'
-import { fromLonLat, toLonLat } from 'ol/proj'
-import OSM from 'ol/source/OSM'
+import { transform } from 'ol/proj'
 import VectorSource from 'ol/source/Vector'
+import WMTS from 'ol/source/WMTS'
+import XYZ from 'ol/source/XYZ'
 import { Fill, Stroke, Style } from 'ol/style'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import TileGrid from 'ol/tilegrid/TileGrid'
+import WMTSTileGrid from 'ol/tilegrid/WMTS'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { VeglenkesekvensMedPosisjoner, Vegobjekt } from '../../api/uberiketClient'
+import { getBaatToken, useBaatToken } from '../../hooks/useBaatToken'
 import { useHighlightRendering } from '../../hooks/useHighlightRendering'
 import { useLocateVegobjekt } from '../../hooks/useLocateVegobjekt'
 import { useVeglenkeRendering } from '../../hooks/useVeglenkeRendering'
-import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom } from '../../state/atoms'
+import { hoveredVegobjektAtom, locateVegobjektAtom, polygonAtom, polygonClipAtom, searchModeAtom, stedfestingAtom, veglenkeColorAtom } from '../../state/atoms'
 import { safeReplaceState } from '../../utils/historyUtils'
+import {
+  DEFAULT_VIEW_CENTER_LON_LAT,
+  DEFAULT_VIEW_ZOOM,
+  GEODATA_XYZ_RESOLUTIONS,
+  GEODATA_XYZ_URL,
+  KARTVERKET_LAYER,
+  KARTVERKET_MATRIX_SET,
+  KARTVERKET_WMTS_MATRIX_IDS,
+  KARTVERKET_WMTS_RESOLUTIONS,
+  KARTVERKET_WMTS_URL,
+  MAP_EXTENT,
+  MAP_PROJECTION,
+  TILE_ORIGIN,
+} from '../../utils/mapConfig'
 import { roundPolygonToTwoDecimals } from '../../utils/polygonRounding'
 import { ensureProjections } from '../../utils/projections'
 import {
+  createStedfestingStyle,
+  createVeglenkeFadedStyle,
+  createVeglenkeStyle,
   EGENGEOMETRI_LINE_STYLE,
   EGENGEOMETRI_POINT_STYLE,
   EGENGEOMETRI_POLYGON_STYLE,
   HIGHLIGHT_POINT_STYLE,
   HIGHLIGHT_STYLE,
   STEDFESTING_POINT_STYLE,
-  STEDFESTING_STYLE,
-  VEGLENKE_FADED_STYLE,
-  VEGLENKE_SELECTED_STYLE,
-  VEGLENKE_STYLE,
 } from './mapStyles'
 import SearchControls from './SearchControls'
 import VeglenkePopup from './VeglenkePopup'
@@ -52,6 +70,12 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const stedfesting = useAtomValue(stedfestingAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
   const locateVegobjekt = useAtomValue(locateVegobjektAtom)
+  const [veglenkeColor, setVeglenkeColor] = useAtom(veglenkeColorAtom)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  const veglenkeStyle = useMemo(() => createVeglenkeStyle(veglenkeColor), [veglenkeColor])
+  const veglenkeFadedStyle = useMemo(() => createVeglenkeFadedStyle(veglenkeColor), [veglenkeColor])
+  const stedfestingLineStyle = useMemo(() => createStedfestingStyle(veglenkeColor), [veglenkeColor])
 
   const mapRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
@@ -61,20 +85,55 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const stedfestingSource = useRef(new VectorSource())
   const highlightSource = useRef(new VectorSource())
   const egengeometriSource = useRef(new VectorSource())
+  const selectedSource = useRef(new VectorSource())
   const overlayRef = useRef<Overlay | null>(null)
   const drawInteraction = useRef<Draw | null>(null)
   const selectInteraction = useRef<Select | null>(null)
   const veglenkeLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
+  const stedfestingLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
+  const selectedLayerRef = useRef<VectorLayer<VectorSource> | null>(null)
+  const settingsRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
+
+  useBaatToken()
+
+  useEffect(() => {
+    ;(window as unknown as { nvdbMap?: unknown }).nvdbMap = {
+      setVeglenkeColor: (color: string) => setVeglenkeColor(color),
+      getVeglenkeColor: () => veglenkeColor,
+    }
+  }, [setVeglenkeColor, veglenkeColor])
+
+  useEffect(() => {
+    if (!settingsOpen) return
+
+    const onPointerDown = (event: MouseEvent | PointerEvent) => {
+      const target = event.target as Node | null
+      if (!target) return
+      if (settingsRef.current?.contains(target)) return
+      setSettingsOpen(false)
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSettingsOpen(false)
+    }
+
+    window.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [settingsOpen])
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
 
     const params = new URLSearchParams(window.location.search)
-    const lon = parseFloat(params.get('lon') || '10.0')
-    const lat = parseFloat(params.get('lat') || '64.0')
-    const zoom = parseFloat(params.get('z') || '5')
+    const lon = parseFloat(params.get('lon') || DEFAULT_VIEW_CENTER_LON_LAT[0].toString())
+    const lat = parseFloat(params.get('lat') || DEFAULT_VIEW_CENTER_LON_LAT[1].toString())
+    const zoom = parseFloat(params.get('z') || DEFAULT_VIEW_ZOOM.toString())
 
     const drawLayer = new VectorLayer({
       source: drawSource.current,
@@ -84,16 +143,21 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       }),
     })
 
+    const initialVeglenkeStyle = createVeglenkeStyle('#3498db')
+    const initialStedfestingLineStyle = createStedfestingStyle('#3498db')
+    const initialSelectedStyle = new Style({ stroke: new Stroke({ color: '#e74c3c', width: 6 }) })
+
     const veglenkeLayer = new VectorLayer({
       source: veglenkeSource.current,
-      style: VEGLENKE_STYLE,
+      style: initialVeglenkeStyle,
     })
     veglenkeLayerRef.current = veglenkeLayer
 
     const stedfestingLayer = new VectorLayer({
       source: stedfestingSource.current,
-      style: (feature) => (feature.getGeometry()?.getType() === 'Point' ? STEDFESTING_POINT_STYLE : STEDFESTING_STYLE),
+      style: (feature) => (feature.getGeometry()?.getType() === 'Point' ? STEDFESTING_POINT_STYLE : initialStedfestingLineStyle),
     })
+    stedfestingLayerRef.current = stedfestingLayer
 
     const highlightLayer = new VectorLayer({
       source: highlightSource.current,
@@ -119,36 +183,99 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
       },
     })
 
+    const selectedLayer = new VectorLayer({
+      source: selectedSource.current,
+      style: initialSelectedStyle,
+      zIndex: 100,
+    })
+    selectedLayerRef.current = selectedLayer
+
     const overlay = new Overlay({
       element: popupRef.current ?? undefined,
       autoPan: { animation: { duration: 250 } },
     })
     overlayRef.current = overlay
 
+    const geodataTileGrid = new TileGrid({
+      extent: [...MAP_EXTENT],
+      origin: [...TILE_ORIGIN],
+      resolutions: GEODATA_XYZ_RESOLUTIONS,
+      tileSize: 256,
+    })
+
+    const kartverketTileGrid = new WMTSTileGrid({
+      origin: [...TILE_ORIGIN],
+      resolutions: KARTVERKET_WMTS_RESOLUTIONS,
+      matrixIds: KARTVERKET_WMTS_MATRIX_IDS,
+    })
+
+    const detailResolution = KARTVERKET_WMTS_RESOLUTIONS[15] ?? KARTVERKET_WMTS_RESOLUTIONS[KARTVERKET_WMTS_RESOLUTIONS.length - 1]
+
+    const geodataLayer = new TileLayer({
+      className: 'basemap-geodata',
+      source: new XYZ({
+        url: GEODATA_XYZ_URL,
+        projection: MAP_PROJECTION,
+        tileGrid: geodataTileGrid,
+      }),
+      minResolution: detailResolution,
+    })
+
+    const kartverketLayer = new TileLayer({
+      className: 'basemap-kartverket',
+      source: new WMTS({
+        url: KARTVERKET_WMTS_URL,
+        layer: KARTVERKET_LAYER,
+        matrixSet: KARTVERKET_MATRIX_SET,
+        format: 'image/png',
+        projection: MAP_PROJECTION,
+        tileGrid: kartverketTileGrid,
+        style: 'default',
+        requestEncoding: 'KVP',
+        tileLoadFunction: (tile, src) => {
+          const token = getBaatToken()
+          const nextSrc = token && !src.includes('gkt=') ? `${src}&gkt=${token}` : src
+          const image = (tile as ImageTile).getImage() as HTMLImageElement
+          image.src = nextSrc
+        },
+      }),
+      maxResolution: detailResolution,
+    })
+
     const map = new OLMap({
       target: mapRef.current,
-      layers: [new TileLayer({ source: new OSM() }), drawLayer, veglenkeLayer, stedfestingLayer, highlightLayer, egengeometriLayer],
+      layers: [geodataLayer, kartverketLayer, drawLayer, veglenkeLayer, stedfestingLayer, highlightLayer, egengeometriLayer, selectedLayer],
       overlays: [overlay],
       view: new View({
-        center: fromLonLat([lon, lat]),
+        projection: MAP_PROJECTION,
+        resolutions: KARTVERKET_WMTS_RESOLUTIONS,
+        center: transform([lon, lat], 'EPSG:4326', MAP_PROJECTION),
         zoom: zoom,
       }),
     })
 
     const select = new Select({
       condition: click,
-      layers: [veglenkeLayer],
-      style: VEGLENKE_SELECTED_STYLE,
+      layers: [veglenkeLayer, stedfestingLayer],
+      style: null,
       hitTolerance: 10,
     })
 
     select.on('select', (e) => {
+      selectedSource.current.clear()
       if (e.selected.length > 0) {
         const feature = e.selected[0]
         if (!feature) return
-        setSelectedFeature(feature)
-        const geom = feature.getGeometry()
+        const geom = feature.getGeometry()?.clone()
         if (geom) {
+          const selection = new Feature({
+            geometry: geom,
+            veglenkesekvensId: feature.get('veglenkesekvensId'),
+            veglenke: feature.get('veglenke'),
+          })
+
+          selectedSource.current.addFeature(selection)
+          setSelectedFeature(selection)
           const extent = geom.getExtent()
           const [minX, minY, maxX, maxY] = extent
           if (minX === undefined || minY === undefined || maxX === undefined || maxY === undefined) return
@@ -167,7 +294,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
 
     map.on('pointermove', (e) => {
       const hit = map.hasFeatureAtPixel(e.pixel, {
-        layerFilter: (layer) => layer === veglenkeLayer,
+        layerFilter: (layer) => layer === veglenkeLayer || layer === stedfestingLayer,
         hitTolerance: 10,
       })
       map.getTargetElement().style.cursor = hit ? 'pointer' : ''
@@ -180,7 +307,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         const view = map.getView()
         const viewCenter = view.getCenter()
         if (!viewCenter) return
-        const center = toLonLat(viewCenter)
+        const center = transform(viewCenter, MAP_PROJECTION, 'EPSG:4326')
         const z = view.getZoom()
         const [centerLon, centerLat] = center
         if (centerLon === undefined || centerLat === undefined || z === undefined) return
@@ -212,15 +339,21 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     stedfestingSource.current.clear()
     highlightSource.current.clear()
     egengeometriSource.current.clear()
+    selectedSource.current.clear()
     setSelectedFeature(null)
     overlayRef.current?.setPosition(undefined)
   }, [searchMode])
 
   useEffect(() => {
-    if (!veglenkeLayerRef.current) return
     const shouldFade = searchMode === 'stedfesting' || (searchMode === 'polygon' && polygonClip)
-    veglenkeLayerRef.current.setStyle(shouldFade ? VEGLENKE_FADED_STYLE : VEGLENKE_STYLE)
-  }, [polygonClip, searchMode])
+    if (veglenkeLayerRef.current) {
+      veglenkeLayerRef.current.setStyle(shouldFade ? veglenkeFadedStyle : veglenkeStyle)
+    }
+    if (stedfestingLayerRef.current) {
+      const lineStyle = stedfestingLineStyle
+      stedfestingLayerRef.current.setStyle((feature) => (feature.getGeometry()?.getType() === 'Point' ? STEDFESTING_POINT_STYLE : lineStyle))
+    }
+  }, [polygonClip, searchMode, stedfestingLineStyle, veglenkeFadedStyle, veglenkeStyle])
 
   useEffect(() => {
     if (searchMode !== 'polygon') return
@@ -263,6 +396,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     stedfestingSource.current.clear()
     highlightSource.current.clear()
     egengeometriSource.current.clear()
+    selectedSource.current.clear()
     setSelectedFeature(null)
     overlayRef.current?.setPosition(undefined)
     setPolygon(null)
@@ -285,8 +419,8 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     draw.on('drawend', (event) => {
       const feature = event.feature
       const geom = feature.getGeometry() as Polygon
-      const roundedUtm = roundPolygonToTwoDecimals(geom.clone().transform('EPSG:3857', 'EPSG:5973'))
-      setPolygon(roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857'))
+      const roundedUtm = roundPolygonToTwoDecimals(geom.clone())
+      setPolygon(roundedUtm)
       mapInstance.current?.removeInteraction(draw)
       setIsDrawing(false)
     })
@@ -349,6 +483,25 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
         </div>
 
         <SearchControls searchMode={searchMode} />
+      </div>
+
+      <div className="map-settings" ref={settingsRef}>
+        <button type="button" className="map-settings-btn" aria-label="Innstillinger" title="Innstillinger" onClick={() => setSettingsOpen((prev) => !prev)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96c-.5-.38-1.04-.69-1.64-.92l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.6.23-1.14.54-1.64.92l-2.39-.96a.5.5 0 0 0-.6.22L2.7 7.46a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.82 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.38 1.04.69 1.64.92l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.6-.23 1.14-.54 1.64-.92l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z" />
+          </svg>
+        </button>
+
+        {settingsOpen && (
+          <div className="map-settings-popover" role="dialog" aria-label="Kartinnstillinger">
+            <div className="map-settings-row">
+              <label className="map-settings-label" htmlFor="veglenke-color">
+                Veglenke-farge
+              </label>
+              <input id="veglenke-color" type="color" value={veglenkeColor} onChange={(e) => setVeglenkeColor(e.target.value)} aria-label="Veglenke-farge" />
+            </div>
+          </div>
+        )}
       </div>
 
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />

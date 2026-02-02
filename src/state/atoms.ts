@@ -10,6 +10,26 @@ ensureProjections()
 
 export const DEFAULT_VEGLENKESEKVENSER_LIMIT = 100
 
+const DEFAULT_VEGLENKE_COLOR = '#3498db'
+
+function readLocalStorageString(key: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    return window.localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function writeLocalStorageString(key: string, value: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(key, value)
+  } catch {
+    // ignore
+  }
+}
+
 function getInitialTypeIds(): number[] {
   const params = new URLSearchParams(window.location.search)
   const typesParam = params.get('types')
@@ -31,10 +51,10 @@ function getInitialPolygon(): Polygon | null {
   if (!wkt) return null
   try {
     const format = new WKT()
-    const geom = format.readGeometry(wkt, { dataProjection: 'EPSG:5973', featureProjection: 'EPSG:5973' })
+    const geom = format.readGeometry(wkt, { dataProjection: 'EPSG:25833', featureProjection: 'EPSG:25833' })
     if (geom instanceof Polygon) {
       const roundedUtm = roundPolygonToTwoDecimals(geom)
-      return roundedUtm.clone().transform('EPSG:5973', 'EPSG:3857')
+      return roundedUtm
     }
   } catch {
     console.warn('Failed to parse WKT from URL')
@@ -90,6 +110,15 @@ export const allTypesSelectedAtom = atom(getInitialAllTypesSelected())
 export const polygonAtom = atom<Polygon | null>(getInitialPolygon())
 export const polygonWktInputAtom = atom<string>(getInitialPolygonWkt())
 export const polygonClipAtom = atom<boolean>(getInitialPolygonClip())
+
+const veglenkeColorBaseAtom = atom<string>(readLocalStorageString('nvdb.vis.veglenkeColor') ?? DEFAULT_VEGLENKE_COLOR)
+export const veglenkeColorAtom = atom(
+  (get) => get(veglenkeColorBaseAtom),
+  (_get, set, next: string) => {
+    set(veglenkeColorBaseAtom, next)
+    writeLocalStorageString('nvdb.vis.veglenkeColor', next)
+  },
+)
 export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
 export const strekningAtom = atom<string>(getInitialStrekning())

@@ -1,24 +1,49 @@
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 
-export const VEGLENKE_STYLE = new Style({
-  stroke: new Stroke({ color: '#3498db', width: 4 }),
-})
+function hexToRgba(hex: string, alpha: number): string {
+  const trimmed = hex.trim().replace(/^#/, '')
+  const normalized =
+    trimmed.length === 3
+      ? trimmed
+          .split('')
+          .map((c) => `${c}${c}`)
+          .join('')
+      : trimmed
+  if (normalized.length !== 6) return `rgba(52, 152, 219, ${alpha})`
+  const r = Number.parseInt(normalized.slice(0, 2), 16)
+  const g = Number.parseInt(normalized.slice(2, 4), 16)
+  const b = Number.parseInt(normalized.slice(4, 6), 16)
+  if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b)) return `rgba(52, 152, 219, ${alpha})`
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
-export const VEGLENKE_FADED_STYLE = new Style({
-  stroke: new Stroke({ color: 'rgba(52, 152, 219, 0.35)', width: 2 }),
-})
+export function createVeglenkeStyle(color: string): Style {
+  return new Style({
+    stroke: new Stroke({ color, width: 4 }),
+  })
+}
 
-export const VEGLENKE_SELECTED_STYLE = new Style({
-  stroke: new Stroke({ color: '#e74c3c', width: 6 }),
-})
+export function createVeglenkeFadedStyle(color: string): Style {
+  return new Style({
+    stroke: new Stroke({ color: hexToRgba(color, 0.35), width: 2 }),
+  })
+}
+
+export function createVeglenkeSelectedStyle(color: string): Style {
+  return new Style({
+    stroke: new Stroke({ color, width: 6 }),
+  })
+}
 
 export const HIGHLIGHT_STYLE = new Style({
   stroke: new Stroke({ color: '#f39c12', width: 8 }),
 })
 
-export const STEDFESTING_STYLE = new Style({
-  stroke: new Stroke({ color: '#3498db', width: 4 }),
-})
+export function createStedfestingStyle(color: string): Style {
+  return new Style({
+    stroke: new Stroke({ color, width: 4 }),
+  })
+}
 
 export const STEDFESTING_POINT_STYLE = new Style({
   image: new CircleStyle({
