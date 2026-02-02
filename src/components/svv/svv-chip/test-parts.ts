@@ -1,4 +1,4 @@
-import { createUseTestId } from "../svv-testid";
+import { createUseTestId } from "@komponentkassen/svv-testid";
 
 export const parts = {
   close: "close",

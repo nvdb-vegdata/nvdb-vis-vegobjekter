@@ -1,19 +1,26 @@
-import classNames from 'classnames'
-import React from 'react'
-import type { SpinnerProps } from './Spinner.types'
-import { useSpinnerTestId } from './test-parts'
+import React from "react";
+import classNames from "classnames";
+import { useSpinnerTestId } from "./test-parts";
+import { SpinnerProps } from "./Spinner.types";
 
-export function SVVSpinner({ ariaLabel, centered = true, size = 'medium', inline = false, children, testId }: SpinnerProps) {
-  const textId = React.useId()
-  const testIds = useSpinnerTestId(testId)
+export function SVVSpinner({
+  ariaLabel,
+  centered = true,
+  size = "medium",
+  inline = false,
+  children,
+  testId,
+}: SpinnerProps) {
+  const textId = React.useId();
+  const testIds = useSpinnerTestId(testId);
 
-  let ariaProps: { 'aria-label'?: string; 'aria-labelledby'?: string } = {}
+  let ariaProps: { "aria-label"?: string; "aria-labelledby"?: string } = {};
   if (ariaLabel) {
-    ariaProps = { 'aria-label': ariaLabel }
+    ariaProps = { "aria-label": ariaLabel };
   } else if (children) {
-    ariaProps = { 'aria-labelledby': textId }
+    ariaProps = { "aria-labelledby": textId };
   } else {
-    ariaProps = { 'aria-label': 'Laster innhold' }
+    ariaProps = { "aria-label": "Laster innhold" };
   }
 
   return (
@@ -21,11 +28,11 @@ export function SVVSpinner({ ariaLabel, centered = true, size = 'medium', inline
       role="status"
       aria-live="polite"
       {...ariaProps}
-      className={classNames('svv-spinner', {
-        'svv-spinner--centered': centered,
-        'svv-spinner--small': size === 'small',
-        'svv-spinner--large': size === 'large',
-        'svv-spinner--inline': inline,
+      className={classNames("svv-spinner", {
+        "svv-spinner--centered": centered,
+        "svv-spinner--small": size === "small",
+        "svv-spinner--large": size === "large",
+        "svv-spinner--inline": inline,
       })}
       data-testid={testIds.root}
     >
@@ -36,7 +43,7 @@ export function SVVSpinner({ ariaLabel, centered = true, size = 'medium', inline
         </p>
       )}
     </div>
-  )
+  );
 }
 
-SVVSpinner.displayName = 'SVVSpinner'
+SVVSpinner.displayName = "SVVSpinner";

@@ -1,6 +1,6 @@
 import { forwardRef, useContext } from "react";
 import classNames from "classnames";
-import { XmarkLarge } from "../svv-icons";
+import { XmarkLarge } from "@komponentkassen/svv-icons";
 import { ChipGroupContext } from "./ChipGroup";
 import { useChipTestId } from "./test-parts";
 import { ChipProps } from "./Chip.types";

@@ -1,3 +1,4 @@
-import { createUseTestId } from '../svv-testid'
+import { createUseTestId } from "@komponentkassen/svv-testid";
 
-export const useSpinnerTestId = createUseTestId()
+export const useSpinnerTestId = createUseTestId();
+

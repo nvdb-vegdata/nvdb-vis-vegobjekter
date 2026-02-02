@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes, PropsWithChildren } from "react";
-import { WithTestId } from "../svv-testid";
+import { WithTestId } from "@komponentkassen/svv-testid";
 import { ChipSize } from "./ChipGroup.types";
 
 export type ChipProps = PropsWithChildren<{

@@ -1,4 +1,12 @@
 {
   "componentRoot": "src/components/svv",
-  "skin": "internal"
+  "skin": "internal",
+  "installedComponents": [
+    "svv-button",
+    "svv-chip",
+    "svv-form",
+    "svv-toggle-group",
+    "svv-tokens",
+    "svv-icons"
+  ]
 }

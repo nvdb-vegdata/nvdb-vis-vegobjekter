@@ -1,4 +1,5 @@
 import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
+import { SVVCheckbox, SVVTextInput } from '@komponentkassen/svv-form'
 import { useAtom } from 'jotai'
 import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
@@ -245,77 +246,60 @@ export default function SearchControls({ searchMode }: Props) {
     <>
       {searchMode === 'strekning' && (
         <div className="strekning-controls">
-          <label className="search-label" htmlFor="strekning-input">
-            Søk på strekning
-          </label>
           <div className="search-input-row">
-            <div className="search-input-wrapper">
-              <input
-                id="strekning-input"
-                className="search-input"
-                placeholder="Eks.: FV6666 S1"
-                value={strekningInput}
-                onChange={handleStrekningChange}
-                onKeyDown={handleStrekningKeyDown}
-              />
-              {strekningInput && (
-                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm strekning" onClick={clearStrekning} icon={<span aria-hidden="true">×</span>} />
-              )}
-            </div>
+            <SVVTextInput
+              id="strekning-input"
+              label="Søk på strekning"
+              inputSize="small"
+              placeholder="Eks.: FV6666 S1"
+              value={strekningInput}
+              onChange={handleStrekningChange}
+              onKeyDown={handleStrekningKeyDown}
+              errorMessage={strekningError ?? undefined}
+              removeMargin
+            />
             <SVVButton size="sm" color="primary" onClick={handleStrekningSearch} disabled={trimmedStrekningInput.length === 0 || !isStrekningValid}>
               Søk
             </SVVButton>
           </div>
-          {strekningError && <div className="strekning-error">{strekningError}</div>}
         </div>
       )}
 
       {searchMode === 'stedfesting' && (
         <div className="strekning-controls">
-          <label className="search-label" htmlFor="stedfesting-input">
-            Stedfesting
-          </label>
           <div className="search-input-row">
-            <div className="search-input-wrapper">
-              <input
-                id="stedfesting-input"
-                className="search-input"
-                placeholder="Eks.: 1234, 0.2-0.5@5678"
-                value={stedfestingInput}
-                onChange={handleStedfestingChange}
-                onKeyDown={handleStedfestingKeyDown}
-              />
-              {stedfestingInput && (
-                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm stedfesting" onClick={clearStedfesting} icon={<span aria-hidden="true">×</span>} />
-              )}
-            </div>
+            <SVVTextInput
+              id="stedfesting-input"
+              label="Stedfesting"
+              inputSize="small"
+              placeholder="Eks.: 1234, 0.2-0.5@5678"
+              value={stedfestingInput}
+              onChange={handleStedfestingChange}
+              onKeyDown={handleStedfestingKeyDown}
+              errorMessage={stedfestingError ?? undefined}
+              removeMargin
+            />
             <SVVButton size="sm" color="primary" onClick={handleStedfestingSearch} disabled={trimmedStedfestingInput.length === 0 || !isStedfestingValid}>
               Søk
             </SVVButton>
           </div>
-          {stedfestingError && <div className="strekning-error">{stedfestingError}</div>}
         </div>
       )}
 
       {searchMode === 'polygon' && (
         <div className="strekning-controls polygon-controls">
-          <label className="search-label" htmlFor="polygon-wkt-input">
-            Polygon WKT
-          </label>
           <div className="search-input-row">
-            <div className="search-input-wrapper">
-              <input
-                id="polygon-wkt-input"
-                className="search-input"
-                placeholder="POLYGON((x y, x y, ...))"
-                value={polygonWktInput}
-                onChange={handlePolygonChange}
-                onKeyDown={handlePolygonKeyDown}
-              />
-              {polygonWktInput && (
-                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm polygon WKT" onClick={clearPolygon} icon={<span aria-hidden="true">×</span>} />
-              )}
-            </div>
+            <SVVTextInput
+              id="polygon-wkt-input"
+              label="Polygon WKT"
+              inputSize="small"
+              placeholder="POLYGON((x y, x y, ...))"
+              value={polygonWktInput}
+              onChange={handlePolygonChange}
+              onKeyDown={handlePolygonKeyDown}
+              errorMessage={polygonError ?? undefined}
+              removeMargin
+            />
             <SVVButton size="sm" color="primary" onClick={handlePolygonSearch} disabled={trimmedPolygonInput.length === 0 || !isPolygonValid}>
               Søk
             </SVVButton>
@@ -332,11 +316,14 @@ export default function SearchControls({ searchMode }: Props) {
               }
             />
           </div>
-          {polygonError && <div className="strekning-error">{polygonError}</div>}
-          <label className="polygon-clip-toggle">
-            <input type="checkbox" checked={polygonClip} onChange={() => setPolygonClip((prev) => !prev)} />
-            Klipp veglenker til polygon
-          </label>
+          <SVVCheckbox
+            id="polygon-clip"
+            label="Klipp veglenker til polygon"
+            checked={polygonClip}
+            onChange={() => setPolygonClip((prev) => !prev)}
+            sm
+            removeMargin
+          />
         </div>
       )}
     </>

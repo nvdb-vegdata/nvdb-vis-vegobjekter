@@ -1,0 +1,11 @@
+{
+  "typography": {
+    "font-weight": {
+      "semibold": { "$type": "fontWeight", "$value": 600 },
+      "regular": { "$type": "fontWeight", "$value": 400 },
+      "bold": { "$type": "fontWeight", "$value": 700 },
+      "light": { "$type": "fontWeight", "$value": 300 }
+    },
+    "font-family": { "$type": "fontFamily", "$value": "LFT Etica, Arial, sans-serif" }
+  }
+}

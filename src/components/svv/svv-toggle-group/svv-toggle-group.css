@@ -1,0 +1,214 @@
+/* Breakpoints */
+/* used in grid */
+/* Brand colors */
+/* Support colors */
+/* Spacing */
+/* Form colors */
+/* Breakpoints */
+/* min size for clickable content */
+/* Standard padding left right */
+/* Standard page padding-top styling */
+/* Standard widths */
+/* standard medium container size */
+/* Article */
+:root {
+  --component-input-border-radius: var(--border-radius-md);
+  --component-input-border-width: var(--border-width-md);
+  --component-input-border-color: var(--colors-borders-quaternary);
+  --colors-brand-orange: var(--colors-interaction-tertiary);
+  --colors-brand-white: var(--colors-backgrounds-primary);
+  --colors-brand-grey-dark: var(--colors-information-neutral-primary);
+  --colors-brand-grey-light: var(--colors-backgrounds-secondary);
+  --colors-brand-grey-medium: #dadadaff;
+  --colors-support-gray-regular-dark: var(--colors-borders-secondary);
+  --spacing-xxxxs: 0.06rem;
+  --spacing-xxxs: 0.125rem;
+  --spacing-3px: 0.1875rem;
+  --spacing-5px: 0.313rem;
+  --spacing-6px: 0.375rem;
+  --spacing-7px: 0.4375rem;
+  --spacing-10px: 0.625rem;
+  --spacing-11px: 0.688rem;
+  --spacing-17px: 1.063rem;
+  --spacing-19px: 1.188rem;
+  --spacing-20px: 1.125rem;
+  --spacing-25px: 1.563rem;
+  --spacing-28px: 1.75rem;
+  --spacing-29px: 1.183rem;
+  --spacing-30px: 1.875rem;
+  --spacing-36px: 2.25rem;
+  --spacing-38px: 2.375rem;
+  --spacing-44px: 2.75rem;
+  --spacing-80px: 5rem;
+  --spacing-12xl: 9.25rem;
+  --min-width-44px: 2.75rem;
+  --min-width-134px: 8.375rem;
+  --min-width-265px: ;
+  --max-width-160px: 10rem;
+  --max-width-220px: 13.75rem;
+  --max-width-245px: 15.313rem;
+  --max-width-280px: 17.5rem;
+  --max-width-342px: 21.375rem;
+  --max-width-360px: 22.5rem;
+  --max-width-416px: 26rem;
+  --max-width-456px: 28.5rem;
+  --max-width-648px: 40.5rem;
+  --max-width-720px: 45rem;
+  --min-height-44px: 2.75rem;
+  --min-height-80px: 5rem;
+  --min-height-94px: 5.875rem;
+  --min-height-114px: 7.125rem;
+  --min-height-176px: 11rem;
+  --min-height-248: 15.5rem;
+  --min-height-260px: 16.25rem;
+  --min-height-280px: 17.5rem;
+  --dimension-width-20px: 1.3rem;
+  --dimension-width-22px: 1.375rem;
+  --dimension-width-44px: 2.75rem;
+  --dimension-width-360px: 22.5rem;
+  --dimension-width-400px: 25rem;
+  --dimension-height-20px: 1.3rem;
+  --dimension-height-22px: 1.375rem;
+  --dimension-height-44px: 2.75rem;
+  --dimension-height-80px: 5rem;
+  --dimension-height-100px: 6.25rem;
+  --size-medium-width: 58.5rem;
+  --size-max-width: 70.5rem;
+  --size-article-body-max-width: 40.5rem;
+  --box-shadow-spread-minus: -0.188rem;
+  --border-width-xl: 0.313rem;
+  --typography-line-height-18: 1.125rem;
+  --typography-line-height-18px: 1.125rem;
+  --typography-line-height-21px: 1.313rem;
+}
+
+/* Standard bottom margin on elements */
+/* Standard bottom margin on elements */
+/* Bigger bottom margin on elements */
+.svv-toggle-group-wrapper {
+  --component-toggle-group-border-radius: var(--border-radius-lg);
+  --component-toggle-group-background: var(--colors-backgrounds-primary);
+  --component-toggle-group-border-color: var(--colors-borders-primary);
+  --component-toggle-group-border-width: var(--border-width-sm);
+  --component-toggle-group-button-border-radius: var(--border-radius-md);
+  --component-toggle-group-button-selected-color: var(--colors-text-primary);
+  --component-toggle-group-button-selected-border-color: var(--colors-borders-senary);
+  --component-toggle-group-button-selected-background: var(--colors-backgrounds-primary);
+  display: grid;
+  gap: var(--spacing-sm);
+  justify-items: start;
+  font-family: var(--typography-font-family);
+  font-style: normal;
+}
+
+.svv-toggle-button {
+  color: var(--colors-text-primary);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-weight: var(--typography-font-weight-semibold);
+  outline: none;
+  max-width: 100%;
+  background-color: transparent;
+  border: var(--border-width-md) solid transparent;
+  position: relative;
+  border-radius: var(--component-toggle-group-button-border-radius);
+}
+.svv-toggle-button:has(svg) {
+  gap: 0.5rem;
+}
+.svv-toggle-button svg {
+  width: var(--sizes-icons-md);
+  height: var(--sizes-icons-md);
+}
+.svv-toggle-button--active {
+  color: var(--component-toggle-group-button-selected-color);
+  background-color: var(--component-toggle-group-button-selected-background);
+  border: var(--border-width-md) solid var(--component-toggle-group-button-selected-border-color);
+  box-shadow: 0 0 0 var(--border-width-sm) var(--component-toggle-group-button-selected-border-color);
+}
+.svv-toggle-button:hover {
+  border-color: var(--component-toggle-group-button-selected-border-color);
+}
+.svv-toggle-button:hover:after {
+  height: 0;
+}
+.svv-toggle-button:focus-visible {
+  outline: var(--border-width-lg) solid var(--colors-focus-primary);
+  outline-offset: var(--border-width-md);
+}
+.svv-toggle-button:active {
+  background-color: var(--colors-backgrounds-tertiary);
+  box-shadow: 0 0 0 1px var(--colors-borders-senary);
+}
+
+.svv-toggle-button-group {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border-radius: var(--component-toggle-group-border-radius);
+  box-shadow: var(--shadow-xs);
+  background: var(--component-toggle-group-background);
+  padding: var(--spacing-xs);
+}
+.svv-toggle-button-group--sm {
+  gap: var(--spacing-md);
+  font-size: var(--typography-font-size-sm);
+  line-height: var(--spacing-lg);
+}
+.svv-toggle-button-group--sm .svv-toggle-button {
+  padding: var(--component-button-padding-vertical-sm) var(--component-button-padding-horizontal-sm);
+}
+.svv-toggle-button-group--sm .svv-toggle-button--only-icon {
+  padding: var(--spacing-sm) var(--component-button-padding-horizontal-sm);
+}
+.svv-toggle-button-group--md {
+  gap: var(--spacing-md);
+  font-size: var(--typography-font-size-sm);
+  line-height: var(--spacing-lg);
+}
+.svv-toggle-button-group--md .svv-toggle-button {
+  padding: var(--component-button-padding-vertical-md) var(--component-button-padding-horizontal-md);
+}
+.svv-toggle-button-group--md .svv-toggle-button--only-icon {
+  padding: var(--spacing-md) var(--component-button-padding-horizontal-md);
+}
+.svv-toggle-button-group--lg {
+  gap: var(--spacing-lg);
+}
+.svv-toggle-button-group--lg .svv-toggle-button {
+  font-size: var(--typography-font-size-md);
+  line-height: 1.75rem;
+  padding: var(--component-button-padding-vertical-lg) var(--component-button-padding-horizontal-lg);
+}
+.svv-toggle-button-group--lg .svv-toggle-button--only-icon {
+  padding: var(--spacing-lg) var(--component-button-padding-horizontal-lg);
+}
+
+.svv-toggle-group-label {
+  font-feature-settings: "clig" off, "liga" off;
+  /* Desktop/Labeltext */
+  font-weight: var(--typography-font-weight-semibold);
+  line-height: var(--spacing-lg);
+  color: var(--colors-text-primary);
+}
+.svv-toggle-group-label--sm {
+  font-size: var(--typography-font-size-xs);
+}
+.svv-toggle-group-label--md {
+  font-size: var(--typography-font-size-xs);
+}
+.svv-toggle-group-label--lg {
+  font-size: var(--typography-font-size-sm);
+}
+
+.svv-toggle-button-group-full-width {
+  width: 100%;
+}
+
+.svv-toggle-button-group-flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}

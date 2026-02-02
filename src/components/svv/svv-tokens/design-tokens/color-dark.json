@@ -1,0 +1,842 @@
+{
+  "color": {
+    "dark": {
+      "brand": {
+        "vegvesen-graa": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.267, 0.31, 0.333],
+            "alpha": 1,
+            "hex": "#444f55ff"
+          }
+        },
+        "vegvesen-orange": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [1, 0.588, 0],
+            "alpha": 1,
+            "hex": "#ff9600ff"
+          }
+        },
+        "vegvesen-white": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [1, 1, 1],
+            "alpha": 1,
+            "hex": "#ffffffff"
+          }
+        },
+        "vegvesen-black": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 1,
+            "hex": "#000000ff"
+          }
+        },
+        "tillegg-black": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "hex": "#000000ff"
+          }
+        },
+        "tillegg-blue-regular": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0.443, 0.592],
+            "hex": "#077197ff"
+          }
+        },
+        "tillegg-green-regular": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0.522, 0.141],
+            "hex": "#148524ff"
+          }
+        },
+        "tillegg-orange-dark": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.89, 0.46, 0],
+            "hex": "#E27500ff"
+          }
+        },
+        "tillegg-red-dark": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.71, 0.2, 0.2],
+            "hex": "#B63434ff"
+          }
+        }
+      },
+      "ui": {
+        "neutral": {
+          "border-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.29, 0.318, 0.337],
+              "hex": "#4a5156ff"
+            }
+          },
+          "background-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.114, 0.125, 0.133],
+              "hex": "#1d2022ff"
+            }
+          },
+          "surface-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.192, 0.212, 0.227],
+              "hex": "#31363aff"
+            }
+          },
+          "background-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.086, 0.094, 0.102],
+              "hex": "#16181aff"
+            }
+          },
+          "surface-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.243, 0.267, 0.282],
+              "hex": "#3e4448ff"
+            }
+          },
+          "border-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.49, 0.51, 0.522],
+              "hex": "#7d8285ff"
+            }
+          },
+          "base-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.451, 0.482, 0.502],
+              "hex": "#737b80ff"
+            }
+          },
+          "border-strong": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.647, 0.659, 0.671],
+              "hex": "#a5a8abff"
+            }
+          },
+          "base-contrast-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0, 0, 0],
+              "hex": "#000000ff"
+            }
+          },
+          "surface-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.145, 0.157, 0.169],
+              "hex": "#25282bff"
+            }
+          },
+          "base-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.533, 0.561, 0.576],
+              "hex": "#888f93ff"
+            }
+          },
+          "text-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.925, 0.925, 0.929],
+              "hex": "#ececedff"
+            }
+          },
+          "base-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.62, 0.643, 0.655],
+              "hex": "#9ea4a7ff"
+            }
+          },
+          "surface-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.165, 0.18, 0.192],
+              "hex": "#2a2e31ff"
+            }
+          },
+          "base-contrast-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.078, 0.082, 0.086],
+              "hex": "#141516ff"
+            }
+          },
+          "text-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.647, 0.659, 0.671],
+              "hex": "#a5a8abff"
+            }
+          }
+        },
+        "info": {
+          "base-contrast-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0, 0, 0],
+              "hex": "#000000ff"
+            }
+          },
+          "base-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.506, 0.718, 0.792],
+              "hex": "#81b7caff"
+            }
+          },
+          "base-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.373, 0.639, 0.737],
+              "hex": "#5fa3bcff"
+            }
+          },
+          "border-strong": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.553, 0.678, 0.733],
+              "hex": "#8dadbbff"
+            }
+          },
+          "text-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.553, 0.678, 0.733],
+              "hex": "#8dadbbff"
+            }
+          },
+          "border-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.169, 0.333, 0.412],
+              "hex": "#2b5569ff"
+            }
+          },
+          "border-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.353, 0.529, 0.616],
+              "hex": "#5a879dff"
+            }
+          },
+          "surface-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.141, 0.278, 0.345],
+              "hex": "#244758ff"
+            }
+          },
+          "surface-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.114, 0.224, 0.275],
+              "hex": "#1d3946ff"
+            }
+          },
+          "surface-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.098, 0.192, 0.235],
+              "hex": "#19313cff"
+            }
+          },
+          "surface-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.082, 0.165, 0.204],
+              "hex": "#152a34ff"
+            }
+          },
+          "base-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.231, 0.561, 0.678],
+              "hex": "#3b8fadff"
+            }
+          },
+          "text-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.906, 0.929, 0.945],
+              "hex": "#e7edf1ff"
+            }
+          },
+          "background-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.051, 0.098, 0.122],
+              "hex": "#0d191fff"
+            }
+          },
+          "base-contrast-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.035, 0.082, 0.098],
+              "hex": "#091519ff"
+            }
+          },
+          "background-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.067, 0.133, 0.161],
+              "hex": "#112229ff"
+            }
+          }
+        },
+        "success": {
+          "base-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.435, 0.706, 0.475],
+              "hex": "#6fb479ff"
+            }
+          },
+          "base-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.294, 0.635, 0.341],
+              "hex": "#4ba257ff"
+            }
+          },
+          "text-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.545, 0.694, 0.549],
+              "hex": "#8bb18cff"
+            }
+          },
+          "border-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.173, 0.353, 0.18],
+              "hex": "#2c5a2eff"
+            }
+          },
+          "surface-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.118, 0.235, 0.122],
+              "hex": "#1e3c1fff"
+            }
+          },
+          "surface-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.102, 0.2, 0.102],
+              "hex": "#1a331aff"
+            }
+          },
+          "base-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.141, 0.553, 0.2],
+              "hex": "#248d33ff"
+            }
+          },
+          "surface-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.086, 0.176, 0.09],
+              "hex": "#162d17ff"
+            }
+          },
+          "background-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.071, 0.137, 0.071],
+              "hex": "#122312ff"
+            }
+          },
+          "surface-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.145, 0.294, 0.149],
+              "hex": "#254b26ff"
+            }
+          },
+          "border-strong": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.545, 0.694, 0.549],
+              "hex": "#8bb18cff"
+            }
+          },
+          "text-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.902, 0.933, 0.902],
+              "hex": "#e6eee6ff"
+            }
+          },
+          "base-contrast-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.008, 0.024, 0.008],
+              "hex": "#020602ff"
+            }
+          },
+          "background-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.051, 0.106, 0.055],
+              "hex": "#0d1b0eff"
+            }
+          },
+          "border-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.337, 0.557, 0.341],
+              "hex": "#568e57ff"
+            }
+          },
+          "base-contrast-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0, 0, 0],
+              "hex": "#000000ff"
+            }
+          }
+        },
+        "warning": {
+          "base-contrast-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [1, 1, 1],
+              "hex": "#ffffffff"
+            }
+          },
+          "base-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.38, 0.208, 0.016],
+              "hex": "#613504ff"
+            }
+          },
+          "base-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.596, 0.329, 0.027],
+              "hex": "#985407ff"
+            }
+          },
+          "text-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.961, 0.922, 0.886],
+              "hex": "#f5ebe2ff"
+            }
+          },
+          "border-strong": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.808, 0.62, 0.471],
+              "hex": "#ce9e78ff"
+            }
+          },
+          "surface-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.361, 0.235, 0.137],
+              "hex": "#5c3c23ff"
+            }
+          },
+          "surface-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.286, 0.188, 0.11],
+              "hex": "#49301cff"
+            }
+          },
+          "surface-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.247, 0.161, 0.094],
+              "hex": "#3f2918ff"
+            }
+          },
+          "surface-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.216, 0.141, 0.082],
+              "hex": "#372415ff"
+            }
+          },
+          "text-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.808, 0.62, 0.471],
+              "hex": "#ce9e78ff"
+            }
+          },
+          "base-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.486, 0.267, 0.02],
+              "hex": "#7c4405ff"
+            }
+          },
+          "background-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.129, 0.082, 0.047],
+              "hex": "#21150cff"
+            }
+          },
+          "border-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.427, 0.278, 0.161],
+              "hex": "#6d4729ff"
+            }
+          },
+          "base-contrast-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.949, 0.914, 0.875],
+              "hex": "#f2e9dfff"
+            }
+          },
+          "background-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.169, 0.11, 0.063],
+              "hex": "#2b1c10ff"
+            }
+          },
+          "border-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.69, 0.451, 0.263],
+              "hex": "#b07343ff"
+            }
+          }
+        },
+        "danger": {
+          "base-contrast-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0, 0, 0],
+              "hex": "#000000ff"
+            }
+          },
+          "base-contrast-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.133, 0.075, 0.075],
+              "hex": "#221313ff"
+            }
+          },
+          "text-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.957, 0.918, 0.914],
+              "hex": "#f4eae9ff"
+            }
+          },
+          "text-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.8, 0.612, 0.6],
+              "hex": "#cc9c99ff"
+            }
+          },
+          "border-subtle": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.502, 0.231, 0.216],
+              "hex": "#803b37ff"
+            }
+          },
+          "surface-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.42, 0.196, 0.18],
+              "hex": "#6b322eff"
+            }
+          },
+          "surface-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.251, 0.118, 0.11],
+              "hex": "#401e1cff"
+            }
+          },
+          "background-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.153, 0.071, 0.067],
+              "hex": "#271211ff"
+            }
+          },
+          "surface-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.29, 0.133, 0.125],
+              "hex": "#4a2220ff"
+            }
+          },
+          "background-tinted": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.2, 0.094, 0.086],
+              "hex": "#331816ff"
+            }
+          },
+          "base-active": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.875, 0.655, 0.655],
+              "hex": "#dfa7a7ff"
+            }
+          },
+          "base-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.8, 0.443, 0.443],
+              "hex": "#cc7171ff"
+            }
+          },
+          "border-strong": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.8, 0.612, 0.6],
+              "hex": "#cc9c99ff"
+            }
+          },
+          "base-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.839, 0.553, 0.553],
+              "hex": "#d68d8dff"
+            }
+          },
+          "border-default": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.706, 0.431, 0.416],
+              "hex": "#b46e6aff"
+            }
+          },
+          "surface-hover": {
+            "$type": "color",
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [0.337, 0.157, 0.145],
+              "hex": "#562825ff"
+            }
+          }
+        },
+        "other": {
+          "focus-highlight": {
+            "$value": "{color.ui.info.base-default}"
+          }
+        }
+      },
+      "trafikkskilt": {
+        "skilt-oransje": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [1, 0.51, 0],
+            "alpha": 1,
+            "hex": "#ff8200ff"
+          }
+        },
+        "skilt-blaa": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0.239, 0.647],
+            "alpha": 1,
+            "hex": "#003da5ff"
+          }
+        },
+        "skilt-gulgronn-fluorescerende": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.925, 0.91, 0.102],
+            "alpha": 1,
+            "hex": "#ece81aff"
+          }
+        },
+        "skilt-hvit": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [1, 1, 1],
+            "alpha": 1,
+            "hex": "#ffffffff"
+          }
+        },
+        "skilt-rod": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.878, 0.235, 0.192],
+            "alpha": 1,
+            "hex": "#e03c31ff"
+          }
+        },
+        "skilt-gul": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.949, 0.663, 0],
+            "alpha": 1,
+            "hex": "#f2a900ff"
+          }
+        },
+        "skilt-brun": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.643, 0.353, 0.165],
+            "alpha": 1,
+            "hex": "#a45a2aff"
+          }
+        },
+        "skilt-gronn": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0.522, 0.325],
+            "alpha": 1,
+            "hex": "#008553ff"
+          }
+        },
+        "skilt-graa": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.616, 0.588, 0.553],
+            "alpha": 1,
+            "hex": "#9d968dff"
+          }
+        },
+        "skilt-svart": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.176, 0.161, 0.149],
+            "alpha": 1,
+            "hex": "#2d2926ff"
+          }
+        },
+        "skilt-burgunder": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0.616, 0.133, 0.208],
+            "alpha": 1,
+            "hex": "#9d2235ff"
+          }
+        }
+      }
+    }
+  }
+}

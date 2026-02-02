@@ -6,5 +6,5 @@ export interface WithTestId {
    * Rotverdi for data-testid, f.eks. testId="accordion" → data-testid="accordion".
    * Konsument må sende unik verdi i repeterte lister.
    */
-  testId?: string
+  testId?: string;
 }

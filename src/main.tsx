@@ -6,6 +6,8 @@ import './api/apiConfig'
 import './components/svv/_core/svv.css'
 import '@komponentkassen/svv-button/svv-button.css'
 import '@komponentkassen/svv-chip/svv-chip.css'
+import '@komponentkassen/svv-toggle-group/svv-toggle-group.css'
+import '@komponentkassen/svv-form/svv-form.css'
 import './index.css'
 
 function logQueryError(error: unknown) {

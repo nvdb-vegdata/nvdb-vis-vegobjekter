@@ -1,6 +1,8 @@
-import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
+import { SVVButton } from '@komponentkassen/svv-button'
 import { SVVChip, SVVChipGroup } from '@komponentkassen/svv-chip'
+import { SVVSearchField, SVVSelect } from '@komponentkassen/svv-form'
 import { useAtom } from 'jotai'
+import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { getKategorier, getVegobjekttyper, isSelectableVegobjekttype, type Kategori, type Vegobjekttype } from '../../api/datakatalogClient'
 import { allTypesSelectedAtom, selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
@@ -125,48 +127,50 @@ export default function ObjectTypeSelector() {
       <div className="section-header-row">
         <div className="section-header">Vegobjekttyper</div>
         <div className="limit-inline">
-          <label htmlFor="veglenke-limit">Maks veglenkesekvenser</label>
-          <select id="veglenke-limit" className="limit-select" value={veglenkesekvensLimit} onChange={(e) => setVeglenkesekvensLimit(Number(e.target.value))}>
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value={200}>200</option>
-          </select>
+          <SVVSelect
+            id="veglenke-limit"
+            legend="Maks veglenkesekvenser"
+            selectSize="xSmall"
+            options={[
+              { value: 10, text: '10' },
+              { value: 20, text: '20' },
+              { value: 50, text: '50' },
+              { value: 100, text: '100' },
+              { value: 200, text: '200' },
+            ]}
+            selected={veglenkesekvensLimit}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setVeglenkesekvensLimit(Number(e.target.value))}
+            removeMargin
+          />
         </div>
       </div>
 
       <div className="search-row">
-        <label className="search-label" htmlFor="type-search">
-          Søk på navn eller ID
-        </label>
-        <div className="search-input-wrapper">
-          <input
-            id="type-search"
-            type="text"
-            className="search-input"
-            placeholder="fartsgrense, 105"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm søk" onClick={() => setSearchQuery('')} icon={<span aria-hidden="true">×</span>} />
-          )}
-        </div>
+        <SVVSearchField
+          id="type-search"
+          label="Søk på navn eller ID"
+          placeholder="fartsgrense, 105"
+          inputSize="small"
+          searchText={searchQuery}
+          onSearch={() => {}}
+          onTextChange={(text: string) => setSearchQuery(text)}
+        />
       </div>
 
       <div className="category-row">
-        <label className="search-label" htmlFor="category-select">
-          Velg kategori
-        </label>
-        <select id="category-select" className="category-select" value={selectedCategoryId} onChange={(e) => handleCategorySelect(e.target.value)}>
-          <option value="">Velg kategori</option>
-          {categories.map((kategori) => (
-            <option key={kategori.id} value={kategori.id}>
-              {`${kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`} (#${kategori.id})`}
-            </option>
-          ))}
-        </select>
+        <SVVSelect
+          id="category-select"
+          legend="Velg kategori"
+          options={categories.map((kategori) => ({
+            value: kategori.id,
+            text: `${kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`} (#${kategori.id})`,
+          }))}
+          selected={selectedCategoryId}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleCategorySelect(e.target.value)}
+          emptyChoiceText="Velg kategori"
+          isFullWidth
+          removeMargin
+        />
       </div>
 
       {selectedTypes.length > 0 && (

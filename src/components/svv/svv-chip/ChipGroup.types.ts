@@ -1,5 +1,5 @@
 import { HTMLAttributes } from "react";
-import { WithTestId } from "../svv-testid";
+import { WithTestId } from "@komponentkassen/svv-testid";
 
 export const CHIP_SIZES = ["sm", "md", "lg"] as const;
 export type ChipSize = (typeof CHIP_SIZES)[number];

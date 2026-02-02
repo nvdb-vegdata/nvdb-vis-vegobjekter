@@ -11,6 +11,7 @@ import Overlay from 'ol/Overlay'
 import View from 'ol/View'
 import 'ol/ol.css'
 import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
+import { SVVToggle, SVVToggleGroup } from '@komponentkassen/svv-toggle-group'
 import { transform } from 'ol/proj'
 import VectorSource from 'ol/source/Vector'
 import WMTS from 'ol/source/WMTS'
@@ -460,13 +461,20 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     }
   }, [isDrawing, polygon, searchMode, setSearchMode, startDrawing])
 
-  const handleStrekningMode = useCallback(() => {
-    setSearchMode('strekning')
-  }, [setSearchMode])
-
-  const handleStedfestingMode = useCallback(() => {
-    setSearchMode('stedfesting')
-  }, [setSearchMode])
+  const handleToggleChange = useCallback(
+    (value: string) => {
+      const mode = value as 'polygon' | 'strekning' | 'stedfesting'
+      if (mode === 'polygon') {
+        setSearchMode('polygon')
+        if (!polygon) {
+          startDrawing()
+        }
+      } else {
+        setSearchMode(mode)
+      }
+    },
+    [polygon, setSearchMode, startDrawing],
+  )
 
   const cancelDrawing = useCallback(() => {
     if (drawInteraction.current && mapInstance.current) {
@@ -480,22 +488,22 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     <>
       <div className="draw-controls">
         <div className="draw-controls-row">
-          <SVVButton
-            size="sm"
-            color={searchMode === 'polygon' ? 'primary' : 'secondary'}
-            className="draw-toggle-btn"
-            onClick={isDrawing && searchMode === 'polygon' ? cancelDrawing : handlePolygonMode}
-          >
-            {isDrawing && searchMode === 'polygon' ? 'Avbryt' : 'Tegn område'}
-          </SVVButton>
+          <SVVToggleGroup key={searchMode} defaultValue={searchMode} onChange={handleToggleChange} size="sm">
+            <SVVToggle value="polygon" label="Tegn område" />
+            <SVVToggle value="strekning" label="Søk på strekning" />
+            <SVVToggle value="stedfesting" label="Stedfesting" />
+          </SVVToggleGroup>
 
-          <SVVButton size="sm" color={searchMode === 'strekning' ? 'primary' : 'secondary'} onClick={handleStrekningMode}>
-            Søk på strekning
-          </SVVButton>
-
-          <SVVButton size="sm" color={searchMode === 'stedfesting' ? 'primary' : 'secondary'} onClick={handleStedfestingMode}>
-            Stedfesting
-          </SVVButton>
+          {searchMode === 'polygon' && (
+            <SVVButton
+              size="sm"
+              color={isDrawing ? 'primary' : 'secondary'}
+              className="draw-toggle-btn"
+              onClick={isDrawing ? cancelDrawing : handlePolygonMode}
+            >
+              {isDrawing ? 'Avbryt' : 'Tegn område'}
+            </SVVButton>
+          )}
 
           {searchMode === 'polygon' && !isDrawing && (polygon || veglenkesekvenser) && (
             <SVVButton size="sm" color="secondary" className="svv-danger" onClick={clearAll}>
