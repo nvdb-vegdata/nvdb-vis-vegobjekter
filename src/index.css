@@ -355,11 +355,13 @@ body,
   justify-content: center;
   background: none;
   border: none;
+  box-shadow: none;
   font-size: 18px;
   color: #4b5563;
   cursor: pointer;
   padding: 0;
   width: 20px;
+  min-width: 20px;
   height: 20px;
   line-height: 1;
 }
@@ -703,8 +705,11 @@ body,
 .clear-types-btn {
   border: none;
   background: none;
+  box-shadow: none;
   color: var(--link-color);
   font-size: 12px;
+  min-width: 0;
+  max-width: none;
   cursor: pointer;
   padding: 0;
 }
@@ -732,6 +737,9 @@ body,
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
+  min-width: 0;
+  max-width: none;
+  box-shadow: none;
   border-radius: 999px;
   border: 1px solid #cfe3f9;
   background: #eaf3ff;
@@ -953,6 +961,8 @@ body,
 
 .vegobjekt-type-header {
   width: 100%;
+  min-width: 0;
+  max-width: none;
   border: 0;
   text-align: left;
   font: inherit;
@@ -963,6 +973,7 @@ body,
   cursor: pointer;
   user-select: none;
   appearance: none;
+  box-shadow: none;
 }
 
 .vegobjekt-type-header:hover {
@@ -1023,6 +1034,9 @@ body,
 .vegobjekt-header-toggle {
   border: none;
   background: none;
+  box-shadow: none;
+  min-width: 0;
+  max-width: none;
   padding: 8px 12px;
   margin: 0;
   display: flex;
@@ -1077,12 +1091,14 @@ body,
   background: #fff;
   color: #555;
   width: 26px;
+  min-width: 26px;
   height: 26px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: none;
 }
 
 .vegobjekt-action-btn:disabled {
@@ -1262,7 +1278,10 @@ body,
 .popup-vegobjekt-link {
   background: none;
   border: none;
+  box-shadow: none;
   padding: 0;
+  min-width: 0;
+  max-width: none;
   color: var(--link-color);
   cursor: pointer;
   font-size: inherit;
@@ -1315,6 +1334,9 @@ body,
 .csv-popover-option {
   display: block;
   width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-shadow: none;
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
@@ -1400,6 +1422,9 @@ body,
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  max-width: none;
+  box-shadow: none;
   border: 1px solid #d7e6f5;
   border-radius: 999px;
   padding: 4px 8px;
@@ -1407,6 +1432,18 @@ body,
   color: #2c3e50;
   font-size: 12px;
   cursor: pointer;
+}
+
+/* SVVButton override for destructive actions */
+.svv-button.svv-danger.svv-button--secondary {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+  color: white;
+}
+
+.svv-button.svv-danger.svv-button--secondary:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
 }
 
 .filter-chip:hover {

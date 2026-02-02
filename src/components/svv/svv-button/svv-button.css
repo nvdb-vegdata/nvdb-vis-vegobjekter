@@ -1,0 +1,405 @@
+/* Breakpoints */
+/* used in grid */
+/* Brand colors */
+/* Support colors */
+/* Spacing */
+/* Form colors */
+/* Breakpoints */
+/* min size for clickable content */
+/* Standard padding left right */
+/* Standard page padding-top styling */
+/* Standard widths */
+/* standard medium container size */
+/* Article */
+:root {
+  --component-input-border-radius: var(--border-radius-md);
+  --component-input-border-width: var(--border-width-md);
+  --component-input-border-color: var(--colors-borders-quaternary);
+  --colors-brand-orange: var(--colors-interaction-tertiary);
+  --colors-brand-white: var(--colors-backgrounds-primary);
+  --colors-brand-grey-dark: var(--colors-information-neutral-primary);
+  --colors-brand-grey-light: var(--colors-backgrounds-secondary);
+  --colors-brand-grey-medium: #dadadaff;
+  --colors-support-gray-regular-dark: var(--colors-borders-secondary);
+  --spacing-xxxxs: 0.06rem;
+  --spacing-xxxs: 0.125rem;
+  --spacing-3px: 0.1875rem;
+  --spacing-5px: 0.313rem;
+  --spacing-6px: 0.375rem;
+  --spacing-7px: 0.4375rem;
+  --spacing-10px: 0.625rem;
+  --spacing-11px: 0.688rem;
+  --spacing-17px: 1.063rem;
+  --spacing-19px: 1.188rem;
+  --spacing-20px: 1.125rem;
+  --spacing-25px: 1.563rem;
+  --spacing-28px: 1.75rem;
+  --spacing-29px: 1.183rem;
+  --spacing-30px: 1.875rem;
+  --spacing-36px: 2.25rem;
+  --spacing-38px: 2.375rem;
+  --spacing-44px: 2.75rem;
+  --spacing-80px: 5rem;
+  --spacing-12xl: 9.25rem;
+  --min-width-44px: 2.75rem;
+  --min-width-134px: 8.375rem;
+  --min-width-265px: ;
+  --max-width-160px: 10rem;
+  --max-width-220px: 13.75rem;
+  --max-width-245px: 15.313rem;
+  --max-width-280px: 17.5rem;
+  --max-width-342px: 21.375rem;
+  --max-width-360px: 22.5rem;
+  --max-width-416px: 26rem;
+  --max-width-456px: 28.5rem;
+  --max-width-648px: 40.5rem;
+  --max-width-720px: 45rem;
+  --min-height-44px: 2.75rem;
+  --min-height-80px: 5rem;
+  --min-height-94px: 5.875rem;
+  --min-height-114px: 7.125rem;
+  --min-height-176px: 11rem;
+  --min-height-248: 15.5rem;
+  --min-height-260px: 16.25rem;
+  --min-height-280px: 17.5rem;
+  --dimension-width-20px: 1.3rem;
+  --dimension-width-22px: 1.375rem;
+  --dimension-width-44px: 2.75rem;
+  --dimension-width-360px: 22.5rem;
+  --dimension-width-400px: 25rem;
+  --dimension-height-20px: 1.3rem;
+  --dimension-height-22px: 1.375rem;
+  --dimension-height-44px: 2.75rem;
+  --dimension-height-80px: 5rem;
+  --dimension-height-100px: 6.25rem;
+  --size-medium-width: 58.5rem;
+  --size-max-width: 70.5rem;
+  --size-article-body-max-width: 40.5rem;
+  --box-shadow-spread-minus: -0.188rem;
+  --border-width-xl: 0.313rem;
+  --typography-line-height-18: 1.125rem;
+  --typography-line-height-18px: 1.125rem;
+  --typography-line-height-21px: 1.313rem;
+}
+
+/* Standard bottom margin on elements */
+/* Standard bottom margin on elements */
+/* Bigger bottom margin on elements */
+@keyframes container-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.svv-spinner {
+  --spinner-size: var(--spacing-xl);
+  --spinner-thickness: var(--border-width-lg);
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  vertical-align: middle;
+}
+.svv-spinner * {
+  box-sizing: border-box;
+}
+.svv-spinner--centered {
+  align-items: center;
+}
+.svv-spinner--inline {
+  display: inline-flex;
+}
+.svv-spinner--small {
+  --spinner-size: var(--spacing-lg);
+  --spinner-thickness: var(--border-width-md);
+  gap: var(--spacing-xs);
+  flex-direction: row;
+  align-items: center;
+}
+.svv-spinner--large {
+  --spinner-size: var(--spacing-3xl);
+  --spinner-thickness: var(--border-width-xl);
+}
+.svv-spinner__text {
+  font-size: var(--typography-font-size-xs);
+  margin: 0;
+}
+@media (min-width: 768px) {
+  .svv-spinner__text {
+    font-size: var(--typography-font-size-sm);
+  }
+}
+.svv-spinner__circle {
+  --antialiasing: 0.5px;
+  --mask-inner: calc(100% - var(--spinner-thickness) - var(--antialiasing));
+  --mask-outer: calc(100% - var(--spinner-thickness));
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border-radius: 50%;
+  animation: container-rotate 1.2s linear infinite;
+  background: conic-gradient(from 0deg at 50% 50%, transparent, var(--colors-information-warning-primary));
+  mask-image: radial-gradient(farthest-side, transparent var(--mask-inner), black var(--mask-outer));
+}
+@media (prefers-reduced-motion: reduce) {
+  .svv-spinner__circle {
+    animation: none !important;
+  }
+}
+
+button {
+  outline: none;
+  border-radius: 0;
+  font: inherit;
+  background: none;
+  border: none;
+  appearance: none;
+}
+
+.svv-button,
+.svv-button--icon-only {
+  --component-button-border-radius: var(--border-radius-md);
+  --component-button-border-width: var(--border-width-md);
+  --component-button-color: var(--colors-text-inverted);
+  --component-button-background: var(--colors-backgrounds-quaternary);
+  --component-button-background-hover: var(--colors-backgrounds-senary);
+  --component-button-background-active: var(--colors-backgrounds-senary);
+  --component-button-secondary-color: var(--colors-text-primary);
+  --component-button-secondary-border-color: var(--colors-borders-senary);
+  --component-button-secondary-background: var(--colors-backgrounds-primary);
+  --component-button-secondary-background-hover: var(--colors-backgrounds-primary);
+  --component-button-secondary-background-active: var(--colors-backgrounds-tertiary);
+  --component-service-button-border-radius: var(--border-radius-lg);
+}
+
+.svv-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: var(--typography-font-weight-semibold);
+  padding: var(--component-button-padding-vertical-md) var(--component-button-padding-horizontal-md);
+  border: var(--component-button-border-width) solid transparent;
+  outline: none;
+  min-width: var(--min-width-134px);
+  max-width: 100%;
+  background-color: var(--component-button-background);
+  color: var(--component-button-color);
+  position: relative;
+  border-radius: var(--component-button-border-radius);
+  transition: all 0.1s ease-in-out 0s;
+}
+.svv-button {
+  font-size: 1.125rem;
+  line-height: 1.625rem;
+}
+.svv-button svg {
+  width: var(--sizes-icons-md);
+  height: var(--sizes-icons-md);
+}
+.svv-button svg path {
+  fill: currentColor;
+}
+@media (min-width: 768px) {
+  .svv-button {
+    max-width: var(--max-width-342px);
+  }
+}
+.svv-button--primary:active:not(:disabled) {
+  background-color: var(--component-button-background-active);
+}
+.svv-button--primary:hover:not(:disabled) {
+  background-color: var(--component-button-background-hover);
+}
+.svv-button--primary:focus-visible:not(:disabled) {
+  outline: var(--border-width-lg) solid var(--colors-focus-primary);
+  outline-offset: var(--border-width-md);
+}
+.svv-button--secondary {
+  background-color: var(--colors-backgrounds-primary);
+  color: var(--component-button-secondary-color);
+  border-color: var(--component-button-secondary-border-color);
+}
+.svv-button--secondary:hover:not(:disabled) {
+  background-color: var(--component-button-secondary-background);
+  box-shadow: 0 0 0 var(--spacing-xxxxs) var(--colors-borders-senary);
+}
+.svv-button--secondary:active:not(:disabled) {
+  background-color: var(--colors-backgrounds-tertiary);
+  box-shadow: 0 0 0 var(--spacing-xxxxs) var(--colors-borders-quaternary);
+}
+.svv-button--secondary:focus-visible {
+  border-color: var(--colors-borders-quaternary);
+  outline: var(--border-width-lg) solid var(--colors-focus-primary);
+  outline-offset: var(--border-width-md);
+}
+.svv-button--tertiary {
+  background-color: transparent;
+  color: var(--component-button-secondary-color);
+  border: 1px solid transparent;
+}
+.svv-button--tertiary:hover:not(:disabled) {
+  background-color: var(--colors-backgrounds-primary);
+  border-color: var(--colors-borders-senary);
+  box-shadow: 0 0 0 var(--border-width-md) var(--colors-borders-senary);
+  text-decoration: underline;
+}
+.svv-button--tertiary:focus-visible {
+  text-decoration: underline;
+  outline: var(--border-width-lg) solid var(--colors-focus-primary);
+  outline-offset: var(--border-width-md);
+}
+.svv-button--tertiary:active:not(:disabled) {
+  text-decoration: underline;
+  background-color: var(--colors-backgrounds-tertiary);
+  border-color: var(--colors-borders-senary);
+  box-shadow: 0 0 0 var(--border-width-md) var(--colors-borders-senary);
+}
+.svv-button[disabled] {
+  opacity: 30%;
+  cursor: not-allowed;
+}
+.svv-button--sm {
+  font-size: var(--typography-font-size-sm);
+  line-height: var(--typography-line-height-md);
+  min-width: var(--size-6xl);
+  padding: var(--component-button-padding-vertical-sm) var(--component-button-padding-horizontal-sm);
+}
+.svv-button--md {
+  font-size: var(--typography-font-size-sm);
+  line-height: var(--typography-line-height-md);
+  min-width: var(--size-6xl);
+  padding: var(--component-button-padding-vertical-md) var(--component-button-padding-horizontal-md);
+}
+.svv-button--lg {
+  font-size: var(--typography-font-size-md);
+  line-height: var(--typography-line-height-lg);
+  min-width: var(--size-6xl);
+  padding: var(--component-button-padding-vertical-lg) var(--component-button-padding-horizontal-lg);
+}
+.svv-button--icon-only {
+  background-color: var(--colors-backgrounds-primary);
+  transition: all 0.1s ease-in-out 0s;
+  width: var(--dimension-width-44px);
+  min-width: var(--dimension-width-44px);
+  height: var(--dimension-height-44px);
+  border: var(--border-width-lg) solid transparent;
+  box-shadow: var(--shadow-md);
+  border-radius: 50% 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--colors-text-primary);
+}
+.svv-button--icon-only--md {
+  width: var(--spacing-3xl);
+  min-width: var(--spacing-3xl);
+  height: var(--spacing-3xl);
+}
+.svv-button--icon-only--lg {
+  width: var(--spacing-4xl);
+  min-width: var(--spacing-4xl);
+  height: var(--spacing-4xl);
+}
+.svv-button--icon-only--square {
+  border-radius: var(--component-button-border-radius);
+}
+.svv-button--icon-only:focus-visible:not(:disabled) {
+  outline: var(--border-width-lg) solid var(--colors-focus-primary);
+  outline-offset: var(--border-width-md);
+}
+.svv-button--icon-only:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+  border: var(--border-width-lg) solid var(--colors-borders-quaternary);
+  cursor: pointer;
+}
+.svv-button--icon-only[disabled] {
+  opacity: 40%;
+  cursor: not-allowed;
+}
+.svv-button--cancel {
+  cursor: pointer;
+  color: var(--colors-text-primary);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--colors-borders-primary);
+  text-decoration-thickness: var(--border-width-sm);
+  text-underline-offset: 5px;
+}
+.svv-button--cancel:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--colors-borders-primary);
+  text-decoration-thickness: var(--border-width-md);
+}
+.svv-button--cancel:focus {
+  text-decoration: underline;
+  text-decoration-color: var(--colors-borders-primary);
+  text-decoration-thickness: var(--border-width-lg);
+  outline: none;
+}
+.svv-button--cancel--has-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+.svv-button--cancel.svv-button--icon-right {
+  flex-direction: row-reverse;
+}
+
+.svv-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--spacing-md);
+  column-gap: var(--spacing-lg);
+}
+.svv-button-row--spacing-top {
+  margin-top: var(--spacing-lg);
+}
+@media (min-width: 768px) {
+  .svv-button-row--spacing-top {
+    margin-top: var(--spacing-xl);
+  }
+}
+.svv-button-row .svv-button {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .svv-button-row .svv-button {
+    width: auto;
+  }
+}
+@media (max-width: 768px) {
+  .svv-button-row--mobile {
+    flex-direction: column-reverse;
+  }
+}
+
+.cancel-button-container {
+  display: flex;
+  justify-content: center;
+  flex-basis: 100%;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .cancel-button-container {
+    justify-content: flex-start;
+  }
+}
+
+.lenke-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 768px) {
+  .lenke-container {
+    width: auto;
+    justify-content: flex-start;
+  }
+}
+
+@media (min-width: 768px) {
+  .svv-form-button-row .svv-button--secondary {
+    order: -1;
+  }
+}

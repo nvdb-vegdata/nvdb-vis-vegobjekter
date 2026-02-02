@@ -49,13 +49,15 @@ The application is in **beta** and displays a visible beta badge in the header.
 
 The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) to keep spacing, borders, radii and shadows consistent.
 
+Interactive buttons use SVV Komponentkassen buttons vendored with `svv-cli` (see `src/components/svv/`).
+
 ### Tokens
 - Prefer existing `--ui-*` tokens over hard-coded values when the style is meant to match existing UI
 - Add a new token only when a value is reused or represents a real semantic choice (e.g. surface, border, radius)
 
 ### Reusable Building Blocks
-- Use `.btn` for primary/secondary/danger actions
-- Use `.btn-icon` for square icon-only actions (same focus ring as `.btn`)
+- Use `SVVButton` / `SVVButtonIcon` from `@komponentkassen/svv-button` for actions
+- Use `SVVChip` / `SVVChipGroup` from `@komponentkassen/svv-chip` for removable chips (filters, selected types)
 - Use `.ui-surface` for white panels with border + radius
 - Use `.ui-popover` for popovers (surface + border + radius + shadow)
 

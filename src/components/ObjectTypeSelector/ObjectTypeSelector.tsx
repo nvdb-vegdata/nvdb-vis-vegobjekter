@@ -1,3 +1,5 @@
+import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
+import { SVVChip, SVVChipGroup } from '@komponentkassen/svv-chip'
 import { useAtom } from 'jotai'
 import { useEffect, useMemo, useState } from 'react'
 import { getKategorier, getVegobjekttyper, isSelectableVegobjekttype, type Kategori, type Vegobjekttype } from '../../api/datakatalogClient'
@@ -148,9 +150,7 @@ export default function ObjectTypeSelector() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button type="button" className="search-clear-btn" onClick={() => setSearchQuery('')} aria-label="Tøm søk">
-              ×
-            </button>
+            <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm søk" onClick={() => setSearchQuery('')} icon={<span aria-hidden="true">×</span>} />
           )}
         </div>
       </div>
@@ -173,32 +173,25 @@ export default function ObjectTypeSelector() {
         <>
           <div className="selected-summary">
             <div className="selected-count">{allTypesSelected ? 'Alle valgt' : `${selectedTypes.length} valgt`}</div>
-            <button type="button" className="clear-types-btn" onClick={handleClearTypes}>
+            <SVVButton size="sm" color="tertiary" className="clear-types-btn" onClick={handleClearTypes}>
               Fjern alle
-            </button>
+            </SVVButton>
           </div>
-          <div className="selected-chips">
+          <SVVChipGroup className="selected-chips" size="sm">
             {allTypesSelected ? (
-              <button type="button" className="selected-chip" onClick={handleClearTypes} aria-label="Fjern alle">
-                <span className="selected-chip-label">Alle</span>
-                <span className="selected-chip-remove">×</span>
-              </button>
+              <SVVChip title="Alle" removable onClick={handleClearTypes} aria-label="Fjern alle" />
             ) : (
               selectedTypes.map((type) => (
-                <button
+                <SVVChip
                   key={type.id}
-                  type="button"
-                  className="selected-chip"
+                  title={`${type.navn ?? `Type ${type.id}`} #${type.id}`}
+                  removable
                   onClick={() => handleTypeRemove(type.id)}
                   aria-label={`Fjern ${type.navn ?? `type ${type.id}`}`}
-                >
-                  <span className="selected-chip-label">{type.navn ?? `Type ${type.id}`}</span>
-                  <span className="selected-chip-id">#{type.id}</span>
-                  <span className="selected-chip-remove">×</span>
-                </button>
+                />
               ))
             )}
-          </div>
+          </SVVChipGroup>
         </>
       )}
 

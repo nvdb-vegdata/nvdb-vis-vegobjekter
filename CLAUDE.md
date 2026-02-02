@@ -42,6 +42,21 @@ test("hello world", () => {
 
 Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
 
+## SVV Komponentkassen (svv-cli)
+
+Use SVV Komponentkassen React components vendored into this repo with `svv-cli`.
+
+- Config: `.svvrc.json` (componentRoot: `src/components/svv`, skin: `internal`)
+- Initialize core styles (once): `svv init` (creates `src/components/svv/_core/`)
+- Add components: `svv install svv-button`, `svv install svv-chip`, etc.
+- Import CSS:
+  - Core CSS once in app entry: `import './components/svv/_core/svv.css'`
+  - Component CSS in app entry: e.g. `import '@komponentkassen/svv-button/svv-button.css'`, `import '@komponentkassen/svv-chip/svv-chip.css'`
+- Prefer SVV components over custom UI:
+  - Buttons: `SVVButton`, `SVVButtonIcon` from `@komponentkassen/svv-button`
+  - Chips: `SVVChip`, `SVVChipGroup` from `@komponentkassen/svv-chip`
+- Do not hand-edit vendored files under `src/components/svv/**`; re-run `svv install <component>` to update them.
+
 Server:
 
 ```ts#index.ts

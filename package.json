@@ -26,6 +26,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.19",
     "axios": "^1.13.2",
+    "classnames": "^2.5.1",
     "jotai": "^2.16.2",
     "ol": "^10.7.0",
     "proj4": "^2.20.2",

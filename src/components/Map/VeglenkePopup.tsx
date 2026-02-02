@@ -1,3 +1,4 @@
+import { SVVButton } from '@komponentkassen/svv-button'
 import { useAtomValue, useSetAtom } from 'jotai'
 import type Feature from 'ol/Feature'
 import { useCallback, useMemo } from 'react'
@@ -65,9 +66,9 @@ export default function VeglenkePopup({ selectedFeature, vegobjekterByType, popu
                 <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
                   {objects.slice(0, 5).map((obj) => (
                     <li key={obj.id}>
-                      <button type="button" className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
+                      <SVVButton size="sm" color="tertiary" className="popup-vegobjekt-link" onClick={() => handleVegobjektClick(type.id, obj.id)}>
                         ID: {obj.id}
-                      </button>
+                      </SVVButton>
                     </li>
                   ))}
                   {objects.length > 5 && <li>...og {objects.length - 5} til</li>}

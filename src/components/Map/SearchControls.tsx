@@ -1,3 +1,4 @@
+import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
 import { useAtom } from 'jotai'
 import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
@@ -258,19 +259,12 @@ export default function SearchControls({ searchMode }: Props) {
                 onKeyDown={handleStrekningKeyDown}
               />
               {strekningInput && (
-                <button className="search-clear-btn" type="button" onClick={clearStrekning} aria-label="Tøm strekning">
-                  ×
-                </button>
+                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm strekning" onClick={clearStrekning} icon={<span aria-hidden="true">×</span>} />
               )}
             </div>
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={handleStrekningSearch}
-              disabled={trimmedStrekningInput.length === 0 || !isStrekningValid}
-            >
+            <SVVButton size="sm" color="primary" onClick={handleStrekningSearch} disabled={trimmedStrekningInput.length === 0 || !isStrekningValid}>
               Søk
-            </button>
+            </SVVButton>
           </div>
           {strekningError && <div className="strekning-error">{strekningError}</div>}
         </div>
@@ -292,19 +286,12 @@ export default function SearchControls({ searchMode }: Props) {
                 onKeyDown={handleStedfestingKeyDown}
               />
               {stedfestingInput && (
-                <button className="search-clear-btn" type="button" onClick={clearStedfesting} aria-label="Tøm stedfesting">
-                  ×
-                </button>
+                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm stedfesting" onClick={clearStedfesting} icon={<span aria-hidden="true">×</span>} />
               )}
             </div>
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={handleStedfestingSearch}
-              disabled={trimmedStedfestingInput.length === 0 || !isStedfestingValid}
-            >
+            <SVVButton size="sm" color="primary" onClick={handleStedfestingSearch} disabled={trimmedStedfestingInput.length === 0 || !isStedfestingValid}>
               Søk
-            </button>
+            </SVVButton>
           </div>
           {stedfestingError && <div className="strekning-error">{stedfestingError}</div>}
         </div>
@@ -326,26 +313,24 @@ export default function SearchControls({ searchMode }: Props) {
                 onKeyDown={handlePolygonKeyDown}
               />
               {polygonWktInput && (
-                <button className="search-clear-btn" type="button" onClick={clearPolygon} aria-label="Tøm polygon WKT">
-                  ×
-                </button>
+                <SVVButtonIcon className="search-clear-btn" ariaLabel="Tøm polygon WKT" onClick={clearPolygon} icon={<span aria-hidden="true">×</span>} />
               )}
             </div>
-            <button className="btn btn-primary" type="button" onClick={handlePolygonSearch} disabled={trimmedPolygonInput.length === 0 || !isPolygonValid}>
+            <SVVButton size="sm" color="primary" onClick={handlePolygonSearch} disabled={trimmedPolygonInput.length === 0 || !isPolygonValid}>
               Søk
-            </button>
-            <button
+            </SVVButton>
+            <SVVButtonIcon
               className={`vegobjekt-action-btn vegobjekt-copy-btn search-copy-btn${polygonCopied ? ' copied' : ''}`}
-              type="button"
+              ariaLabel={polygonCopied ? 'WKT kopiert' : 'Kopier WKT'}
+              title={polygonCopied ? 'Kopiert!' : 'Kopier WKT'}
               onClick={handleCopyPolygonWkt}
               disabled={trimmedPolygonInput.length === 0 || !isPolygonRegexValid}
-              aria-label={polygonCopied ? 'WKT kopiert' : 'Kopier WKT'}
-              title={polygonCopied ? 'Kopiert!' : 'Kopier WKT'}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
-              </svg>
-            </button>
+              icon={
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
+                </svg>
+              }
+            />
           </div>
           {polygonError && <div className="strekning-error">{polygonError}</div>}
           <label className="polygon-clip-toggle">

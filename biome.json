@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!src/api/generated"]
+    "includes": ["**", "!src/api/generated", "!src/components/svv"]
   },
   "formatter": {
     "enabled": true,

@@ -1,3 +1,4 @@
+import { SVVButton, SVVButtonIcon } from '@komponentkassen/svv-button'
 import { useSetAtom } from 'jotai'
 import type { MouseEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -98,37 +99,37 @@ export default function VegobjektItem({
       onMouseLeave={() => setHoveredVegobjekt(null)}
     >
       <div className="vegobjekt-header">
-        <button type="button" className="vegobjekt-header-toggle" onClick={onToggle}>
+        <SVVButton size="sm" color="tertiary" className="vegobjekt-header-toggle" onClick={onToggle}>
           <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
           <span className="vegobjekt-id">ID: {details.id}</span>
           {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
-        </button>
+        </SVVButton>
         <div className="vegobjekt-header-actions">
-          <button
-            type="button"
+          <SVVButtonIcon
             className={`vegobjekt-action-btn vegobjekt-copy-btn${copied ? ' copied' : ''}`}
-            aria-label={copied ? 'ID kopiert' : 'Kopier ID'}
+            ariaLabel={copied ? 'ID kopiert' : 'Kopier ID'}
             title={copied ? 'Kopiert!' : 'Kopier ID'}
             onClick={handleCopyId}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
-            </svg>
-          </button>
-          <button
-            type="button"
+            icon={
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
+              </svg>
+            }
+          />
+          <SVVButtonIcon
             className="vegobjekt-action-btn vegobjekt-locate-btn"
-            aria-label="Finn i kart"
+            ariaLabel="Finn i kart"
             title="Finn i kart"
             onClick={(event) => {
               event.stopPropagation()
               setLocateVegobjekt({ vegobjekt, token: Date.now() })
             }}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 2a7 7 0 0 1 7 7c0 4.2-5.1 10.1-6.4 11.5a.8.8 0 0 1-1.2 0C10.1 19.1 5 13.2 5 9a7 7 0 0 1 7-7Zm0 4.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z" />
-            </svg>
-          </button>
+            icon={
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 2a7 7 0 0 1 7 7c0 4.2-5.1 10.1-6.4 11.5a.8.8 0 0 1-1.2 0C10.1 19.1 5 13.2 5 9a7 7 0 0 1 7-7Zm0 4.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Z" />
+              </svg>
+            }
+          />
         </div>
       </div>
 
@@ -197,15 +198,16 @@ export default function VegobjektItem({
                     if (!isPolygonWkt(geometriEgenskap.verdi.wkt)) return null
                     const isCopied = copiedWktEgenskapId === e.id
                     return (
-                      <button
-                        type="button"
+                      <SVVButton
+                        size="sm"
+                        color="tertiary"
                         className={`vegobjekt-egenskap-copy${isCopied ? ' copied' : ''}`}
                         aria-label={isCopied ? 'WKT kopiert' : 'Kopier WKT'}
                         title={isCopied ? 'Kopiert!' : 'Kopier WKT'}
-                        onClick={(event) => handleCopyWkt(event, e.id, geometriEgenskap.verdi.wkt)}
+                        onClick={(event: MouseEvent<HTMLButtonElement>) => handleCopyWkt(event, e.id, geometriEgenskap.verdi.wkt)}
                       >
                         {isCopied ? 'Kopiert!' : 'Kopier'}
-                      </button>
+                      </SVVButton>
                     )
                   })()}
                 </div>

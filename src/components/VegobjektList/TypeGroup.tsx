@@ -1,3 +1,4 @@
+import { SVVButton } from '@komponentkassen/svv-button'
 import { useSetAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 import type { Vegobjekttype } from '../../api/datakatalogClient'
@@ -76,11 +77,11 @@ export default function TypeGroup({
 
   return (
     <div className="vegobjekt-type-group">
-      <button type="button" className="vegobjekt-type-header" onClick={() => setExpanded(!expanded)}>
+      <SVVButton size="sm" color="tertiary" className="vegobjekt-type-header" onClick={() => setExpanded(!expanded)}>
         <span className="vegobjekt-expand">{expanded ? '-' : '+'}</span>
         <span className="vegobjekt-type-name">{type.navn}</span>
         <span className="vegobjekt-type-count">({objects.length})</span>
-      </button>
+      </SVVButton>
 
       {expanded && (
         <ul className="vegobjekt-type-content">

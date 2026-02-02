@@ -1,3 +1,5 @@
+import { SVVButton } from '@komponentkassen/svv-button'
+import { SVVChip, SVVChipGroup } from '@komponentkassen/svv-chip'
 import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 import type { Vegobjekt } from '../../api/uberiketClient'
@@ -74,18 +76,19 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
         </div>
         <div className="vegobjekt-list-actions">
           {hasNextPage && !isLoading && (
-            <button type="button" className="btn btn-primary btn-small" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
+            <SVVButton size="sm" color="primary" onClick={onFetchNextPage} disabled={isFetchingNextPage}>
               {isFetchingNextPage ? 'Henter...' : 'Hent flere'}
-            </button>
+            </SVVButton>
           )}
           {overallCount > 0 && !isLoading && (
             <>
-              <button type="button" className="btn btn-primary btn-small csv-popover-anchor" popoverTarget="csv-popover">
+              <SVVButton size="sm" color="primary" className="csv-popover-anchor" popoverTarget="csv-popover">
                 Last ned CSV
-              </button>
+              </SVVButton>
               <div id="csv-popover" className="csv-popover" popover="auto">
-                <button
-                  type="button"
+                <SVVButton
+                  size="sm"
+                  color="tertiary"
                   className="csv-popover-option"
                   onClick={() => {
                     downloadCsvAllTypes(filteredVegobjekterByType, selectedTypes)
@@ -93,9 +96,10 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                   }}
                 >
                   Alle typer i én fil
-                </button>
-                <button
-                  type="button"
+                </SVVButton>
+                <SVVButton
+                  size="sm"
+                  color="tertiary"
                   className="csv-popover-option"
                   onClick={() => {
                     downloadCsvPerType(filteredVegobjekterByType, selectedTypes)
@@ -103,7 +107,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                   }}
                 >
                   Én fil per type
-                </button>
+                </SVVButton>
               </div>
             </>
           )}
@@ -114,22 +118,17 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
           <div className="vegobjekt-list-toolbar">
             <div className="vegobjekt-list-toolbar-left">
               {filterSummaries.length > 0 && (
-                <div className="filter-summary">
+                <SVVChipGroup className="filter-summary" size="sm">
                   {filterSummaries.map((filter) => (
-                    <button key={filter.label} type="button" className="filter-chip" onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`}>
-                      <span>{filter.label}</span>
-                      <span className="filter-chip-remove" aria-hidden="true">
-                        ×
-                      </span>
-                    </button>
+                    <SVVChip key={filter.label} title={filter.label} removable onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`} />
                   ))}
-                </div>
+                </SVVChipGroup>
               )}
             </div>
             <div className="vegobjekt-list-toolbar-right">
-              <button type="button" className="btn btn-secondary btn-small filter-popover-anchor" popoverTarget="filter-popover">
+              <SVVButton size="sm" color="secondary" className="filter-popover-anchor" popoverTarget="filter-popover">
                 Filter
-              </button>
+              </SVVButton>
               <div id="filter-popover" className="filter-popover" popover="auto">
                 <label className="filter-popover-field">
                   <span className="filter-popover-label">Vis versjoner med startdato etter...</span>

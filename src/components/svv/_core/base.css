@@ -140,35 +140,37 @@ select {
   font-family: "LFT Etica", arial, sans-serif;
 }
 
-:where(input[type=text],
-input[type=button],
-input[type=submit],
-input[type=email],
-input[type=password],
-input[type=tel],
-input[type=search],
-input[type=number],
-input[type=url],
-textarea,
-select) {
+:where(
+    input[type="text"],
+    input[type="button"],
+    input[type="submit"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="number"],
+    input[type="url"],
+    textarea,
+    select
+  ) {
   -webkit-appearance: none;
   border-radius: 0;
 }
 
 /* Remove default browser styling - x from input with type search */
 /* clears the ‘X’ from IE */
-input[type=search]::-ms-clear,
-input[type=search]::-ms-reveal {
+input[type="search"]::-ms-clear,
+input[type="search"]::-ms-reveal {
   display: none;
   width: 0;
   height: 0;
 }
 
 /* clears the ‘X’ from Chrome */
-input[type=search]::-webkit-search-decoration,
-input[type=search]::-webkit-search-cancel-button,
-input[type=search]::-webkit-search-results-button,
-input[type=search]::-webkit-search-results-decoration {
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
 

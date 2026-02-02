@@ -3,8 +3,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './api/apiConfig'
+import './components/svv/_core/svv.css'
+import '@komponentkassen/svv-button/svv-button.css'
+import '@komponentkassen/svv-chip/svv-chip.css'
 import './index.css'
-import "./components/svv/_core/svv.css";
 
 function logQueryError(error: unknown) {
   if (!error) return
