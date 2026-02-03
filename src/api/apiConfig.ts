@@ -1,28 +1,22 @@
 import { client as datakatalogClient } from './generated/datakatalog/client.gen'
 import { client as uberiketClient } from './generated/uberiket/client.gen'
 
-const HEADERS = {
-  'X-Client': 'nvdb-vis-vegobjekter',
+const TIMEOUT_MS = 20_000
+
+const fetchWithTimeout = ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) })) as typeof fetch
+
+const commonConfig = {
+  headers: { 'X-Client': 'nvdb-vis-vegobjekter' },
+  fetch: fetchWithTimeout,
+  querySerializer: { array: { explode: false, style: 'form' as const } },
 }
 
 datakatalogClient.setConfig({
+  ...commonConfig,
   baseUrl: 'https://nvdbapiles.atlas.vegvesen.no/datakatalog',
-  headers: HEADERS,
-  querySerializer: {
-    array: {
-      explode: false,
-      style: 'form',
-    },
-  },
 })
 
 uberiketClient.setConfig({
+  ...commonConfig,
   baseUrl: 'https://nvdbapiles.atlas.vegvesen.no/uberiket',
-  headers: HEADERS,
-  querySerializer: {
-    array: {
-      explode: false,
-      style: 'form',
-    },
-  },
 })

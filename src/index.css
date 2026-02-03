@@ -85,7 +85,8 @@ body,
 .btn-icon svg {
   width: 18px;
   height: 18px;
-  fill: var(--ui-text);
+  stroke: var(--ui-text);
+  fill: none;
 }
 
 .app a {
@@ -1093,7 +1094,8 @@ body,
 .vegobjekt-action-btn svg {
   width: 14px;
   height: 14px;
-  fill: currentColor;
+  stroke: currentColor;
+  fill: none;
 }
 
 .vegobjekt-action-btn:hover {

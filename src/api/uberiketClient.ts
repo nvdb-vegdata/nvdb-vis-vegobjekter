@@ -202,6 +202,15 @@ export function getVeglenkePositionRange(veglenkesekvens: Veglenkesekvens, vegle
   return { start, end }
 }
 
+function formatPosition(value: number): string {
+  const str = value.toString()
+  const dotIndex = str.indexOf('.')
+  if (dotIndex === -1) return str
+  const decimals = str.length - dotIndex - 1
+  if (decimals <= 8) return str
+  return parseFloat(value.toFixed(8)).toString()
+}
+
 export function buildStedfestingFilter(ranges: VeglenkeRange[]): string {
   const grouped = new Map<number, VeglenkeRange[]>()
 
@@ -251,7 +260,7 @@ export function buildStedfestingFilter(ranges: VeglenkeRange[]): string {
     })
   }
 
-  return merged.map((range) => `${range.startposisjon}-${range.sluttposisjon}@${range.veglenkesekvensId}`).join(',')
+  return merged.map((range) => `${formatPosition(range.startposisjon)}-${formatPosition(range.sluttposisjon)}@${range.veglenkesekvensId}`).join(',')
 }
 
 export function getVegobjektPositions(stedfesting: Stedfesting | undefined, veglenkesekvensId: number): { start: number; slutt: number }[] {

@@ -1,4 +1,5 @@
 import { useAtom } from 'jotai'
+import { Copy } from 'lucide-react'
 import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
 import type { ChangeEvent, KeyboardEvent } from 'react'
@@ -342,9 +343,7 @@ export default function SearchControls({ searchMode }: Props) {
               aria-label={polygonCopied ? 'WKT kopiert' : 'Kopier WKT'}
               title={polygonCopied ? 'Kopiert!' : 'Kopier WKT'}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
-              </svg>
+              <Copy size={16} aria-hidden="true" />
             </button>
           </div>
           {polygonError && <div className="strekning-error">{polygonError}</div>}
