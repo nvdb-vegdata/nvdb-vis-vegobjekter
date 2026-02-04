@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai'
-import { Copy } from 'lucide-react'
+import { Copy, X } from 'lucide-react'
 import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
 import type { ChangeEvent, KeyboardEvent } from 'react'
@@ -260,7 +260,7 @@ export default function SearchControls({ searchMode }: Props) {
               />
               {strekningInput && (
                 <button className="search-clear-btn" type="button" onClick={clearStrekning} aria-label="Tøm strekning">
-                  ×
+                  <X size={14} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -294,7 +294,7 @@ export default function SearchControls({ searchMode }: Props) {
               />
               {stedfestingInput && (
                 <button className="search-clear-btn" type="button" onClick={clearStedfesting} aria-label="Tøm stedfesting">
-                  ×
+                  <X size={14} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -328,7 +328,7 @@ export default function SearchControls({ searchMode }: Props) {
               />
               {polygonWktInput && (
                 <button className="search-clear-btn" type="button" onClick={clearPolygon} aria-label="Tøm polygon WKT">
-                  ×
+                  <X size={14} aria-hidden="true" />
                 </button>
               )}
             </div>

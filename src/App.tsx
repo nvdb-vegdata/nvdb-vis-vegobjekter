@@ -1,6 +1,7 @@
 import { useAtom, useAtomValue } from 'jotai'
+import { X } from 'lucide-react'
 import type { Polygon } from 'ol/geom'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isSelectableVegobjekttype, type Vegobjekttype } from './api/datakatalogClient'
 import MapView from './components/Map/MapView'
 import ObjectTypeSelector from './components/ObjectTypeSelector/ObjectTypeSelector'
@@ -93,6 +94,15 @@ export default function App() {
 
   const totalVeglenker = veglenkeResult?.veglenkesekvenser.reduce((sum, vs) => sum + (vs.veglenker?.length ?? 0), 0) ?? 0
 
+  const limitReached = veglenkeResult?.metadata?.returnert === veglenkesekvensLimit
+
+  const [warningDismissed, setWarningDismissed] = useState(false)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset when polygon changes
+  useEffect(() => {
+    setWarningDismissed(false)
+  }, [polygon])
+
   const totalVegobjekter = Array.from(vegobjekterByType.values()).reduce((sum, arr) => sum + arr.length, 0)
 
   const showSidebarHelp = !veglenkeResult || (!allTypesSelected && selectedTypes.length === 0)
@@ -128,6 +138,14 @@ export default function App() {
 
       <main className="map-container">
         <MapView veglenkesekvenser={veglenkeResult?.veglenkesekvenser} vegobjekterByType={vegobjekterByType} isLoadingVeglenker={veglenkerLoading} />
+        {searchMode === 'polygon' && limitReached && !warningDismissed && (
+          <div className="limit-warning">
+            <span>⚠️ Området inneholder flere veglenkesekvenser enn grensen ({veglenkesekvensLimit}). Tegn et mindre område for å se alle.</span>
+            <button type="button" className="limit-warning-close" onClick={() => setWarningDismissed(true)} aria-label="Lukk advarsel">
+              <X size={16} aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </main>
 
       <aside className="sidebar-right">

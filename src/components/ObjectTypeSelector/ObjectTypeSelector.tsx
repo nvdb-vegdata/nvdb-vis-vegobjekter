@@ -1,4 +1,5 @@
 import { useAtom } from 'jotai'
+import { ChevronDown, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { getKategorier, getVegobjekttyper, isSelectableVegobjekttype, type Kategori, type Vegobjekttype } from '../../api/datakatalogClient'
 import { allTypesSelectedAtom, selectedTypesAtom, veglenkesekvensLimitAtom } from '../../state/atoms'
@@ -149,7 +150,7 @@ export default function ObjectTypeSelector() {
           />
           {searchQuery && (
             <button type="button" className="search-clear-btn" onClick={() => setSearchQuery('')} aria-label="Tøm søk">
-              ×
+              <X size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -159,14 +160,17 @@ export default function ObjectTypeSelector() {
         <label className="search-label" htmlFor="category-select">
           Velg kategori
         </label>
-        <select id="category-select" className="category-select" value={selectedCategoryId} onChange={(e) => handleCategorySelect(e.target.value)}>
-          <option value="">Velg kategori</option>
-          {categories.map((kategori) => (
-            <option key={kategori.id} value={kategori.id}>
-              {`${kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`} (#${kategori.id})`}
-            </option>
-          ))}
-        </select>
+        <div className="category-select-wrapper">
+          <select id="category-select" className="category-select" value={selectedCategoryId} onChange={(e) => handleCategorySelect(e.target.value)}>
+            <option value="">Velg kategori</option>
+            {categories.map((kategori) => (
+              <option key={kategori.id} value={kategori.id}>
+                {`${kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`} (#${kategori.id})`}
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={16} className="category-select-icon" aria-hidden="true" />
+        </div>
       </div>
 
       {selectedTypes.length > 0 && (
@@ -181,7 +185,7 @@ export default function ObjectTypeSelector() {
             {allTypesSelected ? (
               <button type="button" className="selected-chip" onClick={handleClearTypes} aria-label="Fjern alle">
                 <span className="selected-chip-label">Alle</span>
-                <span className="selected-chip-remove">×</span>
+                <X size={12} className="selected-chip-remove" aria-hidden="true" />
               </button>
             ) : (
               selectedTypes.map((type) => (
@@ -194,7 +198,7 @@ export default function ObjectTypeSelector() {
                 >
                   <span className="selected-chip-label">{type.navn ?? `Type ${type.id}`}</span>
                   <span className="selected-chip-id">#{type.id}</span>
-                  <span className="selected-chip-remove">×</span>
+                  <X size={12} className="selected-chip-remove" aria-hidden="true" />
                 </button>
               ))
             )}

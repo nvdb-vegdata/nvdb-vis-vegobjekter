@@ -300,6 +300,10 @@ body,
   margin-bottom: 12px;
 }
 
+.category-select-wrapper {
+  position: relative;
+}
+
 .category-select {
   width: 100%;
   padding: 8px 36px 8px 10px;
@@ -307,9 +311,6 @@ body,
   border-radius: 4px;
   font-size: 13px;
   background-color: white;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -319,6 +320,15 @@ body,
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(11, 92, 171, 0.2);
+}
+
+.category-select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #888;
 }
 
 .limit-select {
@@ -356,13 +366,11 @@ body,
   justify-content: center;
   background: none;
   border: none;
-  font-size: 18px;
   color: #4b5563;
   cursor: pointer;
   padding: 0;
   width: 20px;
   height: 20px;
-  line-height: 1;
 }
 
 .search-clear-btn:hover {
@@ -764,8 +772,6 @@ body,
 }
 
 .selected-chip-remove {
-  font-size: 14px;
-  line-height: 1;
   color: #5c6f82;
 }
 
@@ -1424,7 +1430,47 @@ body,
 }
 
 .filter-chip-remove {
-  font-size: 14px;
-  line-height: 1;
   color: #5c6f82;
+}
+
+.limit-warning {
+  position: absolute;
+  top: 60px;
+  inset-inline: 0;
+  margin-inline: auto;
+  width: max-content;
+  z-index: 1000;
+  padding: 10px 16px;
+  background: #fff4e5;
+  border: 1px solid #f0b429;
+  border-radius: 6px;
+  color: #7a4a00;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.limit-warning-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #7a4a00;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+}
+
+.limit-warning-close:hover {
+  opacity: 1;
+}
+
+.limit-warning-close:focus-visible {
+  outline: 2px solid #7a4a00;
+  outline-offset: 2px;
+  border-radius: 2px;
 }

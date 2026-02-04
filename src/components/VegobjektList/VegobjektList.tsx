@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai'
+import { X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { Vegobjekt } from '../../api/uberiketClient'
 import { focusedVegobjektAtom, selectedTypesAtom, vegobjekterErrorAtom } from '../../state/atoms'
@@ -118,9 +119,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                   {filterSummaries.map((filter) => (
                     <button key={filter.label} type="button" className="filter-chip" onClick={filter.onClear} aria-label={`Fjern filter: ${filter.label}`}>
                       <span>{filter.label}</span>
-                      <span className="filter-chip-remove" aria-hidden="true">
-                        ×
-                      </span>
+                      <X size={12} className="filter-chip-remove" aria-hidden="true" />
                     </button>
                   ))}
                 </div>
