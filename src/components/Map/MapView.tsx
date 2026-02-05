@@ -408,18 +408,6 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     mapInstance,
   })
 
-  const clearAll = useCallback(() => {
-    drawSource.current.clear()
-    veglenkeSource.current.clear()
-    stedfestingSource.current.clear()
-    highlightSource.current.clear()
-    egengeometriSource.current.clear()
-    selectedSource.current.clear()
-    setSelectedFeature(null)
-    overlayRef.current?.setPosition(undefined)
-    setPolygon(null)
-  }, [setPolygon])
-
   const startDrawing = useCallback(() => {
     if (!mapInstance.current) return
 
@@ -493,11 +481,6 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
           <button type="button" className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStedfestingMode}>
             Stedfesting
           </button>
-          {searchMode === 'polygon' && !isDrawing && (polygon || veglenkesekvenser) && (
-            <button type="button" className="btn btn-danger" onClick={clearAll}>
-              Nullstill
-            </button>
-          )}
         </div>
 
         <SearchControls searchMode={searchMode} />
