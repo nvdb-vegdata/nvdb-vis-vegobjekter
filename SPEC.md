@@ -1,4 +1,4 @@
-# NVDB Vegobjekt Visualizer - Specification
+# NVDB Finn Vegdata - Specification
 
 ## Overview
 
@@ -12,11 +12,12 @@ The application is in **beta** and displays a visible beta badge in the header.
 
 1. **Select Object Types** - User selects which road object types they want to find
 2. **Choose Search Mode** - Toggle between polygon, vegsystemreferanse (strekning), or stedfesting (switching mode clears other search inputs/state)
-3. **Define Area/Route** - Draw a small polygon or paste a polygon WKT and click "Søk"/"Kopier WKT", enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
-4. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 100)
-5. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
-6. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. If `metadata.neste` is present, fetch subsequent pages using the `start` token. The "Hent flere" button loads additional pages in batches of up to 10,000 objects per click.
-7. **Inspect** - View detailed vegobjekt information in a collapsible list
+3. **(Optional) Set Date Filter** - Use the "Bruk dato" checkbox and date input in the top row next to mode buttons. Date changes are applied on blur/Enter.
+4. **Define Area/Route** - Draw a small polygon or paste a polygon WKT and click "Søk"/"Kopier WKT", enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
+5. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 100)
+6. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
+7. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. If date filter is enabled, `dato` is sent in the vegobjekt query. If `metadata.neste` is present, fetch subsequent pages using the `start` token. The "Hent flere" button loads additional pages in batches of up to 10,000 objects per click.
+8. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
 
@@ -39,6 +40,14 @@ The application is in **beta** and displays a visible beta badge in the header.
 - Veglenker fully outside the polygon are filtered out
 - The stedfesting filter is based on the overlapping geometry only (not the full veglenke extent)
 - The map renders the full veglenke in a faded style with the clipped portion emphasized
+
+### Date Filtering
+- Date filter is controlled by a checkbox + date input in the top row (next to search mode controls)
+- Date input changes are applied on blur (or Enter), not on every keystroke
+- Vegobjekt queries include `dato` only when date filter is enabled
+- Veglenker are filtered client-side against `gyldighetsperiode` using:
+  - `startdato` inclusive
+  - `sluttdato` exclusive
 
 ### Map Styling
 - Veglenke line color can be changed at runtime via the "Innstillinger" menu in the map
@@ -92,7 +101,8 @@ The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) 
   
 - **Uberiket API**: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1/`
 - Query veglenkesekvenser by polygon or vegsystemreferanse
-- Query vegobjekter by comma-separated type IDs and either stedfesting filter or vegsystemreferanse
+- Query vegobjekter by comma-separated type IDs and either stedfesting filter or vegsystemreferanse (optional `dato`)
+- Requests use `X-Client: nvdb-finn-vegdata`
 
 
 ### Code Generation
@@ -142,12 +152,13 @@ nvdb-vis-vegobjekter/
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /api/v1/vegnett/veglenkesekvenser` | Query road segments by polygon |
-| `GET /api/v1/vegobjekter?typeIder=...` | Query road objects by type IDs and stedfesting filter |
+| `GET /api/v1/vegobjekter?typeIder=...` | Query road objects by type IDs with stedfesting/vegsystemreferanse (optional `dato`) |
 
 Query parameters:
 - `polygon`: UTM33 polygon coordinates
 - `vegsystemreferanse`: Vegsystemreferanse string (e.g., "FV6666 S1")
 - `stedfesting`: Filter by position on veglenkesekvens (e.g., "0.4-0.6@123456")
+- `dato`: Optional date for vegobjekt query
 - `inkluder`: Include stedfesting, egenskaper, gyldighetsperiode, barn
 - `antall`: Limit results
 - `start`: Pagination token from `metadata.neste.start` for the next page
@@ -171,7 +182,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
 
 2. **Select Object Types**
    - User searches by name or ID and selects types of interest
-   - Category dropdown loads categories from datakatalog and selects all types in the chosen category
+   - Category dropdown loads categories from datakatalog, sorted alphabetically, and selects all types in the chosen category
    - Skjermede (sensitive) vegobjekttyper er ikke tilgjengelige i listen
    - Selected types appear as removable chips for quick deselection
    - Must select at least one type before querying
@@ -180,19 +191,26 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
     - User toggles between polygon mode, strekning mode, and stedfesting mode
     - Switching search mode clears inputs/state from the other modes
 
-4. **Define Area/Route**
+4. **(Optional) Set Date Filter**
+   - User can enable "Bruk dato" and select a date in the top control row
+   - The date is committed on blur/Enter
+   - This affects vegobjekt query date and client-side veglenke validity filtering
+
+5. **Define Area/Route**
    - Polygon mode: click "Tegn område" and draw a small polygon (recommended: small area), or paste a polygon WKT and click "Søk"/"Kopier WKT"
    - Strekning mode: enter a vegsystemreferanse (e.g., "FV6666 S1") and click "Søk"
    - Stedfesting mode: enter stedfesting expressions (e.g., "1234, 0.2-0.5@5678") and click "Søk"
    - Polygon is converted to UTM33 coordinates
 
-5. **Query and Display**
+6. **Query and Display**
     - App queries veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 100)
    - Veglenker with geometry overlapping polygon are rendered on map
+   - Veglenker are filtered client-side by gyldighetsperiode for the active reference date (`startdato` inclusive, `sluttdato` exclusive)
    - Stedfesting mode renders full veglenker in a lighter style and overlays clipped stedfesting geometry
    - Queries vegobjekter with stedfesting filter for polygon mode, direct stedfesting filter for stedfesting mode, or vegsystemreferanse for strekning mode
+   - Includes `dato` in vegobjekt query when date filter is enabled
 
-  5. **Inspect Vegobjekter**
+7. **Inspect Vegobjekter**
     - Click on a veglenke to see related vegobjekter
     - Sidebar shows collapsible list of vegobjekter grouped by type
     - A filter button opens a popover to filter by gyldighetsperiode startdato
@@ -202,11 +220,14 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Locate button recenters the map on the vegobjekt's stedfesting geometry
     - Each vegobjekt displays:
       - ID with copy button
+      - Versjon (shown in detail panel, not in list header)
+      - Sist endret (ISO date derived from UTC timestamp in Norwegian timezone)
       - Gyldighetsperiode (validity period)
       - Stedfestinger (format: "0.2-0.8@1234")
       - Barn (child object references)
       - Egenskaper (properties with names mapped from datakatalog)
       - Polygon geometri-egenskaper include a "Kopier" link to copy the WKT
+   - In veglenke popup, veglenkesekvens ID is a link to Uberiket API
    - Enum values are resolved to their display names
 
 ## URL Synchronization
@@ -216,6 +237,7 @@ The application synchronizes state with the URL for shareable links:
 - **Polygon**: Drawn selection polygon coordinates (polygon mode)
 - **Strekning**: Vegsystemreferanse query (strekning mode)
 - **Stedfesting**: Stedfesting expressions (stedfesting mode)
+- **Date filter**: `dato=YYYY-MM-DD` when enabled
 - **Selected types**: List of selected vegobjekttype IDs, or `types=all` when all are selected
 - **Veglenkesekvens limit**: Max veglenkesekvenser selection (`veglenkesekvenslimit`)
 
@@ -246,6 +268,8 @@ interface VegobjektDisplay {
   id: number;
   typeId: number;
   typeName: string;
+  versjonId?: number;
+  sistEndret?: string;
   gyldighetsperiode?: {
     startdato: string;
     sluttdato?: string;
@@ -273,11 +297,10 @@ A "Last ned CSV" button in the vegobjekt list header opens a popover (CSS anchor
 
 ### Download Options
 1. **Alle typer i én fil** — Downloads a single `vegobjekter.csv` containing all vegobjekter across all types. Headers: `TypeID`, `TypeNavn`, `ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`. No egenskaper columns.
-2. **Én fil per type** — Downloads one CSV file per vegobjekttype, named after the type (e.g., `Skiltplate.csv`). Includes common columns (`ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`) plus one dynamic column per unique egenskap name for that type. Geometry properties (GeometriEgenskap) are excluded.
+2. **Fil per type (ZIP)** — Downloads a single `vegobjekter-per-type.zip` containing one CSV file per vegobjekttype (e.g., `Skiltplate.csv`). Each file includes common columns (`ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`) plus one dynamic column per unique egenskap name for that type. Geometry properties (GeometriEgenskap) are excluded.
 
 ## Future Enhancements (Out of Scope)
 
-- Time-based queries
 - More than 10 veglenker per query
 
 ## Geometri-egenskaper (Egengeometri)
