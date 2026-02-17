@@ -8,6 +8,8 @@ The map uses EPSG:25833 (UTM33) and switches between Geodata.no XYZ tiles for ov
 
 The application is in **beta** and displays a visible beta badge in the header.
 
+Feature-specific behavior should be documented in this specification. Keep `AGENTS.md` focused on general workflow and guardrail rules.
+
 ## Core Workflow
 
 1. **Select Object Types** - User selects which road object types they want to find
@@ -111,35 +113,16 @@ The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) 
 - Run `bunx openapi-ts` to regenerate clients after spec updates
 - Generate Zod schemas and enable SDK request/response validation, but treat validation issues as runtime warnings when the upstream spec/implementation diverge
 
-## Project Structure
+## Architecture
 
-```
-nvdb-vis-vegobjekter/
-├── src/
-│   ├── api/
-│   │   ├── generated/         # Generated API clients
-│   │   ├── datakatalogClient.ts
-│   │   └── uberiketClient.ts
-│   ├── components/
-│   │   ├── Map/
-│   │   │   └── MapView.tsx
-│   │   ├── ObjectTypeSelector/
-│   │   │   └── ObjectTypeSelector.tsx
-│   │   └── VegobjektList/
-│   │       └── VegobjektList.tsx
-│   ├── utils/
-│   │   └── geometryUtils.ts   # Turf.js-based line slicing for stedfesting
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── specs/
-│   ├── datakatalog.json
-│   └── uberiket.json
-├── package.json
-├── tsconfig.json
-├── server.ts
-└── index.html
-```
+- `src/components/`: UI components (map controls/view, selectors, lists, detail views).
+- `src/hooks/`: Query and orchestration logic for fetch/filter/render flows.
+- `src/state/`: Shared application state (Jotai atoms) and URL-synced UI state.
+- `src/api/`: API wrappers and integration helpers.
+- `src/api/generated/`: Generated API clients/types (read-only; regenerate, do not hand-edit).
+- `src/utils/`: Pure utilities for geometry, date handling, CSV export, parsing, and URL/history helpers.
+- `src/index.css`: Global design tokens and component styles.
+- `specs/`: OpenAPI source snapshots used for client generation.
 
 ## API Endpoints Used
 
