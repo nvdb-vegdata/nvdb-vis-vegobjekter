@@ -15,6 +15,8 @@ import {
   allTypesSelectedAtom,
   polygonAtom,
   polygonClipAtom,
+  searchDateAtom,
+  searchDateEnabledAtom,
   searchModeAtom,
   selectedTypeIdsAtom,
   selectedTypesAtom,
@@ -33,6 +35,8 @@ export default function App() {
   const allTypesSelected = useAtomValue(allTypesSelectedAtom)
   const polygon = useAtomValue(polygonAtom)
   const polygonClip = useAtomValue(polygonClipAtom)
+  const searchDateEnabled = useAtomValue(searchDateEnabledAtom)
+  const searchDate = useAtomValue(searchDateAtom)
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
   const searchMode = useAtomValue(searchModeAtom)
   const strekning = useAtomValue(strekningAtom)
@@ -86,6 +90,7 @@ export default function App() {
     polygonClip: searchMode === 'polygon' ? polygonClip : false,
     vegsystemreferanse: searchMode === 'strekning' ? strekning : null,
     stedfestingFilterDirect: searchMode === 'stedfesting' ? (stedfestingParsed?.stedfestingFilter ?? null) : null,
+    searchDate: searchDateEnabled ? searchDate : null,
   })
 
   useVegobjekterErrorMessage(vegobjekterError)

@@ -8,6 +8,8 @@ import {
   DEFAULT_VEGLENKESEKVENSER_LIMIT,
   polygonAtom,
   polygonClipAtom,
+  searchDateAtom,
+  searchDateEnabledAtom,
   searchModeAtom,
   stedfestingAtom,
   strekningAtom,
@@ -31,6 +33,8 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
   const polygonClip = useAtomValue(polygonClipAtom)
   const veglenkesekvensLimit = useAtomValue(veglenkesekvensLimitAtom)
   const searchMode = useAtomValue(searchModeAtom)
+  const searchDateEnabled = useAtomValue(searchDateEnabledAtom)
+  const searchDate = useAtomValue(searchDateAtom)
   const strekning = useAtomValue(strekningAtom)
   const stedfesting = useAtomValue(stedfestingAtom)
 
@@ -56,6 +60,11 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
     } else {
       url.searchParams.delete('stedfesting')
     }
+    if (searchDateEnabled && searchDate.trim().length > 0) {
+      url.searchParams.set('dato', searchDate.trim())
+    } else {
+      url.searchParams.delete('dato')
+    }
     if (allTypesSelected) {
       url.searchParams.set('types', 'all')
     } else if (selectedTypes.length > 0) {
@@ -70,5 +79,5 @@ export function useUrlSync(selectedTypes: Vegobjekttype[]) {
     }
     const nextUrl = `${url.pathname}${url.search}${url.hash}`
     safeReplaceState(nextUrl, 'filter-sync')
-  }, [allTypesSelected, polygon, polygonClip, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
+  }, [allTypesSelected, polygon, polygonClip, searchDate, searchDateEnabled, selectedTypes, searchMode, strekning, stedfesting, veglenkesekvensLimit])
 }

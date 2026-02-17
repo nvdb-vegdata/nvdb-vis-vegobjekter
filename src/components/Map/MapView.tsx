@@ -30,10 +30,13 @@ import {
   locateVegobjektAtom,
   polygonAtom,
   polygonClipAtom,
+  searchDateAtom,
+  searchDateEnabledAtom,
   searchModeAtom,
   stedfestingAtom,
   veglenkeColorAtom,
 } from '../../state/atoms'
+import { getTodayDate } from '../../utils/dateUtils'
 import { safeReplaceState } from '../../utils/historyUtils'
 import {
   DEFAULT_VIEW_CENTER_LON_LAT,
@@ -78,6 +81,8 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const [polygon, setPolygon] = useAtom(polygonAtom)
   const [polygonClip, _setPolygonClip] = useAtom(polygonClipAtom)
   const [searchMode, setSearchMode] = useAtom(searchModeAtom)
+  const [searchDateEnabled, setSearchDateEnabled] = useAtom(searchDateEnabledAtom)
+  const [searchDate, setSearchDate] = useAtom(searchDateAtom)
   const stedfesting = useAtomValue(stedfestingAtom)
   const hoveredVegobjekt = useAtomValue(hoveredVegobjektAtom)
   const locateVegobjekt = useAtomValue(locateVegobjektAtom)
@@ -108,6 +113,12 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
   const clipOnlySelectionRef = useRef(false)
   const [isDrawing, setIsDrawing] = useState(false)
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null)
+  const [searchDateDraft, setSearchDateDraft] = useState(searchDate)
+  const referenceDate = searchDateEnabled && searchDate ? searchDate : getTodayDate()
+
+  useEffect(() => {
+    setSearchDateDraft(searchDate)
+  }, [searchDate])
 
   useBaatToken()
 
@@ -387,6 +398,7 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     searchMode,
     stedfesting,
     polygonClip,
+    referenceDate,
     veglenkeSource,
     stedfestingSource,
     drawSource,
@@ -464,6 +476,12 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
     setIsDrawing(false)
   }, [])
 
+  const commitSearchDate = useCallback(() => {
+    const nextDate = searchDateDraft.trim()
+    if (!nextDate || nextDate === searchDate) return
+    setSearchDate(nextDate)
+  }, [searchDate, searchDateDraft, setSearchDate])
+
   return (
     <>
       <div className="draw-controls">
@@ -481,6 +499,38 @@ export default function MapView({ veglenkesekvenser, vegobjekterByType, isLoadin
           <button type="button" className={`btn ${searchMode === 'stedfesting' ? 'btn-primary' : 'btn-secondary'}`} onClick={handleStedfestingMode}>
             Stedfesting
           </button>
+          <div className="search-date-controls">
+            <label className="search-date-toggle">
+              <input
+                type="checkbox"
+                checked={searchDateEnabled}
+                onChange={(event) => {
+                  const enabled = event.target.checked
+                  setSearchDateEnabled(enabled)
+                  if (enabled && !searchDate) {
+                    const today = getTodayDate()
+                    setSearchDate(today)
+                    setSearchDateDraft(today)
+                  }
+                }}
+              />
+              Bruk dato
+            </label>
+            <input
+              type="date"
+              className="search-date-input"
+              value={searchDateDraft}
+              onChange={(event) => setSearchDateDraft(event.target.value)}
+              onBlur={commitSearchDate}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') return
+                commitSearchDate()
+                ;(event.currentTarget as HTMLInputElement).blur()
+              }}
+              disabled={!searchDateEnabled}
+              aria-label="Søkedato"
+            />
+          </div>
         </div>
 
         <SearchControls searchMode={searchMode} />

@@ -8,7 +8,7 @@ import type { MutableRefObject } from 'react'
 import { useEffect } from 'react'
 import type { VeglenkeMedPosisjon, VeglenkesekvensMedPosisjoner } from '../api/uberiketClient'
 import type { SearchMode } from '../state/atoms'
-import { getTodayDate } from '../utils/dateUtils'
+import { isDateWithinGyldighetsperiode } from '../utils/dateUtils'
 import { getLineStringOverlapFractions, getPointAtFraction, sliceLineStringByFraction } from '../utils/geometryUtils'
 import { parseStedfestingRanges } from '../utils/stedfestingParser'
 
@@ -17,6 +17,7 @@ export function useVeglenkeRendering({
   searchMode,
   stedfesting,
   polygonClip,
+  referenceDate,
   veglenkeSource,
   stedfestingSource,
   drawSource,
@@ -26,6 +27,7 @@ export function useVeglenkeRendering({
   searchMode: SearchMode
   stedfesting: string
   polygonClip: boolean
+  referenceDate: string
   veglenkeSource: MutableRefObject<VectorSource>
   stedfestingSource: MutableRefObject<VectorSource>
   drawSource: MutableRefObject<VectorSource>
@@ -41,7 +43,6 @@ export function useVeglenkeRendering({
     veglenkeSource.current.clear()
     stedfestingSource.current.clear()
     const wktFormat = new WKT()
-    const today = getTodayDate()
 
     const drawnFeatures = drawSource.current.getFeatures()
     const drawnGeometry = drawnFeatures.length > 0 ? drawnFeatures[0]?.getGeometry() : null
@@ -71,8 +72,7 @@ export function useVeglenkeRendering({
 
     for (const vs of veglenkesekvenser) {
       for (const vl of vs.veglenker ?? []) {
-        const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
-        if (sluttdato && sluttdato < today) {
+        if (!isDateWithinGyldighetsperiode(referenceDate, vl.gyldighetsperiode)) {
           continue
         }
 
@@ -190,5 +190,5 @@ export function useVeglenkeRendering({
         maxZoom: 18,
       })
     }
-  }, [veglenkesekvenser, searchMode, stedfesting, polygonClip, veglenkeSource, stedfestingSource, drawSource, mapInstance])
+  }, [veglenkesekvenser, searchMode, stedfesting, polygonClip, referenceDate, veglenkeSource, stedfestingSource, drawSource, mapInstance])
 }

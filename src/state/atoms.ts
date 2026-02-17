@@ -3,6 +3,7 @@ import WKT from 'ol/format/WKT'
 import { Polygon } from 'ol/geom'
 import type { Vegobjekttype } from '../api/datakatalogClient'
 import type { Vegobjekt } from '../api/uberiketClient'
+import { getTodayDate } from '../utils/dateUtils'
 import { roundPolygonToTwoDecimals } from '../utils/polygonRounding'
 import { ensureProjections } from '../utils/projections'
 
@@ -95,6 +96,22 @@ function getInitialSearchMode(): SearchMode {
   return strekning.length > 0 ? 'strekning' : 'polygon'
 }
 
+function isIsoDate(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value)
+}
+
+function getInitialSearchDate(): string {
+  const params = new URLSearchParams(window.location.search)
+  const dato = params.get('dato')?.trim() ?? ''
+  return isIsoDate(dato) ? dato : getTodayDate()
+}
+
+function getInitialSearchDateEnabled(): boolean {
+  const params = new URLSearchParams(window.location.search)
+  const dato = params.get('dato')?.trim() ?? ''
+  return isIsoDate(dato)
+}
+
 function getInitialVeglenkesekvensLimit(): number {
   const params = new URLSearchParams(window.location.search)
   const limitParam = params.get('veglenkesekvenslimit')
@@ -134,6 +151,8 @@ export const veglenkeColorAtom = atom(
 )
 export const veglenkesekvensLimitAtom = atom(getInitialVeglenkesekvensLimit())
 export const searchModeAtom = atom<SearchMode>(getInitialSearchMode())
+export const searchDateEnabledAtom = atom<boolean>(getInitialSearchDateEnabled())
+export const searchDateAtom = atom<string>(getInitialSearchDate())
 export const strekningAtom = atom<string>(getInitialStrekning())
 export const strekningInputAtom = atom<string>(getInitialStrekning())
 export const stedfestingAtom = atom<string>(getInitialStedfesting())

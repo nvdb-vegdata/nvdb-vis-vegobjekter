@@ -5,6 +5,9 @@ import type { Stedfesting, VeglenkeMedPosisjon, Vegobjekt } from '../../api/uber
 import { isOnVeglenke } from '../../api/uberiketClient'
 import { focusedVegobjektAtom, selectedTypesAtom } from '../../state/atoms'
 
+const NVDB_API_BASE_URL = 'https://nvdbapiles.atlas.vegvesen.no'
+const UBERIKET_API_BASE_URL = `${NVDB_API_BASE_URL}/uberiket`
+
 interface Props {
   selectedFeature: Feature | null
   vegobjekterByType: Map<number, Vegobjekt[]>
@@ -24,6 +27,7 @@ export default function VeglenkePopup({ selectedFeature, vegobjekterByType, popu
 
   const selectedVeglenkesekvensId = selectedFeature?.get('veglenkesekvensId') as number | undefined
   const selectedVeglenke = selectedFeature?.get('veglenke') as VeglenkeMedPosisjon | undefined
+  const veglenkesekvensUrl = selectedVeglenkesekvensId ? `${UBERIKET_API_BASE_URL}/api/v1/vegnett/veglenkesekvenser/${selectedVeglenkesekvensId}` : null
 
   const vegobjekterOnSelected = useMemo(() => {
     if (!selectedVeglenkesekvensId) return []
@@ -52,7 +56,15 @@ export default function VeglenkePopup({ selectedFeature, vegobjekterByType, popu
       {selectedFeature && (
         <div className="popup-content">
           <div className="popup-title">
-            Veglenke {selectedVeglenkesekvensId}:{selectedVeglenke?.nummer}
+            Veglenke{' '}
+            {selectedVeglenkesekvensId && veglenkesekvensUrl ? (
+              <a href={veglenkesekvensUrl} target="_blank" rel="noopener noreferrer">
+                {selectedVeglenkesekvensId}
+              </a>
+            ) : (
+              selectedVeglenkesekvensId
+            )}
+            :{selectedVeglenke?.nummer}
           </div>
           {vegobjekterOnSelected.length === 0 ? (
             <p style={{ fontSize: 12, color: '#666' }}>Ingen vegobjekter funnet på denne veglenken</p>

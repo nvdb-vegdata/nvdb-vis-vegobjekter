@@ -540,7 +540,46 @@ body,
 .draw-controls-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.search-date-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+}
+
+.search-date-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ui-text);
+  white-space: nowrap;
+}
+
+.search-date-toggle input {
+  accent-color: var(--color-primary);
+}
+
+.search-date-input {
+  height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: var(--ui-surface);
+  font-size: 12px;
+  color: var(--ui-text);
+}
+
+.search-date-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .map-settings {

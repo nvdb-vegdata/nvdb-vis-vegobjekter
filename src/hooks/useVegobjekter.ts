@@ -6,19 +6,22 @@ import type { Vegobjekttype } from '../api/datakatalogClient'
 import { hentVegobjekterMultiType } from '../api/generated/uberiket/sdk.gen'
 import type { InkluderIVegobjekt } from '../api/generated/uberiket/types.gen'
 import { buildStedfestingFilter, type VeglenkeRange, type VeglenkesekvensMedPosisjoner, type Vegobjekt, VegobjekterRequestError } from '../api/uberiketClient'
-import { getTodayDate } from '../utils/dateUtils'
+import { getTodayDate, isDateWithinGyldighetsperiode } from '../utils/dateUtils'
 import { getLineStringOverlapFractions } from '../utils/geometryUtils'
 
-function getOverlappingVeglenkeRanges(veglenkesekvenser: VeglenkesekvensMedPosisjoner[], polygon: Polygon, polygonClip: boolean): VeglenkeRange[] {
+function getOverlappingVeglenkeRanges(
+  veglenkesekvenser: VeglenkesekvensMedPosisjoner[],
+  polygon: Polygon,
+  polygonClip: boolean,
+  referenceDate: string,
+): VeglenkeRange[] {
   const ranges: VeglenkeRange[] = []
   const wktFormat = new WKT()
-  const today = getTodayDate()
   const polygonExtent = polygon.getExtent()
 
   for (const vs of veglenkesekvenser) {
     for (const vl of vs.veglenker) {
-      const sluttdato = (vl as { gyldighetsperiode?: { sluttdato?: string } }).gyldighetsperiode?.sluttdato
-      if (sluttdato && sluttdato < today) {
+      if (!isDateWithinGyldighetsperiode(referenceDate, vl.gyldighetsperiode)) {
         continue
       }
 
@@ -76,6 +79,7 @@ type VegobjekterParams = {
   polygonClip: boolean
   vegsystemreferanse?: string | null
   stedfestingFilterDirect?: string | null
+  searchDate?: string | null
 }
 
 export function useVegobjekter({
@@ -86,18 +90,21 @@ export function useVegobjekter({
   polygonClip,
   vegsystemreferanse,
   stedfestingFilterDirect,
+  searchDate,
 }: VegobjekterParams) {
   const trimmedStrekning = vegsystemreferanse?.trim() ?? ''
+  const trimmedSearchDate = searchDate?.trim() ?? ''
+  const today = getTodayDate()
+  const referenceDate = trimmedSearchDate.length > 0 ? trimmedSearchDate : today
   const directFilter = stedfestingFilterDirect?.trim() ?? ''
   const stedfestingFilter = useMemo(() => {
     if (directFilter.length > 0) return directFilter
     if (!veglenkesekvenser || !polygon || trimmedStrekning.length > 0) return ''
-    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon, polygonClip)
+    const ranges = getOverlappingVeglenkeRanges(veglenkesekvenser, polygon, polygonClip, referenceDate)
     return buildStedfestingFilter(ranges)
-  }, [directFilter, polygonClip, veglenkesekvenser, polygon, trimmedStrekning])
+  }, [directFilter, polygonClip, referenceDate, veglenkesekvenser, polygon, trimmedStrekning])
 
   const enabled = (allTypesSelected || selectedTypes.length > 0) && (trimmedStrekning.length > 0 || stedfestingFilter.length > 0)
-  const today = getTodayDate()
   const typeIds = useMemo(() => selectedTypes.map((type) => type.id).sort((a, b) => a - b), [selectedTypes])
   const typeIdList = useMemo(() => typeIds.join(','), [typeIds])
 
@@ -106,11 +113,11 @@ export function useVegobjekter({
       typeIder: allTypesSelected ? undefined : typeIds,
       antall: 1000,
       inkluder: ['alle'] as InkluderIVegobjekt[],
-      dato: today,
+      dato: trimmedSearchDate.length > 0 ? trimmedSearchDate : undefined,
       vegsystemreferanse: trimmedStrekning.length > 0 ? [trimmedStrekning] : undefined,
       stedfesting: trimmedStrekning.length > 0 ? undefined : [stedfestingFilter],
     }),
-    [allTypesSelected, stedfestingFilter, today, trimmedStrekning, typeIds],
+    [allTypesSelected, stedfestingFilter, trimmedSearchDate, trimmedStrekning, typeIds],
   )
 
   const query = useInfiniteQuery({
@@ -144,7 +151,7 @@ export function useVegobjekter({
         throw new Error(message)
       }
     },
-    queryKey: ['vegobjekter', allTypesSelected ? 'all' : typeIdList, stedfestingFilter, trimmedStrekning, today],
+    queryKey: ['vegobjekter', allTypesSelected ? 'all' : typeIdList, stedfestingFilter, trimmedStrekning, trimmedSearchDate || `today:${today}`],
     enabled,
     initialPageParam: '',
     getNextPageParam: (lastPage) => lastPage.metadata.neste?.start,
