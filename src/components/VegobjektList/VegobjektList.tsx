@@ -103,7 +103,7 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
                     document.getElementById('csv-popover')?.hidePopover()
                   }}
                 >
-                  Én fil per type
+                  Fil per type (ZIP)
                 </button>
               </div>
             </>
