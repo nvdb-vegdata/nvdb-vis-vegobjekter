@@ -7,6 +7,7 @@ export interface VegobjektDetails {
   id: number
   typeId: number
   versjonId?: number
+  sistEndret?: string
   gyldighetsperiode?: { startdato: string; sluttdato?: string }
   stedfestinger: string[]
   barn: { typeId: string; ids: number[] }[]
@@ -48,6 +49,7 @@ export function processVegobjekt(obj: Vegobjekt, typeId: number, vegobjekttype: 
     id: obj.id,
     typeId,
     versjonId: obj.versjon,
+    sistEndret: obj.sistEndret,
     gyldighetsperiode: obj.gyldighetsperiode,
     stedfestinger: formatStedfesting(obj.stedfesting as Stedfesting | undefined),
     barn,

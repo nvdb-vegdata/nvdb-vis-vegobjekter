@@ -4,6 +4,7 @@ import type { MouseEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import type { GeometriEgenskap, Vegobjekt } from '../../api/uberiketClient'
 import { hoveredVegobjektAtom, locateVegobjektAtom } from '../../state/atoms'
+import { formatUtcTimestampToIsoDateInNorwegianTimeZone } from '../../utils/dateUtils'
 import type { VegobjektDetails } from '../../utils/vegobjektProcessing'
 
 const NVDB_API_BASE_URL = 'https://nvdbapiles.atlas.vegvesen.no'
@@ -134,6 +135,13 @@ export default function VegobjektItem({
             <div className="vegobjekt-section">
               <div className="vegobjekt-section-title">Versjon</div>
               <div className="vegobjekt-property">{details.versjonId}</div>
+            </div>
+          )}
+
+          {details.sistEndret && (
+            <div className="vegobjekt-section">
+              <div className="vegobjekt-section-title">Sist endret</div>
+              <div className="vegobjekt-property">{formatUtcTimestampToIsoDateInNorwegianTimeZone(details.sistEndret)}</div>
             </div>
           )}
 
