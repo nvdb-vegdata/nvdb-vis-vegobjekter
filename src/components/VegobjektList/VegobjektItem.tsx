@@ -102,7 +102,6 @@ export default function VegobjektItem({
         <button type="button" className="vegobjekt-header-toggle" onClick={onToggle}>
           <span className="vegobjekt-expand">{isExpanded ? '-' : '+'}</span>
           <span className="vegobjekt-id">ID: {details.id}</span>
-          {details.versjonId && <span className="vegobjekt-version">v{details.versjonId}</span>}
         </button>
         <div className="vegobjekt-header-actions">
           <button
@@ -131,6 +130,13 @@ export default function VegobjektItem({
 
       {isExpanded && (
         <div className="vegobjekt-details">
+          {details.versjonId !== undefined && (
+            <div className="vegobjekt-section">
+              <div className="vegobjekt-section-title">Versjon</div>
+              <div className="vegobjekt-property">{details.versjonId}</div>
+            </div>
+          )}
+
           {details.gyldighetsperiode && (
             <div className="vegobjekt-section">
               <div className="vegobjekt-section-title">Gyldighetsperiode</div>
