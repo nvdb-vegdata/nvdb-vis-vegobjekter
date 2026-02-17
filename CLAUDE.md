@@ -117,7 +117,7 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 When calling NVDB APIs via curl or similar, include the `X-Client` header:
 
 ```sh
-curl -H "X-Client: nvdb-vis-vegobjekter" "https://nvdbapiles.atlas.vegvesen.no/..."
+curl -H "X-Client: nvdb-finn-vegdata" "https://nvdbapiles.atlas.vegvesen.no/..."
 ```
 
 ### Uberiket API

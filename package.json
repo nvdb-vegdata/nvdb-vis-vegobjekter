@@ -1,5 +1,5 @@
 {
-  "name": "nvdb-vis-vegobjekter",
+  "name": "nvdb-finn-vegdata",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -7,8 +7,8 @@
     "dev": "bun --hot ./server.ts",
     "build": "bun build ./index.html --outdir ./dist",
     "fetch:specs": "bun run fetch:datakatalog && bun run fetch:uberiket",
-    "fetch:datakatalog": "curl -sS -H 'X-Client: nvdb-vis-vegobjekter' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/datakatalog' -o specs/datakatalog.json",
-    "fetch:uberiket": "curl -sS -H 'X-Client: nvdb-vis-vegobjekter' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/uberiket' -o specs/uberiket.json",
+    "fetch:datakatalog": "curl -sS -H 'X-Client: nvdb-finn-vegdata' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/datakatalog' -o specs/datakatalog.json",
+    "fetch:uberiket": "curl -sS -H 'X-Client: nvdb-finn-vegdata' 'https://nvdbapiles.atlas.vegvesen.no/api-docs/uberiket' -o specs/uberiket.json",
     "generate:api": "bunx openapi-ts",
     "typecheck": "bunx tsc --noEmit",
     "lint": "biome check --write"

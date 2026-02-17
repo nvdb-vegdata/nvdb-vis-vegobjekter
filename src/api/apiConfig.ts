@@ -6,7 +6,7 @@ const TIMEOUT_MS = 20_000
 const fetchWithTimeout = ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) })) as typeof fetch
 
 const commonConfig = {
-  headers: { 'X-Client': 'nvdb-vis-vegobjekter' },
+  headers: { 'X-Client': 'nvdb-finn-vegdata' },
   fetch: fetchWithTimeout,
   querySerializer: { array: { explode: false, style: 'form' as const } },
 }

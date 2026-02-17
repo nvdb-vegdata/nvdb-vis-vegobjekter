@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "nvdb-vis-vegobjekter",
+      "name": "nvdb-finn-vegdata",
       "dependencies": {
         "@tanstack/react-query": "^5.90.19",
         "axios": "^1.13.2",
