@@ -21,11 +21,9 @@ export default function ObjectTypeSelector() {
         setIsLoading(true)
         const [types, kategoriList] = await Promise.all([getVegobjekttyper(), getKategorier()])
         const visibleTypes = types.filter(isSelectableVegobjekttype).sort((a, b) => (a.navn ?? '').localeCompare(b.navn ?? ''))
+        const getCategoryDisplayName = (kategori: Kategori) => kategori.navn ?? kategori.kortnavn ?? `Kategori ${kategori.id}`
         const sortedCategories = [...kategoriList].sort((a, b) => {
-          if (a.sorteringsnummer !== b.sorteringsnummer) {
-            return a.sorteringsnummer - b.sorteringsnummer
-          }
-          return (a.navn ?? '').localeCompare(b.navn ?? '')
+          return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b), 'nb', { sensitivity: 'base' })
         })
         setAllTypes(visibleTypes)
         setCategories(sortedCategories)
