@@ -1,4 +1,4 @@
-# NVDB Vegobjekt Visualisering
+# NVDB Finn Vegdata
 
 Proof of concept for visualisering av vegobjekter fra NVDB ved hjelp av [Uberiket API](https://nvdb.atlas.vegvesen.no/docs/category/uberiket).
 
