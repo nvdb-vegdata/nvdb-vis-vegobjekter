@@ -1,6 +1,6 @@
 import { useAtomValue } from 'jotai'
 import { X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Vegobjekt } from '../../api/uberiketClient'
 import { focusedVegobjektAtom, selectedTypesAtom, vegobjekterErrorAtom } from '../../state/atoms'
 import { downloadCsvAllTypes, downloadCsvPerType } from '../../utils/csvExport'
@@ -12,9 +12,11 @@ interface Props {
   hasNextPage: boolean
   isFetchingNextPage: boolean
   onFetchNextPage: () => void
+  fetchAllPages: () => Promise<void>
+  isFetchingAll: boolean
 }
 
-export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPage, isFetchingNextPage, onFetchNextPage }: Props) {
+export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPage, isFetchingNextPage, onFetchNextPage, fetchAllPages, isFetchingAll }: Props) {
   const selectedTypes = useAtomValue(selectedTypesAtom)
   const focusedVegobjekt = useAtomValue(focusedVegobjektAtom)
   const errorMessage = useAtomValue(vegobjekterErrorAtom)
@@ -58,6 +60,42 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
     )
   }, [vegobjekterByType, startDateAfter, startDateBefore])
 
+  // Track pending CSV download type to trigger after fetchAllPages completes
+  const [pendingCsvDownload, setPendingCsvDownload] = useState<'all' | 'perType' | null>(null)
+
+  const handleCsvAllTypes = useCallback(() => {
+    if (hasNextPage) {
+      setPendingCsvDownload('all')
+      void fetchAllPages()
+    } else {
+      downloadCsvAllTypes(filteredVegobjekterByType, selectedTypes)
+      document.getElementById('csv-popover')?.hidePopover()
+    }
+  }, [hasNextPage, fetchAllPages, filteredVegobjekterByType, selectedTypes])
+
+  const handleCsvPerType = useCallback(() => {
+    if (hasNextPage) {
+      setPendingCsvDownload('perType')
+      void fetchAllPages()
+    } else {
+      downloadCsvPerType(filteredVegobjekterByType, selectedTypes)
+      document.getElementById('csv-popover')?.hidePopover()
+    }
+  }, [hasNextPage, fetchAllPages, filteredVegobjekterByType, selectedTypes])
+
+  // When fetchAllPages completes and we have a pending download, execute it
+  useEffect(() => {
+    if (pendingCsvDownload && !isFetchingAll && !hasNextPage) {
+      if (pendingCsvDownload === 'all') {
+        downloadCsvAllTypes(filteredVegobjekterByType, selectedTypes)
+      } else {
+        downloadCsvPerType(filteredVegobjekterByType, selectedTypes)
+      }
+      setPendingCsvDownload(null)
+      document.getElementById('csv-popover')?.hidePopover()
+    }
+  }, [pendingCsvDownload, isFetchingAll, hasNextPage, filteredVegobjekterByType, selectedTypes])
+
   const typesWithObjects = selectedTypes.filter((type) => {
     const objects = filteredVegobjekterByType.get(type.id)
     return objects && objects.length > 0
@@ -81,28 +119,14 @@ export default function VegobjektList({ vegobjekterByType, isLoading, hasNextPag
           )}
           {overallCount > 0 && !isLoading && (
             <>
-              <button type="button" className="btn btn-primary btn-small csv-popover-anchor" popoverTarget="csv-popover">
-                Last ned CSV
+              <button type="button" className="btn btn-primary btn-small csv-popover-anchor" popoverTarget="csv-popover" disabled={isFetchingAll}>
+                {isFetchingAll ? 'Henter alle...' : 'Last ned CSV'}
               </button>
               <div id="csv-popover" className="csv-popover" popover="auto">
-                <button
-                  type="button"
-                  className="csv-popover-option"
-                  onClick={() => {
-                    downloadCsvAllTypes(filteredVegobjekterByType, selectedTypes)
-                    document.getElementById('csv-popover')?.hidePopover()
-                  }}
-                >
+                <button type="button" className="csv-popover-option" onClick={handleCsvAllTypes} disabled={isFetchingAll}>
                   Alle typer i én fil
                 </button>
-                <button
-                  type="button"
-                  className="csv-popover-option"
-                  onClick={() => {
-                    downloadCsvPerType(filteredVegobjekterByType, selectedTypes)
-                    document.getElementById('csv-popover')?.hidePopover()
-                  }}
-                >
+                <button type="button" className="csv-popover-option" onClick={handleCsvPerType} disabled={isFetchingAll}>
                   Fil per type (ZIP)
                 </button>
               </div>
