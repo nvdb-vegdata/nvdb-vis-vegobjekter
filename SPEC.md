@@ -276,7 +276,9 @@ To determine if a vegobjekt is on a specific veglenke:
 
 ## CSV Export
 
-A "Last ned CSV" button in the vegobjekt list header opens a popover (CSS anchor positioning) with two download options:
+A "Last ned CSV" button in the vegobjekt list header opens a popover (CSS anchor positioning) with two download options.
+
+When the user clicks a download option and there are unfetched pages remaining (`hasNextPage`), the app automatically fetches remaining pages (up to 10,000 objects) before generating the CSV. The button text changes to "Henter alle..." and is disabled during the fetch. Once fetching completes, the CSV is generated with the loaded data and downloaded. If all data is already loaded, the download happens immediately.
 
 ### Download Options
 1. **Alle typer i én fil** — Downloads a single `vegobjekter.csv` containing all vegobjekter across all types. Headers: `TypeID`, `TypeNavn`, `ID`, `Versjon`, `Startdato`, `Sluttdato`, `Stedfesting`. No egenskaper columns.

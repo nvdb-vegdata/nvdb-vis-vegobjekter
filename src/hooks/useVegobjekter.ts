@@ -158,30 +158,44 @@ export function useVegobjekter({
   })
 
   const [isFetchingBatch, setIsFetchingBatch] = useState(false)
+  const [isFetchingForCsv, setIsFetchingForCsv] = useState(false)
 
-  const fetchNextBatch = useCallback(async () => {
-    if (isFetchingBatch || !query.hasNextPage) return
-    setIsFetchingBatch(true)
+  const fetchNextBatch = useCallback(
+    async (setLoading: (v: boolean) => void) => {
+      if (!query.hasNextPage) return
+      setLoading(true)
 
-    try {
-      let loaded = 0
-      let pages = query.data?.pages ?? []
-      let hasNext: boolean = query.hasNextPage === true
+      try {
+        let loaded = 0
+        let pages = query.data?.pages ?? []
+        let hasNext: boolean = query.hasNextPage === true
 
-      while (hasNext && loaded < 10000) {
-        const previousPageCount = pages.length
-        const result = await query.fetchNextPage()
-        pages = result.data?.pages ?? pages
-        const newPages = pages.slice(previousPageCount)
-        loaded += newPages.reduce((sum, page) => sum + (page.vegobjekter?.length ?? 0), 0)
-        hasNext = result.hasNextPage === true
+        while (hasNext && loaded < 10000) {
+          const previousPageCount = pages.length
+          const result = await query.fetchNextPage()
+          pages = result.data?.pages ?? pages
+          const newPages = pages.slice(previousPageCount)
+          loaded += newPages.reduce((sum, page) => sum + (page.vegobjekter?.length ?? 0), 0)
+          hasNext = result.hasNextPage === true
 
-        if (newPages.length === 0) break
+          if (newPages.length === 0) break
+        }
+      } finally {
+        setLoading(false)
       }
-    } finally {
-      setIsFetchingBatch(false)
-    }
-  }, [isFetchingBatch, query.data, query.fetchNextPage, query.hasNextPage])
+    },
+    [query.data, query.fetchNextPage, query.hasNextPage],
+  )
+
+  const fetchMore = useCallback(async () => {
+    if (isFetchingBatch) return
+    await fetchNextBatch(setIsFetchingBatch)
+  }, [isFetchingBatch, fetchNextBatch])
+
+  const fetchForCsv = useCallback(async () => {
+    if (isFetchingForCsv) return
+    await fetchNextBatch(setIsFetchingForCsv)
+  }, [isFetchingForCsv, fetchNextBatch])
 
   const vegobjekterByType = new Map<number, Vegobjekt[]>(selectedTypes.map((type) => [type.id, [] as Vegobjekt[]]))
 
@@ -210,7 +224,9 @@ export function useVegobjekter({
     isError: query.isError,
     error,
     hasNextPage: query.hasNextPage ?? false,
-    fetchNextPage: fetchNextBatch,
+    fetchNextPage: fetchMore,
     isFetchingNextPage: isFetchingBatch,
+    fetchAllPages: fetchForCsv,
+    isFetchingAll: isFetchingForCsv,
   }
 }

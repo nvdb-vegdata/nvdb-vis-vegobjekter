@@ -82,6 +82,8 @@ export default function App() {
     hasNextPage: vegobjekterHasNextPage,
     fetchNextPage: fetchNextVegobjekterPage,
     isFetchingNextPage: vegobjekterFetchingNextPage,
+    fetchAllPages: fetchAllVegobjekterPages,
+    isFetchingAll: vegobjekterFetchingAll,
   } = useVegobjekter({
     selectedTypes,
     allTypesSelected,
@@ -187,6 +189,8 @@ export default function App() {
             onFetchNextPage={() => {
               void fetchNextVegobjekterPage()
             }}
+            fetchAllPages={fetchAllVegobjekterPages}
+            isFetchingAll={vegobjekterFetchingAll}
           />
         )}
       </aside>
