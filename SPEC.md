@@ -18,7 +18,7 @@ Feature-specific behavior should be documented in this specification. Keep `AGEN
 4. **Define Area/Route** - Draw a small polygon or paste a polygon WKT and click "Søk"/"Kopier WKT", enter a vegsystemreferanse (e.g., "FV6666 S1"), or provide stedfesting (e.g., "0.2-0.5@1234")
 5. **Fetch Veglenker** - Query veglenkesekvenser by polygon, vegsystemreferanse, or stedfesting IDs (configurable limit, default 100)
 6. **Visualize Veglenker** - Display veglenker on map (only those with geometry overlapping polygon). Polygon clipping is enabled by default, fading the full veglenke and overlaying only the portion inside the polygon.
-7. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. If date filter is enabled, `dato` is sent in the vegobjekt query. If `metadata.neste` is present, fetch subsequent pages using the `start` token. The "Hent flere" button loads additional pages in batches of up to 10,000 objects per click.
+7. **Fetch Vegobjekter** - Fetch vegobjekter for all selected types in one request using comma-separated type IDs and a stedfesting filter, or use vegsystemreferanse when searching by strekning. Stedfesting mode uses the provided stedfesting filter directly. If polygon clipping is enabled, the stedfesting filter is built from only the overlapping polygon portions of each veglenke. `dato` is always sent in the vegobjekt query (selected date when enabled, otherwise today's date). If `metadata.neste` is present, fetch subsequent pages using the `start` token. The "Hent flere" button loads additional pages in batches of up to 10,000 objects per click.
 8. **Inspect** - View detailed vegobjekt information in a collapsible list
 
 ## Key Concepts
@@ -46,7 +46,7 @@ Feature-specific behavior should be documented in this specification. Keep `AGEN
 ### Date Filtering
 - Date filter is controlled by a checkbox + date input in the top row (next to search mode controls)
 - Date input changes are applied on blur (or Enter), not on every keystroke
-- Vegobjekt queries include `dato` only when date filter is enabled
+- Vegobjekt queries always include `dato` (selected date when enabled, otherwise today's date)
 - Veglenker are filtered client-side against `gyldighetsperiode` using:
   - `startdato` inclusive
   - `sluttdato` exclusive
@@ -103,7 +103,7 @@ The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) 
   
 - **Uberiket API**: `https://nvdbapiles.atlas.vegvesen.no/uberiket/api/v1/`
 - Query veglenkesekvenser by polygon or vegsystemreferanse
-- Query vegobjekter by comma-separated type IDs and either stedfesting filter or vegsystemreferanse (optional `dato`)
+- Query vegobjekter by comma-separated type IDs and either stedfesting filter or vegsystemreferanse (always includes `dato`)
 - Requests use `X-Client: nvdb-finn-vegdata`
 
 
@@ -135,13 +135,13 @@ The UI uses a small set of global CSS tokens (in `src/index.css` under `:root`) 
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /api/v1/vegnett/veglenkesekvenser` | Query road segments by polygon |
-| `GET /api/v1/vegobjekter?typeIder=...` | Query road objects by type IDs with stedfesting/vegsystemreferanse (optional `dato`) |
+| `GET /api/v1/vegobjekter?typeIder=...` | Query road objects by type IDs with stedfesting/vegsystemreferanse (always includes `dato`) |
 
 Query parameters:
 - `polygon`: UTM33 polygon coordinates
 - `vegsystemreferanse`: Vegsystemreferanse string (e.g., "FV6666 S1")
 - `stedfesting`: Filter by position on veglenkesekvens (e.g., "0.4-0.6@123456")
-- `dato`: Optional date for vegobjekt query
+- `dato`: Date for vegobjekt query (selected date when enabled, otherwise today's date)
 - `inkluder`: Include stedfesting, egenskaper, gyldighetsperiode, barn
 - `antall`: Limit results
 - `start`: Pagination token from `metadata.neste.start` for the next page
@@ -191,7 +191,7 @@ When querying vegobjekter, only the veglenker that geometrically overlap with th
    - Veglenker are filtered client-side by gyldighetsperiode for the active reference date (`startdato` inclusive, `sluttdato` exclusive)
    - Stedfesting mode renders full veglenker in a lighter style and overlays clipped stedfesting geometry
    - Queries vegobjekter with stedfesting filter for polygon mode, direct stedfesting filter for stedfesting mode, or vegsystemreferanse for strekning mode
-   - Includes `dato` in vegobjekt query when date filter is enabled
+   - Includes `dato` in vegobjekt query (selected date when enabled, otherwise today's date)
 
 7. **Inspect Vegobjekter**
     - Click on a veglenke to see related vegobjekter
