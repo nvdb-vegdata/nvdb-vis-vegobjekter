@@ -113,11 +113,11 @@ export function useVegobjekter({
       typeIder: allTypesSelected ? undefined : typeIds,
       antall: 1000,
       inkluder: ['alle'] as InkluderIVegobjekt[],
-      dato: trimmedSearchDate.length > 0 ? trimmedSearchDate : undefined,
+      dato: referenceDate,
       vegsystemreferanse: trimmedStrekning.length > 0 ? [trimmedStrekning] : undefined,
       stedfesting: trimmedStrekning.length > 0 ? undefined : [stedfestingFilter],
     }),
-    [allTypesSelected, stedfestingFilter, trimmedSearchDate, trimmedStrekning, typeIds],
+    [allTypesSelected, referenceDate, stedfestingFilter, trimmedStrekning, typeIds],
   )
 
   const query = useInfiniteQuery({
